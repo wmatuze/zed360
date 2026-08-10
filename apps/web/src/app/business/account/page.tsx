@@ -135,6 +135,15 @@ export default async function BusinessAccountPage({
                       hidden until Zed360 approves the business.
                     </p>
                   ) : null}
+                  {business.status === "active" &&
+                  business.reviewStatus === "approved" ? (
+                    <Link
+                      className="button button-primary mt-5"
+                      href="/business/requests"
+                    >
+                      View matched requests →
+                    </Link>
+                  ) : null}
                   {business.latestReviewReason ? (
                     <p className="mt-4 rounded-xl border border-white/8 bg-black/15 p-3 text-sm leading-6 text-white/58">
                       Review note: {business.latestReviewReason}

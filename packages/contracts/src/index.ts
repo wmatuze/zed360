@@ -237,6 +237,49 @@ export const businessAccountSchema = z.object({
 
 export type BusinessAccount = z.infer<typeof businessAccountSchema>;
 
+export const businessRequestMatchStatusSchema = z.enum([
+  "queued",
+  "sent",
+  "viewed",
+  "responded",
+  "declined",
+  "expired",
+]);
+
+export const matchedBusinessRequestSchema = z.object({
+  matchId: z.string().uuid(),
+  business: z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+    role: z.enum(["owner", "manager", "staff"]),
+  }),
+  matchStatus: businessRequestMatchStatusSchema,
+  request: z.object({
+    id: z.string().uuid(),
+    summary: z.string(),
+    details: z.string().nullable(),
+    categoryName: z.string(),
+    districtName: z.string().nullable(),
+    timing: requestTimingSchema.nullable(),
+    neededAt: z.string().datetime().nullable(),
+    budgetMinimum: z.number().nonnegative().nullable(),
+    budgetMaximum: z.number().nonnegative().nullable(),
+    createdAt: z.string().datetime(),
+    expiresAt: z.string().datetime().nullable(),
+  }),
+});
+
+export const matchedBusinessRequestsSchema = z.object({
+  requests: z.array(matchedBusinessRequestSchema),
+});
+
+export type MatchedBusinessRequest = z.infer<
+  typeof matchedBusinessRequestSchema
+>;
+export type MatchedBusinessRequests = z.infer<
+  typeof matchedBusinessRequestsSchema
+>;
+
 export const submitBusinessReviewSchema = z
   .object({
     decision: businessReviewDecisionSchema,
