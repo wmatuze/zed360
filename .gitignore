@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Environment and credentials
+.env
+.env.*
+!.env.example
+
+# Build output
+.next/
+dist/
+coverage/
+.turbo/
+
+# Local data and uploads
+uploads/
+tmp/
+*.log
+
+# Private research exports
+Zed360_Survey_Responses*.csv
+
+# Editor and operating system
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

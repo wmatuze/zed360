@@ -1,0 +1,7 @@
+.next
+dist
+coverage
+node_modules
+pnpm-lock.yaml
+packages/database/drizzle/meta
+Zed360_Survey_Responses_Page_Values_2026-08-06.csv

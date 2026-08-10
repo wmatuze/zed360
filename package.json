@@ -1,0 +1,33 @@
+{
+  "name": "zed360",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Zambia's business discovery, matching, and trust platform.",
+  "packageManager": "pnpm@10.33.2",
+  "scripts": {
+    "dev": "turbo dev",
+    "dev:web": "turbo dev --filter=@zed360/web --filter=@zed360/api",
+    "dev:api": "turbo dev --filter=@zed360/api",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "auth:sync-env": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/sync-web-environment.ps1",
+    "db:generate": "pnpm --filter @zed360/database db:generate",
+    "db:check": "pnpm --filter @zed360/database db:check",
+    "db:migrate": "pnpm --filter @zed360/database db:migrate",
+    "db:match-backfill": "pnpm --filter @zed360/database build && pnpm --filter @zed360/database db:match-backfill",
+    "db:seed": "pnpm --filter @zed360/database db:seed",
+    "db:studio": "pnpm --filter @zed360/database db:studio",
+    "admin:grant-role": "pnpm --filter @zed360/database admin:grant-role",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.6",
+    "turbo": "^2.10.8"
+  }
+}

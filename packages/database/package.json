@@ -1,0 +1,40 @@
+{
+  "name": "@zed360/database",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./schema": {
+      "types": "./dist/schema.d.ts",
+      "default": "./dist/schema.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc --noEmit -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "node --test scripts/*.test.mjs",
+    "db:check": "node scripts/check-connection.mjs",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:match-backfill": "node scripts/backfill-request-matches.mjs",
+    "db:seed": "node scripts/seed-reference-data.mjs",
+    "db:studio": "drizzle-kit studio",
+    "admin:grant-role": "node scripts/grant-platform-role.mjs"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.0",
+    "postgres": "^3.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "dotenv": "^17.0.0",
+    "drizzle-kit": "^0.31.0",
+    "typescript": "^5.9.0"
+  }
+}
