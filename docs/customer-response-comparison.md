@@ -23,3 +23,15 @@ not show contact buttons.
 
 Recording a confirmed connection and allowing customers to close their request
 are later milestones.
+
+## Link retention
+
+The browser remembers up to five private requests using local storage. Visiting
+a private request page also adds it to the recent list, so an existing link can
+be remembered on a new browser after it is opened once.
+
+The request form shows **My recent requests** with a Forget control for shared
+devices. Confirmation and comparison pages provide copy, native device sharing,
+and WhatsApp sharing controls. Browser storage is only a convenience: clearing
+site data or changing devices removes the recent list, so optional verified
+email or WhatsApp recovery remains a future feature.

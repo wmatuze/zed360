@@ -2,6 +2,9 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { rememberRecentRequest } from "@/lib/recent-requests";
+import { PrivateRequestActions } from "./private-request-actions";
+import { RecentRequestsPanel } from "./recent-requests-panel";
 
 type District = { id: string; name: string; slug: string };
 type Province = {
@@ -22,6 +25,7 @@ type CreatedRequest = {
   shareToken: string;
   status: "open";
   createdAt: string;
+  summary?: string;
 };
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/v1";
@@ -119,7 +123,13 @@ export function RequestForm() {
         );
       }
 
-      setCreatedRequest(result);
+      setCreatedRequest({ ...result, summary: request.summary });
+      rememberRecentRequest({
+        id: result.id,
+        shareToken: result.shareToken,
+        summary: request.summary,
+        createdAt: result.createdAt,
+      });
     } catch (error) {
       setSubmitError(
         error instanceof Error
@@ -165,6 +175,10 @@ export function RequestForm() {
         >
           View my private request →
         </Link>
+        <PrivateRequestActions
+          shareToken={createdRequest.shareToken}
+          summary={createdRequest.summary ?? "My Zed360 request"}
+        />
         <button
           className="button button-secondary ml-0 mt-3 sm:ml-3 sm:mt-6"
           onClick={createAnotherRequest}
@@ -183,6 +197,7 @@ export function RequestForm() {
       className="space-y-5 rounded-3xl border border-white/10 bg-white/[0.035] p-6 shadow-2xl sm:p-8"
       onSubmit={handleSubmit}
     >
+      <RecentRequestsPanel />
       {referenceError ? (
         <div
           className="rounded-xl border border-red-300/20 bg-red-300/8 px-4 py-3 text-sm text-red-100"

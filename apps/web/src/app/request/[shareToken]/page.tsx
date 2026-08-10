@@ -5,6 +5,8 @@ import {
   CustomerRequestApiError,
   fetchSharedCustomerRequest,
 } from "@/lib/customer-request";
+import { PrivateRequestActions } from "../private-request-actions";
+import { RememberRequest } from "./remember-request";
 
 export const metadata: Metadata = { title: "Your request responses" };
 export const dynamic = "force-dynamic";
@@ -77,6 +79,14 @@ export default async function SharedRequestPage({
 
   return (
     <main className="min-h-screen bg-[var(--ink)] px-5 py-6 text-white sm:px-8 lg:px-10">
+      <RememberRequest
+        request={{
+          id: data.request.id,
+          summary: data.request.summary,
+          createdAt: data.request.createdAt,
+        }}
+        shareToken={shareToken}
+      />
       <header className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4">
         <Link className="flex items-center gap-3" href="/">
           <span className="brand-mark" aria-hidden="true">
@@ -112,6 +122,10 @@ export default async function SharedRequestPage({
         <div className="mt-8 rounded-2xl border border-[var(--lime)]/20 bg-[var(--lime)]/8 p-5 text-sm leading-6 text-white/65">
           Keep this page private. Anyone with its link can view your request and
           business responses.
+          <PrivateRequestActions
+            shareToken={shareToken}
+            summary={data.request.summary}
+          />
         </div>
 
         <div className="mt-12 flex items-end justify-between gap-5">
