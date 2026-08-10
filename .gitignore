@@ -10,7 +10,11 @@ node_modules/
 # Build output
 .next/
 dist/
-coverage/
+/coverage/
+/apps/api/coverage/
+/apps/web/coverage/
+/apps/worker/coverage/
+/packages/*/coverage/
 .turbo/
 
 # Local data and uploads

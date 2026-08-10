@@ -237,6 +237,167 @@ export const businessAccountSchema = z.object({
 
 export type BusinessAccount = z.infer<typeof businessAccountSchema>;
 
+export const serviceFulfillmentModeSchema = z.enum([
+  "at_business",
+  "customer_pickup",
+  "business_travel",
+  "delivery",
+  "remote",
+]);
+
+export const serviceCoverageScopeSchema = z.enum([
+  "business_location",
+  "selected_districts",
+  "selected_provinces",
+  "nationwide",
+  "remote",
+]);
+
+export const serviceCoverageOptionInputSchema = z
+  .object({
+    mode: serviceFulfillmentModeSchema,
+    coverageScope: serviceCoverageScopeSchema,
+    districtIds: z.array(z.string().uuid()).max(50).default([]),
+    provinceIds: z.array(z.string().uuid()).max(10).default([]),
+    feeMinimum: z.coerce.number().nonnegative().optional(),
+    feeMaximum: z.coerce.number().nonnegative().optional(),
+    leadTimeMinimumDays: z.coerce
+      .number()
+      .int()
+      .nonnegative()
+      .max(365)
+      .optional(),
+    leadTimeMaximumDays: z.coerce
+      .number()
+      .int()
+      .nonnegative()
+      .max(365)
+      .optional(),
+    notes: z.string().trim().max(500).optional().or(z.literal("")),
+  })
+  .superRefine((option, context) => {
+    const expectedScope =
+      option.mode === "at_business" || option.mode === "customer_pickup"
+        ? "business_location"
+        : option.mode === "remote"
+          ? "remote"
+          : null;
+    if (expectedScope && option.coverageScope !== expectedScope) {
+      context.addIssue({
+        code: "custom",
+        path: ["coverageScope"],
+        message: `This fulfilment mode requires ${expectedScope.replace("_", " ")} coverage.`,
+      });
+    }
+    if (
+      (option.mode === "business_travel" || option.mode === "delivery") &&
+      !["selected_districts", "selected_provinces", "nationwide"].includes(
+        option.coverageScope,
+      )
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["coverageScope"],
+        message:
+          "Choose selected districts, selected provinces, or nationwide.",
+      });
+    }
+    if (
+      option.coverageScope === "selected_districts" &&
+      option.districtIds.length === 0
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["districtIds"],
+        message: "Choose at least one district.",
+      });
+    }
+    if (
+      option.coverageScope === "selected_provinces" &&
+      option.provinceIds.length === 0
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["provinceIds"],
+        message: "Choose at least one province.",
+      });
+    }
+    if (
+      option.feeMinimum !== undefined &&
+      option.feeMaximum !== undefined &&
+      option.feeMinimum > option.feeMaximum
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["feeMaximum"],
+        message: "Minimum fee cannot be greater than maximum fee.",
+      });
+    }
+    if (
+      option.leadTimeMinimumDays !== undefined &&
+      option.leadTimeMaximumDays !== undefined &&
+      option.leadTimeMinimumDays > option.leadTimeMaximumDays
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["leadTimeMaximumDays"],
+        message: "Minimum delivery time cannot exceed maximum delivery time.",
+      });
+    }
+  });
+
+export const updateBusinessServiceCoverageSchema = z
+  .object({
+    options: z.array(serviceCoverageOptionInputSchema).max(5),
+  })
+  .superRefine(({ options }, context) => {
+    const modes = new Set<string>();
+    for (const [index, option] of options.entries()) {
+      if (modes.has(option.mode)) {
+        context.addIssue({
+          code: "custom",
+          path: ["options", index, "mode"],
+          message: "Each fulfilment mode can only be configured once.",
+        });
+      }
+      modes.add(option.mode);
+    }
+  });
+
+export type UpdateBusinessServiceCoverage = z.infer<
+  typeof updateBusinessServiceCoverageSchema
+>;
+
+export const businessServiceCoverageSchema = z.object({
+  business: z.object({ id: z.string().uuid(), name: z.string() }),
+  services: z.array(
+    z.object({
+      id: z.string().uuid(),
+      name: z.string(),
+      categoryName: z.string(),
+      options: z.array(
+        z.object({
+          id: z.string().uuid(),
+          mode: serviceFulfillmentModeSchema,
+          coverageScope: serviceCoverageScopeSchema,
+          districtIds: z.array(z.string().uuid()),
+          provinceIds: z.array(z.string().uuid()),
+          feeMinimum: z.number().nonnegative().nullable(),
+          feeMaximum: z.number().nonnegative().nullable(),
+          leadTimeMinimumDays: z.number().int().nonnegative().nullable(),
+          leadTimeMaximumDays: z.number().int().nonnegative().nullable(),
+          notes: z.string().nullable(),
+          lastConfirmedAt: z.string().datetime().nullable(),
+        }),
+      ),
+    }),
+  ),
+});
+
+export type BusinessServiceCoverage = z.infer<
+  typeof businessServiceCoverageSchema
+>;
+
 export const businessRequestMatchStatusSchema = z.enum([
   "queued",
   "sent",

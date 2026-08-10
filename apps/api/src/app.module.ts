@@ -10,6 +10,8 @@ import { BusinessReviewsController } from './business-reviews.controller';
 import { BusinessReviewsService } from './business-reviews.service';
 import { BusinessRequestsController } from './business-requests.controller';
 import { BusinessRequestsService } from './business-requests.service';
+import { BusinessServiceCoverageController } from './business-service-coverage.controller';
+import { BusinessServiceCoverageService } from './business-service-coverage.service';
 import { DatabaseService } from './database.service';
 import { ReferenceDataController } from './reference-data.controller';
 import { ReferenceDataService } from './reference-data.service';
@@ -24,6 +26,7 @@ import { PlatformAuthorizationService } from './platform-authorization.service';
     BusinessAccountsController,
     BusinessReviewsController,
     BusinessRequestsController,
+    BusinessServiceCoverageController,
     BusinessApplicationsController,
     ReferenceDataController,
     RequestsController,
@@ -35,6 +38,7 @@ import { PlatformAuthorizationService } from './platform-authorization.service';
     BusinessAccountsService,
     BusinessReviewsService,
     BusinessRequestsService,
+    BusinessServiceCoverageService,
     DatabaseService,
     ReferenceDataService,
     RequestsService,

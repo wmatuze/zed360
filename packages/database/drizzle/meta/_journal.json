@@ -29,6 +29,13 @@
       "when": 1786354067487,
       "tag": "0003_brief_secret_warriors",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1786368338809,
+      "tag": "0004_skinny_goblin_queen",
+      "breakpoints": true
     }
   ]
 }

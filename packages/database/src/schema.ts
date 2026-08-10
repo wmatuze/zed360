@@ -1,6 +1,7 @@
 import { relations, sql } from "drizzle-orm";
 import {
   boolean,
+  check,
   geometry,
   index,
   integer,
@@ -54,6 +55,20 @@ export const responseStatus = pgEnum("response_status", [
   "available",
   "unavailable",
   "needs_more_information",
+]);
+export const serviceFulfillmentMode = pgEnum("service_fulfillment_mode", [
+  "at_business",
+  "customer_pickup",
+  "business_travel",
+  "delivery",
+  "remote",
+]);
+export const serviceCoverageScope = pgEnum("service_coverage_scope", [
+  "business_location",
+  "selected_districts",
+  "selected_provinces",
+  "nationwide",
+  "remote",
 ]);
 export const verificationType = pgEnum("verification_type", [
   "contact",
@@ -276,6 +291,75 @@ export const businessServices = pgTable(
   ],
 );
 
+export const businessServiceFulfillmentOptions = pgTable(
+  "business_service_fulfillment_options",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    businessServiceId: uuid("business_service_id")
+      .notNull()
+      .references(() => businessServices.id, { onDelete: "cascade" }),
+    mode: serviceFulfillmentMode("mode").notNull(),
+    coverageScope: serviceCoverageScope("coverage_scope").notNull(),
+    feeMinimum: numeric("fee_minimum", { precision: 14, scale: 2 }),
+    feeMaximum: numeric("fee_maximum", { precision: 14, scale: 2 }),
+    leadTimeMinimumDays: integer("lead_time_minimum_days"),
+    leadTimeMaximumDays: integer("lead_time_maximum_days"),
+    notes: text("notes"),
+    isActive: boolean("is_active").default(true).notNull(),
+    lastConfirmedAt: timestamp("last_confirmed_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("business_service_fulfillment_mode_unique").on(
+      table.businessServiceId,
+      table.mode,
+    ),
+    index("business_service_fulfillment_service_idx").on(
+      table.businessServiceId,
+    ),
+    check(
+      "business_service_fulfillment_fee_range_check",
+      sql`${table.feeMinimum} is null or ${table.feeMaximum} is null or ${table.feeMinimum} <= ${table.feeMaximum}`,
+    ),
+    check(
+      "business_service_fulfillment_lead_range_check",
+      sql`${table.leadTimeMinimumDays} is null or ${table.leadTimeMaximumDays} is null or ${table.leadTimeMinimumDays} <= ${table.leadTimeMaximumDays}`,
+    ),
+  ],
+);
+
+export const businessServiceCoverageAreas = pgTable(
+  "business_service_coverage_areas",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fulfillmentOptionId: uuid("fulfillment_option_id")
+      .notNull()
+      .references(() => businessServiceFulfillmentOptions.id, {
+        onDelete: "cascade",
+      }),
+    provinceId: uuid("province_id").references(() => provinces.id),
+    districtId: uuid("district_id").references(() => districts.id),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("business_service_coverage_district_unique")
+      .on(table.fulfillmentOptionId, table.districtId)
+      .where(sql`${table.districtId} is not null`),
+    uniqueIndex("business_service_coverage_province_unique")
+      .on(table.fulfillmentOptionId, table.provinceId)
+      .where(sql`${table.provinceId} is not null`),
+    index("business_service_coverage_option_idx").on(table.fulfillmentOptionId),
+    index("business_service_coverage_district_idx").on(table.districtId),
+    index("business_service_coverage_province_idx").on(table.provinceId),
+    check(
+      "business_service_coverage_one_area_check",
+      sql`num_nonnulls(${table.provinceId}, ${table.districtId}) = 1`,
+    ),
+  ],
+);
+
 export const customerRequests = pgTable(
   "customer_requests",
   {
@@ -457,6 +541,24 @@ export const businessesRelations = relations(businesses, ({ many }) => ({
   verifications: many(businessVerifications),
   reviews: many(businessReviews),
 }));
+
+export const businessServicesRelations = relations(
+  businessServices,
+  ({ many }) => ({
+    fulfillmentOptions: many(businessServiceFulfillmentOptions),
+  }),
+);
+
+export const businessServiceFulfillmentOptionsRelations = relations(
+  businessServiceFulfillmentOptions,
+  ({ one, many }) => ({
+    service: one(businessServices, {
+      fields: [businessServiceFulfillmentOptions.businessServiceId],
+      references: [businessServices.id],
+    }),
+    coverageAreas: many(businessServiceCoverageAreas),
+  }),
+);
 
 export const customerRequestsRelations = relations(
   customerRequests,

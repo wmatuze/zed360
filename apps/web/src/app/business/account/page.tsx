@@ -144,6 +144,14 @@ export default async function BusinessAccountPage({
                       View matched requests →
                     </Link>
                   ) : null}
+                  {business.role !== "staff" && business.status !== "closed" ? (
+                    <Link
+                      className="button button-secondary mt-3"
+                      href={`/business/${business.id}/coverage`}
+                    >
+                      Manage service coverage →
+                    </Link>
+                  ) : null}
                   {business.latestReviewReason ? (
                     <p className="mt-4 rounded-xl border border-white/8 bg-black/15 p-3 text-sm leading-6 text-white/58">
                       Review note: {business.latestReviewReason}
