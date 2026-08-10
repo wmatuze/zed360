@@ -18,6 +18,8 @@ import { ReferenceDataService } from './reference-data.service';
 import { RequestsController } from './requests.controller';
 import { RequestsService } from './requests.service';
 import { PlatformAuthorizationService } from './platform-authorization.service';
+import { PublicBusinessesController } from './public-businesses.controller';
+import { PublicBusinessesService } from './public-businesses.service';
 
 @Module({
   imports: [],
@@ -28,6 +30,7 @@ import { PlatformAuthorizationService } from './platform-authorization.service';
     BusinessRequestsController,
     BusinessServiceCoverageController,
     BusinessApplicationsController,
+    PublicBusinessesController,
     ReferenceDataController,
     RequestsController,
   ],
@@ -43,6 +46,7 @@ import { PlatformAuthorizationService } from './platform-authorization.service';
     ReferenceDataService,
     RequestsService,
     PlatformAuthorizationService,
+    PublicBusinessesService,
   ],
 })
 export class AppModule {}

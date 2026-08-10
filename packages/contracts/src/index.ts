@@ -398,6 +398,112 @@ export type BusinessServiceCoverage = z.infer<
   typeof businessServiceCoverageSchema
 >;
 
+export const publicBusinessDirectoryQuerySchema = z.object({
+  q: z.string().trim().max(100).optional(),
+  category: z.string().trim().max(120).optional(),
+  province: z.string().trim().max(120).optional(),
+  district: z.string().uuid().optional(),
+  fulfillment: serviceFulfillmentModeSchema.optional(),
+  page: z.coerce.number().int().positive().max(1000).default(1),
+});
+
+export type PublicBusinessDirectoryQuery = z.infer<
+  typeof publicBusinessDirectoryQuerySchema
+>;
+
+const publicBusinessTrustSchema = z.object({
+  contactVerified: z.boolean(),
+  registrationVerified: z.boolean(),
+});
+
+const publicBusinessLocationSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  isPrimary: z.boolean(),
+  district: z
+    .object({
+      name: z.string(),
+      slug: z.string(),
+      provinceName: z.string(),
+      provinceSlug: z.string(),
+    })
+    .nullable(),
+});
+
+const publicBusinessCoverageAreaSchema = z.object({
+  name: z.string(),
+  slug: z.string(),
+});
+
+const publicBusinessFulfillmentOptionSchema = z.object({
+  mode: serviceFulfillmentModeSchema,
+  coverageScope: serviceCoverageScopeSchema,
+  feeMinimum: z.number().nonnegative().nullable(),
+  feeMaximum: z.number().nonnegative().nullable(),
+  leadTimeMinimumDays: z.number().int().nonnegative().nullable(),
+  leadTimeMaximumDays: z.number().int().nonnegative().nullable(),
+  notes: z.string().nullable(),
+  districts: z.array(publicBusinessCoverageAreaSchema),
+  provinces: z.array(publicBusinessCoverageAreaSchema),
+});
+
+const publicBusinessServiceSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  description: z.string().nullable(),
+  category: z.object({ name: z.string(), slug: z.string() }),
+  priceFrom: z.number().nonnegative().nullable(),
+  priceTo: z.number().nonnegative().nullable(),
+  lastConfirmedAt: z.string().datetime().nullable(),
+  fulfillment: z.array(publicBusinessFulfillmentOptionSchema),
+});
+
+export const publicBusinessSummarySchema = z.object({
+  id: z.string().uuid(),
+  slug: z.string(),
+  name: z.string(),
+  description: z.string().nullable(),
+  logoUrl: z.string().nullable(),
+  coverUrl: z.string().nullable(),
+  lastConfirmedAt: z.string().datetime().nullable(),
+  trust: publicBusinessTrustSchema,
+  primaryLocation: publicBusinessLocationSchema.nullable(),
+  categories: z.array(z.object({ name: z.string(), slug: z.string() })),
+  serviceNames: z.array(z.string()),
+  fulfillmentModes: z.array(serviceFulfillmentModeSchema),
+});
+
+export const publicBusinessDirectorySchema = z.object({
+  businesses: z.array(publicBusinessSummarySchema),
+  page: z.number().int().positive(),
+  pageSize: z.number().int().positive(),
+  total: z.number().int().nonnegative(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+export type PublicBusinessDirectory = z.infer<
+  typeof publicBusinessDirectorySchema
+>;
+
+export const publicBusinessProfileSchema = z.object({
+  id: z.string().uuid(),
+  slug: z.string(),
+  name: z.string(),
+  description: z.string().nullable(),
+  phone: z.string().nullable(),
+  whatsapp: z.string().nullable(),
+  email: z.string().nullable(),
+  website: z.string().nullable(),
+  logoUrl: z.string().nullable(),
+  coverUrl: z.string().nullable(),
+  lastConfirmedAt: z.string().datetime().nullable(),
+  trust: publicBusinessTrustSchema,
+  locations: z.array(publicBusinessLocationSchema),
+  services: z.array(publicBusinessServiceSchema),
+});
+
+export type PublicBusinessProfile = z.infer<typeof publicBusinessProfileSchema>;
+
 export const businessRequestMatchStatusSchema = z.enum([
   "queued",
   "sent",

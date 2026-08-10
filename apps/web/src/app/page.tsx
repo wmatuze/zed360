@@ -49,6 +49,9 @@ export default function Home() {
             className="hidden items-center gap-8 text-sm text-white/65 md:flex"
             aria-label="Main navigation"
           >
+            <Link className="transition hover:text-white" href="/businesses">
+              Browse businesses
+            </Link>
             <a className="transition hover:text-white" href="#how-it-works">
               How it works
             </a>
@@ -86,9 +89,9 @@ export default function Home() {
                 Tell us what you need
                 <span aria-hidden="true">→</span>
               </Link>
-              <a className="button button-secondary" href="#how-it-works">
-                See how it works
-              </a>
+              <Link className="button button-secondary" href="/businesses">
+                Browse businesses
+              </Link>
             </div>
 
             <div className="mt-12 flex flex-wrap gap-x-7 gap-y-3 text-sm text-white/42">
@@ -192,7 +195,7 @@ export default function Home() {
           {categories.map(([title, description, initials]) => (
             <Link
               className="category-card"
-              href={`/request?category=${encodeURIComponent(title)}`}
+              href={`/businesses?q=${encodeURIComponent(title)}`}
               key={title}
             >
               <span>{initials}</span>
