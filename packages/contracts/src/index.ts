@@ -267,6 +267,17 @@ export const matchedBusinessRequestSchema = z.object({
     createdAt: z.string().datetime(),
     expiresAt: z.string().datetime().nullable(),
   }),
+  response: z
+    .object({
+      id: z.string().uuid(),
+      status: z.enum(["available", "unavailable", "needs_more_information"]),
+      message: z.string(),
+      priceMinimum: z.number().nonnegative().nullable(),
+      priceMaximum: z.number().nonnegative().nullable(),
+      createdAt: z.string().datetime(),
+      updatedAt: z.string().datetime(),
+    })
+    .nullable(),
 });
 
 export const matchedBusinessRequestsSchema = z.object({
@@ -278,6 +289,37 @@ export type MatchedBusinessRequest = z.infer<
 >;
 export type MatchedBusinessRequests = z.infer<
   typeof matchedBusinessRequestsSchema
+>;
+
+export const submitBusinessResponseSchema = z
+  .object({
+    status: z.enum(["available", "unavailable", "needs_more_information"]),
+    message: z.string().trim().min(10).max(1200),
+    priceMinimum: z.coerce.number().nonnegative().optional(),
+    priceMaximum: z.coerce.number().nonnegative().optional(),
+  })
+  .refine(
+    ({ priceMinimum, priceMaximum }) =>
+      priceMinimum === undefined ||
+      priceMaximum === undefined ||
+      priceMinimum <= priceMaximum,
+    {
+      message: "Minimum price cannot be greater than maximum price",
+      path: ["priceMaximum"],
+    },
+  );
+
+export type SubmitBusinessResponse = z.infer<
+  typeof submitBusinessResponseSchema
+>;
+
+export const submittedBusinessResponseSchema = z.object({
+  matchId: z.string().uuid(),
+  response: matchedBusinessRequestSchema.shape.response.unwrap(),
+});
+
+export type SubmittedBusinessResponse = z.infer<
+  typeof submittedBusinessResponseSchema
 >;
 
 export const submitBusinessReviewSchema = z

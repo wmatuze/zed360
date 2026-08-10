@@ -22,6 +22,13 @@ describe('toMatchedBusinessRequest', () => {
       budgetMaximum: '250.00',
       createdAt: new Date('2026-08-10T08:00:00.000Z'),
       expiresAt: new Date('2026-09-09T08:00:00.000Z'),
+      responseId: null,
+      responseStatus: null,
+      responseMessage: null,
+      responsePriceMinimum: null,
+      responsePriceMaximum: null,
+      responseCreatedAt: null,
+      responseUpdatedAt: null,
     });
 
     expect(result.request).toEqual(
@@ -33,5 +40,6 @@ describe('toMatchedBusinessRequest', () => {
     );
     expect(result.request).not.toHaveProperty('answers');
     expect(result.request).not.toHaveProperty('shareToken');
+    expect(result.response).toBeNull();
   });
 });

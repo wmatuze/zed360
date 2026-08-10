@@ -7,6 +7,7 @@ import {
 } from "@/lib/business-requests";
 import { getVerifiedBusinessSession } from "@/lib/business-account";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { ResponseForm } from "./response-form";
 
 export const metadata: Metadata = { title: "Matched requests" };
 export const dynamic = "force-dynamic";
@@ -91,7 +92,7 @@ export default async function BusinessRequestsPage() {
 
         {data?.requests.length ? (
           <div className="mt-10 grid gap-5">
-            {data.requests.map(({ matchId, business, request }) => (
+            {data.requests.map(({ matchId, business, request, response }) => (
               <article
                 className="rounded-2xl border border-white/10 bg-white/[0.035] p-6 sm:p-7"
                 key={matchId}
@@ -140,6 +141,19 @@ export default async function BusinessRequestsPage() {
                     </dd>
                   </div>
                 </dl>
+                {response ? (
+                  <p className="mt-5 rounded-xl border border-[var(--lime)]/20 bg-[var(--lime)]/8 px-4 py-3 text-sm text-white/70">
+                    Response sent. You can update it while this request remains
+                    active.
+                  </p>
+                ) : null}
+                {business.role === "owner" || business.role === "manager" ? (
+                  <ResponseForm matchId={matchId} response={response} />
+                ) : (
+                  <p className="mt-5 text-sm text-white/45">
+                    An owner or manager can respond to this request.
+                  </p>
+                )}
               </article>
             ))}
           </div>
