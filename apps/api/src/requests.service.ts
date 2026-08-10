@@ -1,8 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import type { CreateCustomerRequest } from '@zed360/contracts';
+import type {
+  CreateCustomerRequest,
+  SharedCustomerRequest,
+} from '@zed360/contracts';
 import {
   and,
   businessLocations,
+  businessResponses,
   businesses,
   businessServices,
   categories,
@@ -131,6 +135,112 @@ export class RequestsService {
       ...created,
       status: 'open' as const,
       createdAt: created.createdAt.toISOString(),
+    };
+  }
+
+  async getSharedRequest(shareToken: string): Promise<SharedCustomerRequest> {
+    const [request] = await this.database.db
+      .select({
+        id: customerRequests.id,
+        summary: customerRequests.summary,
+        details: customerRequests.details,
+        status: customerRequests.status,
+        answers: customerRequests.answers,
+        categoryName: categories.name,
+        districtName: districts.name,
+        neededAt: customerRequests.neededAt,
+        budgetMinimum: customerRequests.budgetMinimum,
+        budgetMaximum: customerRequests.budgetMaximum,
+        createdAt: customerRequests.createdAt,
+        expiresAt: customerRequests.expiresAt,
+      })
+      .from(customerRequests)
+      .innerJoin(categories, eq(customerRequests.categoryId, categories.id))
+      .leftJoin(districts, eq(customerRequests.districtId, districts.id))
+      .where(eq(customerRequests.shareToken, shareToken))
+      .limit(1);
+
+    if (!request || request.status === 'draft') {
+      throw new NotFoundException('This private request link is unavailable.');
+    }
+
+    const responseRows = await this.database.db
+      .select({
+        matchId: requestMatches.id,
+        status: businessResponses.status,
+        message: businessResponses.message,
+        priceMinimum: businessResponses.priceMinimum,
+        priceMaximum: businessResponses.priceMaximum,
+        updatedAt: businessResponses.updatedAt,
+        businessId: businesses.id,
+        businessName: businesses.name,
+        businessDescription: businesses.description,
+        phone: businesses.phone,
+        whatsapp: businesses.whatsapp,
+        email: businesses.email,
+        website: businesses.website,
+      })
+      .from(requestMatches)
+      .innerJoin(
+        businessResponses,
+        eq(businessResponses.matchId, requestMatches.id),
+      )
+      .innerJoin(businesses, eq(requestMatches.businessId, businesses.id))
+      .where(
+        and(
+          eq(requestMatches.requestId, request.id),
+          eq(requestMatches.status, 'responded'),
+          eq(businesses.status, 'active'),
+          eq(businesses.reviewStatus, 'approved'),
+        ),
+      );
+
+    const timing = request.answers.timing;
+    const validTiming =
+      timing === 'as_soon_as_possible' ||
+      timing === 'today' ||
+      timing === 'this_week' ||
+      timing === 'specific_date' ||
+      timing === 'flexible'
+        ? timing
+        : null;
+    const optionalNumber = (value: string | null) =>
+      value === null ? null : Number(value);
+
+    return {
+      request: {
+        id: request.id,
+        summary: request.summary,
+        details: request.details,
+        status: request.status,
+        categoryName: request.categoryName,
+        districtName: request.districtName,
+        timing: validTiming,
+        neededAt: request.neededAt?.toISOString() ?? null,
+        budgetMinimum: optionalNumber(request.budgetMinimum),
+        budgetMaximum: optionalNumber(request.budgetMaximum),
+        createdAt: request.createdAt.toISOString(),
+        expiresAt: request.expiresAt?.toISOString() ?? null,
+      },
+      responses: responseRows
+        .filter((response) => response.message !== null)
+        .map((response) => ({
+          matchId: response.matchId,
+          status: response.status,
+          message: response.message!,
+          priceMinimum: optionalNumber(response.priceMinimum),
+          priceMaximum: optionalNumber(response.priceMaximum),
+          updatedAt: response.updatedAt.toISOString(),
+          business: {
+            id: response.businessId,
+            name: response.businessName,
+            description: response.businessDescription,
+            phone: response.phone,
+            whatsapp: response.whatsapp,
+            email: response.email,
+            website: response.website,
+          },
+        })),
     };
   }
 }

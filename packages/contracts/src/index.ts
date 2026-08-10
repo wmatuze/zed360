@@ -322,6 +322,44 @@ export type SubmittedBusinessResponse = z.infer<
   typeof submittedBusinessResponseSchema
 >;
 
+export const sharedCustomerRequestSchema = z.object({
+  request: z.object({
+    id: z.string().uuid(),
+    summary: z.string(),
+    details: z.string().nullable(),
+    status: z.enum(["open", "matched", "resolved", "expired", "cancelled"]),
+    categoryName: z.string(),
+    districtName: z.string().nullable(),
+    timing: requestTimingSchema.nullable(),
+    neededAt: z.string().datetime().nullable(),
+    budgetMinimum: z.number().nonnegative().nullable(),
+    budgetMaximum: z.number().nonnegative().nullable(),
+    createdAt: z.string().datetime(),
+    expiresAt: z.string().datetime().nullable(),
+  }),
+  responses: z.array(
+    z.object({
+      matchId: z.string().uuid(),
+      status: z.enum(["available", "unavailable", "needs_more_information"]),
+      message: z.string(),
+      priceMinimum: z.number().nonnegative().nullable(),
+      priceMaximum: z.number().nonnegative().nullable(),
+      updatedAt: z.string().datetime(),
+      business: z.object({
+        id: z.string().uuid(),
+        name: z.string(),
+        description: z.string().nullable(),
+        phone: z.string().nullable(),
+        whatsapp: z.string().nullable(),
+        email: z.string().nullable(),
+        website: z.string().nullable(),
+      }),
+    }),
+  ),
+});
+
+export type SharedCustomerRequest = z.infer<typeof sharedCustomerRequestSchema>;
+
 export const submitBusinessReviewSchema = z
   .object({
     decision: businessReviewDecisionSchema,

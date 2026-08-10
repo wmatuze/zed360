@@ -4,12 +4,30 @@ import { RequestsService } from './requests.service';
 
 describe('RequestsController', () => {
   const create = jest.fn();
+  const getSharedRequest = jest.fn();
   const controller = new RequestsController({
     create,
+    getSharedRequest,
   } as unknown as RequestsService);
 
   beforeEach(() => {
     create.mockReset();
+    getSharedRequest.mockReset().mockResolvedValue({});
+  });
+
+  it('loads a request using a valid private share token', async () => {
+    const shareToken = '84854378-4d60-43a4-b53c-f7ee9c2f291e';
+
+    await controller.getSharedRequest(shareToken);
+
+    expect(getSharedRequest).toHaveBeenCalledWith(shareToken);
+  });
+
+  it('rejects a malformed private share token', () => {
+    expect(() => controller.getSharedRequest('not-a-token')).toThrow(
+      BadRequestException,
+    );
+    expect(getSharedRequest).not.toHaveBeenCalled();
   });
 
   it('passes a valid request to the service', async () => {

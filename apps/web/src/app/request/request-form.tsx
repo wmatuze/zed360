@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 
 type District = { id: string; name: string; slug: string };
 type Province = {
@@ -148,14 +149,24 @@ export function RequestForm() {
           Your request is now open.
         </h2>
         <p className="mt-3 leading-7 text-white/60">
-          Zed360 received your request successfully. Matching and business
-          notifications will be enabled as verified businesses join the pilot.
+          Zed360 received your request successfully. Use your private page to
+          check and compare responses from approved businesses.
         </p>
         <p className="mt-4 text-sm text-white/42">
           Request reference: {createdRequest.id.slice(0, 8).toUpperCase()}
         </p>
+        <div className="mt-6 rounded-2xl border border-white/10 bg-black/15 p-4 text-sm leading-6 text-white/55">
+          Save the private link below. Anyone with the link can see this request
+          and its business responses, so do not post it publicly.
+        </div>
+        <Link
+          className="button button-primary mt-6"
+          href={`/request/${createdRequest.shareToken}`}
+        >
+          View my private request →
+        </Link>
         <button
-          className="button button-secondary mt-7"
+          className="button button-secondary ml-0 mt-3 sm:ml-3 sm:mt-6"
           onClick={createAnotherRequest}
           type="button"
         >
