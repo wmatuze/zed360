@@ -286,10 +286,7 @@ export default async function BusinessProfilePage({
 
             {business.products.length ? (
               <section className="mt-12">
-                <p className="eyebrow">
-                  <span /> Window shopping
-                </p>
-                <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em]">
+                <h2 className="text-3xl font-semibold tracking-[-0.04em]">
                   Products
                 </h2>
                 <p className="mt-2 text-sm text-white/42">
