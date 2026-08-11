@@ -158,6 +158,15 @@ export default async function BusinessProfilePage({
                     Registration verified
                   </span>
                 ) : null}
+                {business.reviewSummary.reviewCount > 0 ? (
+                  <span className="rounded-full border border-amber-200/25 bg-amber-200/8 px-3 py-1 text-xs text-amber-100/85">
+                    ★ {business.reviewSummary.averageRating} ·{" "}
+                    {business.reviewSummary.reviewCount}{" "}
+                    {business.reviewSummary.reviewCount === 1
+                      ? "verified review"
+                      : "verified reviews"}
+                  </span>
+                ) : null}
               </div>
               <h1 className="mt-5 text-balance text-4xl font-semibold tracking-[-0.055em] sm:text-6xl">
                 {business.name}
@@ -382,6 +391,72 @@ export default async function BusinessProfilePage({
                     </figure>
                   ))}
                 </div>
+              </section>
+            ) : null}
+
+            {business.reviews.length ? (
+              <section className="mt-12">
+                <p className="eyebrow">
+                  <span /> Customer feedback
+                </p>
+                <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
+                  <div>
+                    <h2 className="text-3xl font-semibold tracking-[-0.04em]">
+                      Verified reviews
+                    </h2>
+                    <p className="mt-2 text-sm text-white/42">
+                      From customers who selected this business through a
+                      Zed360 request.
+                    </p>
+                  </div>
+                  <span className="text-sm font-semibold text-[var(--lime)]">
+                    ★ {business.reviewSummary.averageRating} from{" "}
+                    {business.reviewSummary.reviewCount}
+                  </span>
+                </div>
+                <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                  {business.reviews.map((review) => (
+                    <article
+                      className="rounded-3xl border border-white/10 bg-white/[0.035] p-6"
+                      key={review.id}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="font-semibold">Verified customer</p>
+                          <p className="mt-1 text-xs text-white/35">
+                            {new Date(review.createdAt).toLocaleDateString(
+                              "en-ZM",
+                              { dateStyle: "medium" },
+                            )}
+                          </p>
+                        </div>
+                        <span
+                          aria-label={`${review.rating} out of 5 stars`}
+                          className="text-[var(--lime)]"
+                        >
+                          {"★".repeat(review.rating)}
+                          <span className="text-white/15">
+                            {"★".repeat(5 - review.rating)}
+                          </span>
+                        </span>
+                      </div>
+                      {review.body ? (
+                        <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-white/58">
+                          {review.body}
+                        </p>
+                      ) : (
+                        <p className="mt-4 text-sm text-white/35">
+                          Rating only
+                        </p>
+                      )}
+                    </article>
+                  ))}
+                </div>
+                <p className="mt-4 text-xs leading-5 text-white/32">
+                  “Verified” means the reviewer selected this business through
+                  Zed360. It does not verify payment, delivery, or every claim
+                  in the review.
+                </p>
               </section>
             ) : null}
           </div>

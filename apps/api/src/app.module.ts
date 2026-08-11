@@ -24,15 +24,20 @@ import { PublicBusinessesController } from './public-businesses.controller';
 import { PublicBusinessesService } from './public-businesses.service';
 import { MediaReviewsController } from './media-reviews.controller';
 import { MediaReviewsService } from './media-reviews.service';
+import { AdminCustomerReviewsController } from './admin-customer-reviews.controller';
+import { CustomerReviewsController } from './customer-reviews.controller';
+import { CustomerReviewsService } from './customer-reviews.service';
 
 @Module({
   imports: [],
   controllers: [
     AppController,
+    AdminCustomerReviewsController,
     BusinessAccountsController,
     BusinessReviewsController,
     BusinessRequestsController,
     BusinessServiceCoverageController,
+    CustomerReviewsController,
     BusinessApplicationsController,
     BusinessCatalogController,
     MediaReviewsController,
@@ -50,6 +55,7 @@ import { MediaReviewsService } from './media-reviews.service';
     BusinessReviewsService,
     BusinessRequestsService,
     BusinessServiceCoverageService,
+    CustomerReviewsService,
     DatabaseService,
     ReferenceDataService,
     RequestsService,

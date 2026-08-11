@@ -97,9 +97,17 @@ export default async function AdminReviewsPage({
           <Link className="button button-quiet" href="/business/account">
             Business account
           </Link>
-          <Link className="button button-quiet" href="/admin/media-reviews">
-            Media reviews
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              className="button button-quiet"
+              href="/admin/customer-reviews"
+            >
+              Customer reviews
+            </Link>
+            <Link className="button button-quiet" href="/admin/media-reviews">
+              Media reviews
+            </Link>
+          </div>
           <form action={signOut}>
             <button className="button button-quiet" type="submit">
               Sign out

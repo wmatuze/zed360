@@ -119,6 +119,11 @@ export const mediaModerationStatus = pgEnum("media_moderation_status", [
   "approved",
   "rejected",
 ]);
+export const reviewModerationStatus = pgEnum("review_moderation_status", [
+  "pending",
+  "approved",
+  "rejected",
+]);
 
 export const users = pgTable(
   "users",
@@ -591,6 +596,12 @@ export const reviews = pgTable(
     authorUserId: uuid("author_user_id").references(() => users.id),
     rating: integer("rating").notNull(),
     body: text("body"),
+    moderationStatus: reviewModerationStatus("moderation_status")
+      .default("pending")
+      .notNull(),
+    moderationNote: text("moderation_note"),
+    reviewedByUserId: uuid("reviewed_by_user_id").references(() => users.id),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
     isPublished: boolean("is_published").default(false).notNull(),
     ...timestamps,
   },
@@ -600,6 +611,11 @@ export const reviews = pgTable(
       table.businessId,
       table.isPublished,
     ),
+    index("reviews_moderation_created_idx").on(
+      table.moderationStatus,
+      table.createdAt,
+    ),
+    check("reviews_rating_check", sql`${table.rating} between 1 and 5`),
   ],
 );
 
@@ -659,6 +675,7 @@ export const businessesRelations = relations(businesses, ({ many }) => ({
   reviews: many(businessReviews),
   products: many(businessProducts),
   media: many(businessMediaAssets),
+  customerReviews: many(reviews),
 }));
 
 export const businessProductsRelations = relations(
