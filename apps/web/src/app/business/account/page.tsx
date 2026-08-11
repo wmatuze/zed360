@@ -145,12 +145,20 @@ export default async function BusinessAccountPage({
                     </Link>
                   ) : null}
                   {business.role !== "staff" && business.status !== "closed" ? (
-                    <Link
-                      className="button button-secondary mt-3"
-                      href={`/business/${business.id}/coverage`}
-                    >
-                      Manage service coverage →
-                    </Link>
+                    <div className="mt-3 flex flex-col gap-3">
+                      <Link
+                        className="button button-secondary"
+                        href={`/business/${business.id}/coverage`}
+                      >
+                        Manage service coverage →
+                      </Link>
+                      <Link
+                        className="button button-secondary"
+                        href={`/business/${business.id}/catalog`}
+                      >
+                        Manage digital storefront →
+                      </Link>
+                    </div>
                   ) : null}
                   {business.latestReviewReason ? (
                     <p className="mt-4 rounded-xl border border-white/8 bg-black/15 p-3 text-sm leading-6 text-white/58">

@@ -25,7 +25,8 @@
     "db:match-backfill": "node scripts/backfill-request-matches.mjs",
     "db:seed": "node scripts/seed-reference-data.mjs",
     "db:studio": "drizzle-kit studio",
-    "admin:grant-role": "node scripts/grant-platform-role.mjs"
+    "admin:grant-role": "node scripts/grant-platform-role.mjs",
+    "storage:configure-business-media": "node scripts/configure-business-media-storage.mjs"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.0",

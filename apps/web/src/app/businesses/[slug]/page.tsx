@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -112,11 +113,36 @@ export default async function BusinessProfilePage({
 
       <section className="mx-auto w-full max-w-6xl px-5 pb-20 pt-10 sm:px-8 lg:px-10 lg:pt-16">
         <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.035] p-7 sm:p-10">
+          {business.coverUrl ? (
+            <Image
+              alt=""
+              className="object-cover opacity-20"
+              fill
+              priority
+              sizes="100vw"
+              src={business.coverUrl}
+              unoptimized
+            />
+          ) : null}
+          <div className="absolute inset-0 bg-gradient-to-r from-[var(--ink)] via-[var(--ink)]/85 to-transparent" />
           <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-[var(--lime)]/8 blur-3xl" />
           <div className="relative flex flex-col gap-8 sm:flex-row sm:items-start">
-            <span className="grid h-20 w-20 shrink-0 place-items-center rounded-3xl bg-[var(--lime)] text-3xl font-bold text-[var(--ink)] shadow-[0_18px_50px_rgba(184,242,56,.15)]">
-              {business.name.slice(0, 1).toUpperCase()}
-            </span>
+            {business.logoUrl ? (
+              <span className="relative block h-20 w-20 shrink-0 overflow-hidden rounded-3xl bg-white/8 shadow-[0_18px_50px_rgba(184,242,56,.15)]">
+                <Image
+                  alt={`${business.name} logo`}
+                  className="object-cover"
+                  fill
+                  sizes="80px"
+                  src={business.logoUrl}
+                  unoptimized
+                />
+              </span>
+            ) : (
+              <span className="grid h-20 w-20 shrink-0 place-items-center rounded-3xl bg-[var(--lime)] text-3xl font-bold text-[var(--ink)] shadow-[0_18px_50px_rgba(184,242,56,.15)]">
+                {business.name.slice(0, 1).toUpperCase()}
+              </span>
+            )}
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap gap-2">
                 <span className="rounded-full border border-[var(--lime)]/25 bg-[var(--lime)]/8 px-3 py-1 text-xs text-[var(--lime)]">
@@ -257,6 +283,107 @@ export default async function BusinessProfilePage({
                 This business has not published its services yet.
               </div>
             )}
+
+            {business.products.length ? (
+              <section className="mt-12">
+                <h2 className="text-3xl font-semibold tracking-[-0.04em]">
+                  Products
+                </h2>
+                <p className="mt-2 text-sm text-white/42">
+                  Display only—contact the business directly to buy or order.
+                </p>
+                <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                  {business.products.map((product) => {
+                    const image = product.media[0];
+                    const price = moneyRange(
+                      product.priceFrom,
+                      product.priceTo,
+                    );
+                    return (
+                      <article
+                        className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.035]"
+                        key={product.id}
+                      >
+                        {image ? (
+                          <div className="relative aspect-[4/3] bg-white/5">
+                            <Image
+                              alt={image.altText}
+                              className="object-cover"
+                              fill
+                              sizes="(max-width: 640px) 100vw, 40vw"
+                              src={image.url}
+                              unoptimized
+                            />
+                          </div>
+                        ) : null}
+                        <div className="p-5">
+                          <div className="flex items-start justify-between gap-4">
+                            <h3 className="font-semibold">{product.name}</h3>
+                            {price ? (
+                              <span className="text-sm text-[var(--lime)]">
+                                {price}
+                              </span>
+                            ) : null}
+                          </div>
+                          {product.description ? (
+                            <p className="mt-2 text-sm leading-6 text-white/45">
+                              {product.description}
+                            </p>
+                          ) : null}
+                          <p className="mt-4 text-xs capitalize text-white/35">
+                            {product.availability.replaceAll("_", " ")}
+                          </p>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+            ) : null}
+
+            {business.gallery.length ? (
+              <section className="mt-12">
+                <p className="eyebrow">
+                  <span /> Business gallery
+                </p>
+                <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em]">
+                  Work and photos
+                </h2>
+                <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                  {business.gallery.map((media) => (
+                    <figure
+                      className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.035]"
+                      key={media.id}
+                    >
+                      <div className="relative aspect-[4/3] bg-white/5">
+                        <Image
+                          alt={media.altText}
+                          className="object-cover"
+                          fill
+                          sizes="(max-width: 640px) 100vw, 40vw"
+                          src={media.url}
+                          unoptimized
+                        />
+                      </div>
+                      {media.title || media.caption ? (
+                        <figcaption className="p-4">
+                          {media.title ? (
+                            <p className="text-sm font-semibold">
+                              {media.title}
+                            </p>
+                          ) : null}
+                          {media.caption ? (
+                            <p className="mt-1 text-xs leading-5 text-white/42">
+                              {media.caption}
+                            </p>
+                          ) : null}
+                        </figcaption>
+                      ) : null}
+                    </figure>
+                  ))}
+                </div>
+              </section>
+            ) : null}
           </div>
 
           <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
