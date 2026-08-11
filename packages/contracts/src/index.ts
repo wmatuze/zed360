@@ -775,6 +775,26 @@ export type SubmittedBusinessResponse = z.infer<
   typeof submittedBusinessResponseSchema
 >;
 
+export const customerRequestOutcomeActionSchema = z.discriminatedUnion(
+  "action",
+  [
+    z.object({
+      action: z.literal("contacted"),
+      matchId: z.string().uuid(),
+    }),
+    z.object({
+      action: z.literal("chosen"),
+      matchId: z.string().uuid(),
+    }),
+    z.object({ action: z.literal("closed_without_choice") }),
+    z.object({ action: z.literal("reopened") }),
+  ],
+);
+
+export type CustomerRequestOutcomeAction = z.infer<
+  typeof customerRequestOutcomeActionSchema
+>;
+
 export const sharedCustomerRequestSchema = z.object({
   request: z.object({
     id: z.string().uuid(),
@@ -809,6 +829,10 @@ export const sharedCustomerRequestSchema = z.object({
       }),
     }),
   ),
+  outcome: z.object({
+    contactedBusinessIds: z.array(z.string().uuid()),
+    selectedBusinessId: z.string().uuid().nullable(),
+  }),
 });
 
 export type SharedCustomerRequest = z.infer<typeof sharedCustomerRequestSchema>;

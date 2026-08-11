@@ -5,14 +5,17 @@ import { RequestsService } from './requests.service';
 describe('RequestsController', () => {
   const create = jest.fn();
   const getSharedRequest = jest.fn();
+  const recordOutcome = jest.fn();
   const controller = new RequestsController({
     create,
     getSharedRequest,
+    recordOutcome,
   } as unknown as RequestsService);
 
   beforeEach(() => {
     create.mockReset();
     getSharedRequest.mockReset().mockResolvedValue({});
+    recordOutcome.mockReset().mockResolvedValue({});
   });
 
   it('loads a request using a valid private share token', async () => {
@@ -28,6 +31,27 @@ describe('RequestsController', () => {
       BadRequestException,
     );
     expect(getSharedRequest).not.toHaveBeenCalled();
+  });
+
+  it('records a valid customer choice using the private share token', async () => {
+    const shareToken = '84854378-4d60-43a4-b53c-f7ee9c2f291e';
+    const action = {
+      action: 'chosen',
+      matchId: 'b69a05f3-c203-41b0-94ce-e3ab8af41771',
+    };
+
+    await controller.recordOutcome(shareToken, action);
+
+    expect(recordOutcome).toHaveBeenCalledWith(shareToken, action);
+  });
+
+  it('rejects an invalid customer outcome before reaching the service', () => {
+    expect(() =>
+      controller.recordOutcome('84854378-4d60-43a4-b53c-f7ee9c2f291e', {
+        action: 'chosen',
+      }),
+    ).toThrow(BadRequestException);
+    expect(recordOutcome).not.toHaveBeenCalled();
   });
 
   it('passes a valid request to the service', async () => {

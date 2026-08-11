@@ -566,7 +566,16 @@ export const interactions = pgTable(
     resolvedAt: timestamp("resolved_at", { withTimezone: true }),
     outcomeConfirmed: boolean("outcome_confirmed").default(false).notNull(),
   },
-  (table) => [index("interactions_business_idx").on(table.businessId)],
+  (table) => [
+    index("interactions_business_idx").on(table.businessId),
+    uniqueIndex("interactions_request_business_unique").on(
+      table.requestId,
+      table.businessId,
+    ),
+    uniqueIndex("interactions_request_confirmed_unique")
+      .on(table.requestId)
+      .where(sql`${table.outcomeConfirmed} = true`),
+  ],
 );
 
 export const reviews = pgTable(
