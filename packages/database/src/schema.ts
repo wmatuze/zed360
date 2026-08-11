@@ -97,6 +97,28 @@ export const businessReviewDecision = pgEnum("business_review_decision", [
   "reopened",
   "reinstated",
 ]);
+export const catalogItemStatus = pgEnum("catalog_item_status", [
+  "active",
+  "archived",
+]);
+export const catalogAvailability = pgEnum("catalog_availability", [
+  "available",
+  "out_of_stock",
+  "made_to_order",
+  "contact_business",
+]);
+export const businessMediaPurpose = pgEnum("business_media_purpose", [
+  "logo",
+  "cover",
+  "gallery",
+  "work_sample",
+  "product",
+]);
+export const mediaModerationStatus = pgEnum("media_moderation_status", [
+  "pending",
+  "approved",
+  "rejected",
+]);
 
 export const users = pgTable(
   "users",
@@ -360,6 +382,92 @@ export const businessServiceCoverageAreas = pgTable(
   ],
 );
 
+export const businessProducts = pgTable(
+  "business_products",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    businessId: uuid("business_id")
+      .notNull()
+      .references(() => businesses.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    description: text("description"),
+    priceFrom: numeric("price_from", { precision: 14, scale: 2 }),
+    priceTo: numeric("price_to", { precision: 14, scale: 2 }),
+    availability: catalogAvailability("availability")
+      .default("contact_business")
+      .notNull(),
+    status: catalogItemStatus("status").default("active").notNull(),
+    isPublished: boolean("is_published").default(false).notNull(),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    lastConfirmedAt: timestamp("last_confirmed_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    index("business_products_business_status_idx").on(
+      table.businessId,
+      table.status,
+    ),
+    check(
+      "business_products_price_range_check",
+      sql`${table.priceFrom} is null or ${table.priceTo} is null or ${table.priceFrom} <= ${table.priceTo}`,
+    ),
+  ],
+);
+
+export const businessMediaAssets = pgTable(
+  "business_media_assets",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    businessId: uuid("business_id")
+      .notNull()
+      .references(() => businesses.id, { onDelete: "cascade" }),
+    productId: uuid("product_id").references(() => businessProducts.id, {
+      onDelete: "cascade",
+    }),
+    purpose: businessMediaPurpose("purpose").notNull(),
+    storageBucket: text("storage_bucket").notNull(),
+    storagePath: text("storage_path").notNull(),
+    mimeType: text("mime_type").notNull(),
+    fileSizeBytes: integer("file_size_bytes").notNull(),
+    width: integer("width"),
+    height: integer("height"),
+    title: text("title"),
+    altText: text("alt_text").notNull(),
+    caption: text("caption"),
+    moderationStatus: mediaModerationStatus("moderation_status")
+      .default("pending")
+      .notNull(),
+    moderationNote: text("moderation_note"),
+    reviewedByUserId: uuid("reviewed_by_user_id").references(() => users.id),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("business_media_storage_object_unique").on(
+      table.storageBucket,
+      table.storagePath,
+    ),
+    index("business_media_business_moderation_idx").on(
+      table.businessId,
+      table.moderationStatus,
+    ),
+    index("business_media_product_idx").on(table.productId),
+    check(
+      "business_media_product_purpose_check",
+      sql`(${table.purpose} = 'product') = (${table.productId} is not null)`,
+    ),
+    check(
+      "business_media_file_size_check",
+      sql`${table.fileSizeBytes} > 0 and ${table.fileSizeBytes} <= 5242880`,
+    ),
+    check(
+      "business_media_dimensions_check",
+      sql`(${table.width} is null or ${table.width} > 0) and (${table.height} is null or ${table.height} > 0)`,
+    ),
+  ],
+);
+
 export const customerRequests = pgTable(
   "customer_requests",
   {
@@ -540,7 +648,34 @@ export const businessesRelations = relations(businesses, ({ many }) => ({
   members: many(businessMembers),
   verifications: many(businessVerifications),
   reviews: many(businessReviews),
+  products: many(businessProducts),
+  media: many(businessMediaAssets),
 }));
+
+export const businessProductsRelations = relations(
+  businessProducts,
+  ({ one, many }) => ({
+    business: one(businesses, {
+      fields: [businessProducts.businessId],
+      references: [businesses.id],
+    }),
+    media: many(businessMediaAssets),
+  }),
+);
+
+export const businessMediaAssetsRelations = relations(
+  businessMediaAssets,
+  ({ one }) => ({
+    business: one(businesses, {
+      fields: [businessMediaAssets.businessId],
+      references: [businesses.id],
+    }),
+    product: one(businessProducts, {
+      fields: [businessMediaAssets.productId],
+      references: [businessProducts.id],
+    }),
+  }),
+);
 
 export const businessServicesRelations = relations(
   businessServices,

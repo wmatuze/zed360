@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import {
   fetchPublicBusinessDirectory,
@@ -231,10 +232,35 @@ export default async function BusinessesPage({
                 href={`/businesses/${business.slug}`}
                 key={business.id}
               >
+                {business.coverUrl ? (
+                  <div className="relative mb-5 aspect-[16/7] overflow-hidden rounded-2xl bg-white/5">
+                    <Image
+                      alt=""
+                      className="object-cover"
+                      fill
+                      sizes="(max-width: 640px) 100vw, 33vw"
+                      src={business.coverUrl}
+                      unoptimized
+                    />
+                  </div>
+                ) : null}
                 <div className="flex items-start justify-between gap-4">
-                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[var(--lime)] text-lg font-bold text-[var(--ink)]">
-                    {business.name.slice(0, 1).toUpperCase()}
-                  </span>
+                  {business.logoUrl ? (
+                    <span className="relative block h-12 w-12 shrink-0 overflow-hidden rounded-2xl bg-white/8">
+                      <Image
+                        alt={`${business.name} logo`}
+                        className="object-cover"
+                        fill
+                        sizes="48px"
+                        src={business.logoUrl}
+                        unoptimized
+                      />
+                    </span>
+                  ) : (
+                    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[var(--lime)] text-lg font-bold text-[var(--ink)]">
+                      {business.name.slice(0, 1).toUpperCase()}
+                    </span>
+                  )}
                   <div className="flex flex-wrap justify-end gap-2">
                     {business.trust.contactVerified ? (
                       <span className="rounded-full border border-[var(--lime)]/25 bg-[var(--lime)]/8 px-3 py-1 text-xs text-[var(--lime)]">

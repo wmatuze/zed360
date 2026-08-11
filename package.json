@@ -20,6 +20,7 @@
     "db:seed": "pnpm --filter @zed360/database db:seed",
     "db:studio": "pnpm --filter @zed360/database db:studio",
     "admin:grant-role": "pnpm --filter @zed360/database admin:grant-role",
+    "storage:configure-business-media": "pnpm --filter @zed360/database storage:configure-business-media",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

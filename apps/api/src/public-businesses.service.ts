@@ -8,6 +8,8 @@ import {
   and,
   asc,
   businessLocations,
+  businessMediaAssets,
+  businessProducts,
   businesses,
   businessServiceCoverageAreas,
   businessServiceFulfillmentOptions,
@@ -23,6 +25,7 @@ import {
 } from '@zed360/database';
 import type { SQL } from 'drizzle-orm';
 import { DatabaseService } from './database.service';
+import { publicMediaUrl } from './media-storage';
 
 const pageSize = 18;
 
@@ -111,9 +114,30 @@ export class PublicBusinessesService {
               district: primaryLocationRow.district,
             }
           : null;
+        const businessMedia = related.media.filter(
+          (asset) => asset.businessId === business.id,
+        );
+        const approvedLogo = businessMedia.find(
+          (asset) => asset.purpose === 'logo',
+        );
+        const approvedCover = businessMedia.find(
+          (asset) => asset.purpose === 'cover',
+        );
 
         return {
           ...business,
+          logoUrl: approvedLogo
+            ? publicMediaUrl(
+                approvedLogo.storageBucket,
+                approvedLogo.storagePath,
+              )
+            : business.logoUrl,
+          coverUrl: approvedCover
+            ? publicMediaUrl(
+                approvedCover.storageBucket,
+                approvedCover.storagePath,
+              )
+            : business.coverUrl,
           lastConfirmedAt: business.lastConfirmedAt?.toISOString() ?? null,
           trust: this.trustFor(business.id, related.verifications),
           primaryLocation,
@@ -163,8 +187,20 @@ export class PublicBusinessesService {
     }
 
     const related = await this.loadRelated([business.id]);
+    const approvedLogo = related.media.find(
+      (asset) => asset.purpose === 'logo',
+    );
+    const approvedCover = related.media.find(
+      (asset) => asset.purpose === 'cover',
+    );
     return {
       ...business,
+      logoUrl: approvedLogo
+        ? publicMediaUrl(approvedLogo.storageBucket, approvedLogo.storagePath)
+        : business.logoUrl,
+      coverUrl: approvedCover
+        ? publicMediaUrl(approvedCover.storageBucket, approvedCover.storagePath)
+        : business.coverUrl,
       lastConfirmedAt: business.lastConfirmedAt?.toISOString() ?? null,
       trust: this.trustFor(business.id, related.verifications),
       locations: related.locations.map((location) => ({
@@ -214,6 +250,23 @@ export class PublicBusinessesService {
               })),
           })),
       })),
+      gallery: related.media
+        .filter(
+          (asset) =>
+            asset.purpose === 'gallery' || asset.purpose === 'work_sample',
+        )
+        .map((asset) => this.publicMedia(asset)),
+      products: related.products.map((product) => ({
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        priceFrom: optionalNumber(product.priceFrom),
+        priceTo: optionalNumber(product.priceTo),
+        availability: product.availability,
+        media: related.media
+          .filter((asset) => asset.productId === product.id)
+          .map((asset) => this.publicMedia(asset)),
+      })),
     };
   }
 
@@ -234,6 +287,16 @@ export class PublicBusinessesService {
           where search_service.business_id = ${businesses.id}
             and search_service.is_available = true
             and (search_service.name ilike ${pattern} or search_category.name ilike ${pattern})
+        )
+        or exists (
+          select 1 from business_products search_product
+          where search_product.business_id = ${businesses.id}
+            and search_product.status = 'active'
+            and search_product.is_published = true
+            and (
+              search_product.name ilike ${pattern}
+              or coalesce(search_product.description, '') ilike ${pattern}
+            )
         )
       )`);
     }
@@ -332,7 +395,13 @@ export class PublicBusinessesService {
   }
 
   private async loadRelated(businessIds: string[]) {
-    const [locationRows, serviceRows, verificationRows] = await Promise.all([
+    const [
+      locationRows,
+      serviceRows,
+      verificationRows,
+      productRows,
+      mediaRows,
+    ] = await Promise.all([
       this.database.db
         .select({
           id: businessLocations.id,
@@ -389,6 +458,30 @@ export class PublicBusinessesService {
             inArray(businessVerifications.businessId, businessIds),
             eq(businessVerifications.status, 'verified'),
           ),
+        ),
+      this.database.db
+        .select()
+        .from(businessProducts)
+        .where(
+          and(
+            inArray(businessProducts.businessId, businessIds),
+            eq(businessProducts.status, 'active'),
+            eq(businessProducts.isPublished, true),
+          ),
+        )
+        .orderBy(asc(businessProducts.sortOrder), asc(businessProducts.name)),
+      this.database.db
+        .select()
+        .from(businessMediaAssets)
+        .where(
+          and(
+            inArray(businessMediaAssets.businessId, businessIds),
+            eq(businessMediaAssets.moderationStatus, 'approved'),
+          ),
+        )
+        .orderBy(
+          asc(businessMediaAssets.sortOrder),
+          asc(businessMediaAssets.createdAt),
         ),
     ]);
 
@@ -472,6 +565,25 @@ export class PublicBusinessesService {
       options: optionRows,
       areas: areaRows,
       verifications: verificationRows,
+      products: productRows,
+      media: mediaRows,
+    };
+  }
+
+  private publicMedia(asset: typeof businessMediaAssets.$inferSelect) {
+    return {
+      id: asset.id,
+      productId: asset.productId,
+      purpose: asset.purpose,
+      url: publicMediaUrl(asset.storageBucket, asset.storagePath),
+      mimeType: asset.mimeType as 'image/jpeg' | 'image/png' | 'image/webp',
+      fileSizeBytes: asset.fileSizeBytes,
+      width: asset.width,
+      height: asset.height,
+      title: asset.title,
+      altText: asset.altText,
+      caption: asset.caption,
+      createdAt: asset.createdAt.toISOString(),
     };
   }
 

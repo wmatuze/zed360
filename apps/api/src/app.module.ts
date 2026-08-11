@@ -4,6 +4,8 @@ import { AppService } from './app.service';
 import { AuthenticatedUserService } from './authenticated-user.service';
 import { BusinessApplicationsController } from './business-applications.controller';
 import { BusinessApplicationsService } from './business-applications.service';
+import { BusinessCatalogController } from './business-catalog.controller';
+import { BusinessCatalogService } from './business-catalog.service';
 import { BusinessAccountsController } from './business-accounts.controller';
 import { BusinessAccountsService } from './business-accounts.service';
 import { BusinessReviewsController } from './business-reviews.controller';
@@ -20,6 +22,8 @@ import { RequestsService } from './requests.service';
 import { PlatformAuthorizationService } from './platform-authorization.service';
 import { PublicBusinessesController } from './public-businesses.controller';
 import { PublicBusinessesService } from './public-businesses.service';
+import { MediaReviewsController } from './media-reviews.controller';
+import { MediaReviewsService } from './media-reviews.service';
 
 @Module({
   imports: [],
@@ -30,6 +34,8 @@ import { PublicBusinessesService } from './public-businesses.service';
     BusinessRequestsController,
     BusinessServiceCoverageController,
     BusinessApplicationsController,
+    BusinessCatalogController,
+    MediaReviewsController,
     PublicBusinessesController,
     ReferenceDataController,
     RequestsController,
@@ -38,6 +44,8 @@ import { PublicBusinessesService } from './public-businesses.service';
     AppService,
     AuthenticatedUserService,
     BusinessApplicationsService,
+    BusinessCatalogService,
+    MediaReviewsService,
     BusinessAccountsService,
     BusinessReviewsService,
     BusinessRequestsService,

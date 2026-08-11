@@ -398,6 +398,181 @@ export type BusinessServiceCoverage = z.infer<
   typeof businessServiceCoverageSchema
 >;
 
+export const catalogAvailabilitySchema = z.enum([
+  "available",
+  "out_of_stock",
+  "made_to_order",
+  "contact_business",
+]);
+
+export const catalogItemStatusSchema = z.enum(["active", "archived"]);
+export const businessMediaPurposeSchema = z.enum([
+  "logo",
+  "cover",
+  "gallery",
+  "work_sample",
+  "product",
+]);
+export const mediaModerationStatusSchema = z.enum([
+  "pending",
+  "approved",
+  "rejected",
+]);
+
+export const saveBusinessProductSchema = z
+  .object({
+    name: z.string().trim().min(2).max(120),
+    description: z.string().trim().max(1200).optional().or(z.literal("")),
+    priceFrom: z.coerce.number().nonnegative().optional(),
+    priceTo: z.coerce.number().nonnegative().optional(),
+    availability: catalogAvailabilitySchema,
+    status: catalogItemStatusSchema.default("active"),
+    isPublished: z.boolean().default(false),
+  })
+  .refine(
+    ({ priceFrom, priceTo }) =>
+      priceFrom === undefined || priceTo === undefined || priceFrom <= priceTo,
+    {
+      path: ["priceTo"],
+      message: "Minimum price cannot be greater than maximum price.",
+    },
+  );
+
+export type SaveBusinessProduct = z.infer<typeof saveBusinessProductSchema>;
+
+const allowedBusinessImageTypeSchema = z.enum([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
+
+export const createBusinessMediaUploadIntentSchema = z
+  .object({
+    fileName: z.string().trim().min(1).max(180),
+    mimeType: allowedBusinessImageTypeSchema,
+    fileSizeBytes: z.coerce
+      .number()
+      .int()
+      .positive()
+      .max(5 * 1024 * 1024),
+    purpose: businessMediaPurposeSchema,
+    productId: z.string().uuid().optional(),
+  })
+  .refine(
+    ({ purpose, productId }) =>
+      purpose === "product" ? Boolean(productId) : !productId,
+    {
+      path: ["productId"],
+      message: "Product images must be linked to one product.",
+    },
+  );
+
+export type CreateBusinessMediaUploadIntent = z.infer<
+  typeof createBusinessMediaUploadIntentSchema
+>;
+
+export const businessMediaUploadIntentSchema = z.object({
+  bucket: z.string(),
+  path: z.string(),
+});
+
+export type BusinessMediaUploadIntent = z.infer<
+  typeof businessMediaUploadIntentSchema
+>;
+
+export const completeBusinessMediaUploadSchema = z
+  .object({
+    storagePath: z.string().trim().min(1).max(500),
+    mimeType: allowedBusinessImageTypeSchema,
+    fileSizeBytes: z.coerce
+      .number()
+      .int()
+      .positive()
+      .max(5 * 1024 * 1024),
+    width: z.coerce.number().int().positive().max(12000).optional(),
+    height: z.coerce.number().int().positive().max(12000).optional(),
+    purpose: businessMediaPurposeSchema,
+    productId: z.string().uuid().optional(),
+    title: z.string().trim().max(120).optional().or(z.literal("")),
+    altText: z.string().trim().min(3).max(180),
+    caption: z.string().trim().max(500).optional().or(z.literal("")),
+  })
+  .refine(
+    ({ purpose, productId }) =>
+      purpose === "product" ? Boolean(productId) : !productId,
+    {
+      path: ["productId"],
+      message: "Product images must be linked to one product.",
+    },
+  );
+
+export type CompleteBusinessMediaUpload = z.infer<
+  typeof completeBusinessMediaUploadSchema
+>;
+
+export const businessMediaAssetSchema = z.object({
+  id: z.string().uuid(),
+  productId: z.string().uuid().nullable(),
+  purpose: businessMediaPurposeSchema,
+  url: z.string().url(),
+  mimeType: allowedBusinessImageTypeSchema,
+  fileSizeBytes: z.number().int().positive(),
+  width: z.number().int().positive().nullable(),
+  height: z.number().int().positive().nullable(),
+  title: z.string().nullable(),
+  altText: z.string(),
+  caption: z.string().nullable(),
+  moderationStatus: mediaModerationStatusSchema,
+  moderationNote: z.string().nullable(),
+  createdAt: z.string().datetime(),
+});
+
+export const businessCatalogProductSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  description: z.string().nullable(),
+  priceFrom: z.number().nonnegative().nullable(),
+  priceTo: z.number().nonnegative().nullable(),
+  availability: catalogAvailabilitySchema,
+  status: catalogItemStatusSchema,
+  isPublished: z.boolean(),
+  lastConfirmedAt: z.string().datetime().nullable(),
+  media: z.array(businessMediaAssetSchema),
+});
+
+export const businessCatalogSchema = z.object({
+  business: z.object({ id: z.string().uuid(), name: z.string() }),
+  bucket: z.string(),
+  products: z.array(businessCatalogProductSchema),
+  media: z.array(businessMediaAssetSchema),
+});
+
+export type BusinessCatalog = z.infer<typeof businessCatalogSchema>;
+
+export const submitMediaReviewSchema = z
+  .object({
+    decision: z.enum(["approved", "rejected"]),
+    note: z.string().trim().max(500).optional().or(z.literal("")),
+  })
+  .refine(({ decision, note }) => decision !== "rejected" || Boolean(note), {
+    path: ["note"],
+    message: "Explain why this image is being rejected.",
+  });
+
+export type SubmitMediaReview = z.infer<typeof submitMediaReviewSchema>;
+
+export const adminMediaReviewQueueSchema = z.object({
+  viewerRole: z.enum(["admin", "reviewer"]),
+  media: z.array(
+    businessMediaAssetSchema.extend({
+      business: z.object({ id: z.string().uuid(), name: z.string() }),
+      productName: z.string().nullable(),
+    }),
+  ),
+});
+
+export type AdminMediaReviewQueue = z.infer<typeof adminMediaReviewQueueSchema>;
+
 export const publicBusinessDirectoryQuerySchema = z.object({
   q: z.string().trim().max(100).optional(),
   category: z.string().trim().max(120).optional(),
@@ -458,6 +633,15 @@ const publicBusinessServiceSchema = z.object({
   fulfillment: z.array(publicBusinessFulfillmentOptionSchema),
 });
 
+const publicBusinessMediaSchema = businessMediaAssetSchema.omit({
+  moderationStatus: true,
+  moderationNote: true,
+});
+
+const publicBusinessProductSchema = businessCatalogProductSchema
+  .omit({ status: true, isPublished: true, lastConfirmedAt: true, media: true })
+  .extend({ media: z.array(publicBusinessMediaSchema) });
+
 export const publicBusinessSummarySchema = z.object({
   id: z.string().uuid(),
   slug: z.string(),
@@ -500,6 +684,8 @@ export const publicBusinessProfileSchema = z.object({
   trust: publicBusinessTrustSchema,
   locations: z.array(publicBusinessLocationSchema),
   services: z.array(publicBusinessServiceSchema),
+  gallery: z.array(publicBusinessMediaSchema),
+  products: z.array(publicBusinessProductSchema),
 });
 
 export type PublicBusinessProfile = z.infer<typeof publicBusinessProfileSchema>;
