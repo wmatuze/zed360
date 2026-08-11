@@ -6,8 +6,21 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
-import { createCustomerRequestSchema } from '@zed360/contracts';
+import {
+  createCustomerRequestSchema,
+  customerRequestOutcomeActionSchema,
+} from '@zed360/contracts';
 import { RequestsService } from './requests.service';
+
+function validateShareToken(shareToken: string) {
+  const validToken =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      shareToken,
+    );
+  if (!validToken) {
+    throw new BadRequestException('A valid private request link is required.');
+  }
+}
 
 @Controller('requests')
 export class RequestsController {
@@ -15,16 +28,23 @@ export class RequestsController {
 
   @Get('shared/:shareToken')
   getSharedRequest(@Param('shareToken') shareToken: string) {
-    const validToken =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-        shareToken,
-      );
-    if (!validToken) {
+    validateShareToken(shareToken);
+    return this.requests.getSharedRequest(shareToken);
+  }
+
+  @Post('shared/:shareToken/outcome')
+  recordOutcome(
+    @Param('shareToken') shareToken: string,
+    @Body() body: unknown,
+  ) {
+    validateShareToken(shareToken);
+    const parsed = customerRequestOutcomeActionSchema.safeParse(body);
+    if (!parsed.success) {
       throw new BadRequestException(
-        'A valid private request link is required.',
+        'Choose a valid action for this private request.',
       );
     }
-    return this.requests.getSharedRequest(shareToken);
+    return this.requests.recordOutcome(shareToken, parsed.data);
   }
 
   @Post()

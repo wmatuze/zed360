@@ -1,6 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type {
   CreateCustomerRequest,
+  CustomerRequestOutcomeAction,
   SharedCustomerRequest,
 } from '@zed360/contracts';
 import {
@@ -13,6 +18,7 @@ import {
   customerRequests,
   districts,
   eq,
+  interactions,
   or,
   requestMatches,
 } from '@zed360/database';
@@ -195,6 +201,14 @@ export class RequestsService {
         ),
       );
 
+    const interactionRows = await this.database.db
+      .select({
+        businessId: interactions.businessId,
+        outcomeConfirmed: interactions.outcomeConfirmed,
+      })
+      .from(interactions)
+      .where(eq(interactions.requestId, request.id));
+
     const timing = request.answers.timing;
     const validTiming =
       timing === 'as_soon_as_possible' ||
@@ -241,6 +255,150 @@ export class RequestsService {
             website: response.website,
           },
         })),
+      outcome: {
+        contactedBusinessIds: interactionRows.map(
+          (interaction) => interaction.businessId,
+        ),
+        selectedBusinessId:
+          interactionRows.find((interaction) => interaction.outcomeConfirmed)
+            ?.businessId ?? null,
+      },
     };
+  }
+
+  async recordOutcome(
+    shareToken: string,
+    action: CustomerRequestOutcomeAction,
+  ): Promise<SharedCustomerRequest> {
+    await this.database.db.transaction(async (transaction) => {
+      const [request] = await transaction
+        .select({
+          id: customerRequests.id,
+          status: customerRequests.status,
+          expiresAt: customerRequests.expiresAt,
+        })
+        .from(customerRequests)
+        .where(eq(customerRequests.shareToken, shareToken))
+        .limit(1);
+
+      if (!request || request.status === 'draft') {
+        throw new NotFoundException(
+          'This private request link is unavailable.',
+        );
+      }
+
+      if (
+        request.status === 'expired' ||
+        (request.expiresAt !== null && request.expiresAt < new Date())
+      ) {
+        throw new ConflictException('This request has expired.');
+      }
+
+      if (action.action === 'reopened') {
+        if (request.status !== 'resolved' && request.status !== 'cancelled') {
+          throw new ConflictException('This request is already open.');
+        }
+        await transaction
+          .update(interactions)
+          .set({ outcomeConfirmed: false, resolvedAt: null })
+          .where(eq(interactions.requestId, request.id));
+        await transaction
+          .update(customerRequests)
+          .set({ status: 'open', updatedAt: new Date() })
+          .where(eq(customerRequests.id, request.id));
+        return;
+      }
+
+      if (action.action === 'closed_without_choice') {
+        if (request.status !== 'open' && request.status !== 'matched') {
+          throw new ConflictException('This request is already closed.');
+        }
+        await transaction
+          .update(interactions)
+          .set({ outcomeConfirmed: false, resolvedAt: null })
+          .where(eq(interactions.requestId, request.id));
+        await transaction
+          .update(customerRequests)
+          .set({ status: 'cancelled', updatedAt: new Date() })
+          .where(eq(customerRequests.id, request.id));
+        return;
+      }
+
+      if (
+        request.status !== 'open' &&
+        request.status !== 'matched' &&
+        !(action.action === 'chosen' && request.status === 'resolved')
+      ) {
+        throw new ConflictException(
+          'Reopen this request before recording another outcome.',
+        );
+      }
+
+      const [eligibleResponse] = await transaction
+        .select({
+          businessId: businesses.id,
+          responseStatus: businessResponses.status,
+        })
+        .from(requestMatches)
+        .innerJoin(
+          businessResponses,
+          eq(businessResponses.matchId, requestMatches.id),
+        )
+        .innerJoin(businesses, eq(businesses.id, requestMatches.businessId))
+        .where(
+          and(
+            eq(requestMatches.id, action.matchId),
+            eq(requestMatches.requestId, request.id),
+            eq(requestMatches.status, 'responded'),
+            eq(businesses.status, 'active'),
+            eq(businesses.reviewStatus, 'approved'),
+          ),
+        )
+        .limit(1);
+
+      if (
+        !eligibleResponse ||
+        eligibleResponse.responseStatus === 'unavailable'
+      ) {
+        throw new ConflictException(
+          'That business response is no longer available for this request.',
+        );
+      }
+
+      const now = new Date();
+      if (action.action === 'chosen') {
+        await transaction
+          .update(interactions)
+          .set({ outcomeConfirmed: false, resolvedAt: null })
+          .where(eq(interactions.requestId, request.id));
+      }
+
+      await transaction
+        .insert(interactions)
+        .values({
+          requestId: request.id,
+          businessId: eligibleResponse.businessId,
+          contactedAt: now,
+          resolvedAt: action.action === 'chosen' ? now : null,
+          outcomeConfirmed: action.action === 'chosen',
+        })
+        .onConflictDoUpdate({
+          target: [interactions.requestId, interactions.businessId],
+          set: {
+            contactedAt: now,
+            resolvedAt: action.action === 'chosen' ? now : null,
+            outcomeConfirmed: action.action === 'chosen',
+          },
+        });
+
+      if (action.action === 'chosen') {
+        await transaction
+          .update(customerRequests)
+          .set({ status: 'resolved', updatedAt: now })
+          .where(eq(customerRequests.id, request.id));
+      }
+    });
+
+    return this.getSharedRequest(shareToken);
   }
 }

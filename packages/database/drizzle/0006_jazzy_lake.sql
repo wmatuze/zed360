@@ -1,0 +1,2 @@
+CREATE UNIQUE INDEX "interactions_request_business_unique" ON "interactions" USING btree ("request_id","business_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "interactions_request_confirmed_unique" ON "interactions" USING btree ("request_id") WHERE "interactions"."outcome_confirmed" = true;

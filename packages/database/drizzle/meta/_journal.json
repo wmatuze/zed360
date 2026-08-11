@@ -43,6 +43,13 @@
       "when": 1786436034346,
       "tag": "0005_cloudy_lockjaw",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1786446620412,
+      "tag": "0006_jazzy_lake",
+      "breakpoints": true
     }
   ]
 }

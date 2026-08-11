@@ -21,8 +21,23 @@ and submitted business contact channels. The customer decides which business
 to contact. An unavailable response remains visible for transparency but does
 not show contact buttons.
 
-Recording a confirmed connection and allowing customers to close their request
-are later milestones.
+## Request outcomes
+
+The holder of the private request link can record that they contacted a
+business, choose one responding business, or close the request without making
+a selection. Choosing a business resolves the request, while closing without a
+selection cancels it. Either state removes the request from active business
+matching, but the customer can still read the existing responses and reopen an
+accidentally closed request.
+
+Only an active, approved business with a visible response can be selected. A
+request can have several contacted businesses but only one confirmed choice.
+These signals measure useful customer-to-business connections; they do not
+claim that payment, delivery, or service quality has been verified by Zed360.
+
+The private share token remains the authorization boundary. Customers are not
+forced to create an account, so anyone who obtains the link can also change the
+request outcome.
 
 ## Link retention
 

@@ -7,6 +7,10 @@ import {
 } from "@/lib/customer-request";
 import { PrivateRequestActions } from "../private-request-actions";
 import { RememberRequest } from "./remember-request";
+import {
+  RequestClosureControls,
+  ResponseOutcomeControls,
+} from "./request-outcome-controls";
 
 export const metadata: Metadata = { title: "Your request responses" };
 export const dynamic = "force-dynamic";
@@ -47,6 +51,7 @@ function websiteHref(value: string | null) {
   } catch {
     return null;
   }
+
 }
 
 export default async function SharedRequestPage({
@@ -76,6 +81,14 @@ export default async function SharedRequestPage({
       </main>
     );
   }
+
+  const requestClosed =
+    data.request.status === "resolved" ||
+    data.request.status === "cancelled" ||
+    data.request.status === "expired";
+  const selectedBusiness = data.responses.find(
+    (response) => response.business.id === data.outcome.selectedBusinessId,
+  );
 
   return (
     <main className="min-h-screen bg-[var(--ink)] px-5 py-6 text-white sm:px-8 lg:px-10">
@@ -120,13 +133,28 @@ export default async function SharedRequestPage({
         </div>
 
         <div className="mt-8 rounded-2xl border border-[var(--lime)]/20 bg-[var(--lime)]/8 p-5 text-sm leading-6 text-white/65">
-          Keep this page private. Anyone with its link can view your request and
-          business responses.
+          Keep this page private. Anyone with its link can view your request,
+          compare responses, and record your decision.
           <PrivateRequestActions
             shareToken={shareToken}
             summary={data.request.summary}
           />
         </div>
+
+        {requestClosed ? (
+          <div className="mt-5 rounded-2xl border border-white/12 bg-white/[0.045] p-5 text-sm leading-6 text-white/65">
+            <strong className="block text-white">
+              {data.request.status === "resolved"
+                ? "Request completed"
+                : data.request.status === "cancelled"
+                  ? "Request closed"
+                  : "Request expired"}
+            </strong>
+            {selectedBusiness
+              ? `You selected ${selectedBusiness.business.name}. Your responses remain available on this private page.`
+              : "Your responses remain available on this private page."}
+          </div>
+        ) : null}
 
         <div className="mt-12 flex items-end justify-between gap-5">
           <div>
@@ -218,6 +246,20 @@ export default async function SharedRequestPage({
                       ) : null}
                     </div>
                   ) : null}
+                  {response.status !== "unavailable" ? (
+                    <ResponseOutcomeControls
+                      businessName={response.business.name}
+                      contacted={data.outcome.contactedBusinessIds.includes(
+                        response.business.id,
+                      )}
+                      matchId={response.matchId}
+                      requestClosed={requestClosed}
+                      selected={
+                        data.outcome.selectedBusinessId === response.business.id
+                      }
+                      shareToken={shareToken}
+                    />
+                  ) : null}
                 </article>
               );
             })}
@@ -231,6 +273,10 @@ export default async function SharedRequestPage({
             </p>
           </div>
         )}
+        <RequestClosureControls
+          requestStatus={data.request.status}
+          shareToken={shareToken}
+        />
       </section>
     </main>
   );
