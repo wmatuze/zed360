@@ -38,9 +38,14 @@ export default async function BusinessNotificationsPage() {
         <Link href="/">
           <BrandLogo />
         </Link>
-        <Link className="button button-quiet" href="/business/account">
-          Business account
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link className="button button-quiet" href="/business/dashboard">
+            Dashboard
+          </Link>
+          <Link className="button button-quiet" href="/business/account">
+            Account
+          </Link>
+        </div>
       </header>
 
       <section className="mx-auto w-full max-w-5xl pb-20 pt-12 lg:pt-16">

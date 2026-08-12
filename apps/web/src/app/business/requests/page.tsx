@@ -61,6 +61,9 @@ export default async function BusinessRequestsPage() {
           <BrandLogo />
         </Link>
         <div className="flex items-center gap-3">
+          <Link className="button button-quiet" href="/business/dashboard">
+            Dashboard
+          </Link>
           <Link className="button button-quiet" href="/business/notifications">
             Notifications
           </Link>
