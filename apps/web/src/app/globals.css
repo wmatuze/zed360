@@ -60,19 +60,6 @@ select {
     64px 64px;
 }
 
-.brand-mark {
-  display: grid;
-  height: 2rem;
-  width: 2rem;
-  place-items: center;
-  border-radius: 0.7rem;
-  background: var(--lime);
-  color: var(--ink);
-  font-weight: 850;
-  transform: rotate(-7deg);
-  box-shadow: 0 8px 28px rgba(184, 242, 56, 0.18);
-}
-
 .eyebrow {
   display: flex;
   align-items: center;

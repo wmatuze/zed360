@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BrandLogo } from "@/components/brand-logo";
 import { redirect } from "next/navigation";
 import { signOut } from "@/app/business/account/actions";
 import {
@@ -57,12 +58,7 @@ export default async function CustomerReviewModerationPage({
     <main className="min-h-screen bg-[var(--ink)] px-5 py-6 text-white sm:px-8 lg:px-10">
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4">
         <Link className="flex items-center gap-3" href="/">
-          <span className="brand-mark" aria-hidden="true">
-            Z
-          </span>
-          <span className="text-xl font-semibold tracking-[-0.04em]">
-            Zed360
-          </span>
+          <BrandLogo />
         </Link>
         <div className="flex flex-wrap items-center gap-3">
           <Link className="button button-quiet" href="/admin/reviews">

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLogo } from "@/components/brand-logo";
 
 const categories = [
   ["Automotive", "Parts, mechanics & repairs", "AU"],
@@ -37,12 +38,7 @@ export default function Home() {
             href="/"
             aria-label="Zed360 home"
           >
-            <span className="brand-mark" aria-hidden="true">
-              Z
-            </span>
-            <span className="text-xl font-semibold tracking-[-0.04em]">
-              Zed360
-            </span>
+            <BrandLogo />
           </Link>
 
           <nav
