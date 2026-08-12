@@ -43,7 +43,7 @@ export default async function BusinessNotificationsPage() {
         </Link>
       </header>
 
-      <section className="mx-auto w-full max-w-5xl pb-20 pt-16 lg:pt-24">
+      <section className="mx-auto w-full max-w-5xl pb-20 pt-12 lg:pt-16">
         <p className="eyebrow">
           <span /> Business activity
         </p>
@@ -76,16 +76,16 @@ export default async function BusinessNotificationsPage() {
           </div>
         ) : null}
 
-        <div className="mt-10 space-y-4">
+        <div className="mt-8 divide-y divide-white/8 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025]">
           {data?.notifications.map((notification) => {
             const markRead = markNotificationRead.bind(null, notification.id);
             return (
               <article
-                className={`rounded-2xl border p-5 ${notification.readAt ? "border-white/8 bg-white/[0.025]" : "border-[var(--lime)]/22 bg-[var(--lime)]/7"}`}
+                className={`grid gap-3 px-4 py-4 sm:grid-cols-[1fr_auto] sm:items-center sm:px-5 ${notification.readAt ? "bg-transparent" : "bg-[var(--lime)]/7"}`}
                 key={notification.id}
               >
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                     <p className="text-xs text-white/38">
                       {notification.business.name} ·{" "}
                       {new Date(notification.createdAt).toLocaleString("en-ZM", {
@@ -93,28 +93,33 @@ export default async function BusinessNotificationsPage() {
                         timeStyle: "short",
                       })}
                     </p>
-                    <h2 className="mt-2 text-lg font-semibold">
+                    {!notification.readAt ? (
+                      <span className="rounded-full bg-[var(--lime)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--ink)]">
+                        New
+                      </span>
+                    ) : null}
+                  </div>
+                    <h2 className="mt-1 text-base font-semibold">
                       {notification.title}
                     </h2>
-                    <p className="mt-2 text-sm leading-6 text-white/55">
+                    <p className="mt-1 line-clamp-2 text-sm leading-5 text-white/55">
                       {notification.body}
                     </p>
-                  </div>
-                  {!notification.readAt ? (
-                    <span className="rounded-full bg-[var(--lime)] px-3 py-1 text-xs font-semibold text-[var(--ink)]">
-                      New
-                    </span>
-                  ) : null}
                 </div>
-                <div className="mt-4 flex flex-wrap gap-3">
+                <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                   {notification.actionUrl ? (
-                    <Link className="button button-primary" href={notification.actionUrl}>
+                    <Link
+                      className="button button-primary px-4 py-2 text-sm"
+                      href={notification.actionUrl}
+                    >
                       View
                     </Link>
                   ) : null}
                   {!notification.readAt ? (
                     <form action={markRead}>
-                      <button className="button button-quiet">Mark as read</button>
+                      <button className="button button-quiet px-4 py-2 text-sm">
+                        Mark as read
+                      </button>
                     </form>
                   ) : null}
                 </div>

@@ -17,12 +17,10 @@ export class BusinessNotificationsApiError extends Error {
 async function request(
   accessToken: string,
   path = "",
-  method: "GET" | "POST" = "GET",
 ): Promise<BusinessNotificationList> {
   const response = await fetch(`${apiUrl}/business-notifications${path}`, {
     cache: "no-store",
     headers: { authorization: `Bearer ${accessToken}` },
-    method,
   });
   const body = (await response.json().catch(() => null)) as {
     message?: unknown;
@@ -45,13 +43,32 @@ async function request(
   return parsed.data;
 }
 
+async function mutate(accessToken: string, path: string) {
+  const response = await fetch(`${apiUrl}/business-notifications${path}`, {
+    cache: "no-store",
+    headers: { authorization: `Bearer ${accessToken}` },
+    method: "POST",
+  });
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as {
+      message?: unknown;
+    } | null;
+    throw new BusinessNotificationsApiError(
+      typeof body?.message === "string"
+        ? body.message
+        : "The notification could not be updated.",
+      response.status,
+    );
+  }
+}
+
 export const fetchBusinessNotifications = (accessToken: string) =>
   request(accessToken);
 
 export const markBusinessNotificationRead = (
   accessToken: string,
   notificationId: string,
-) => request(accessToken, `/${notificationId}/read`, "POST");
+) => mutate(accessToken, `/${notificationId}/read`);
 
 export const markAllBusinessNotificationsRead = (accessToken: string) =>
-  request(accessToken, "/read-all", "POST");
+  mutate(accessToken, "/read-all");

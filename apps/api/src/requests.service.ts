@@ -10,8 +10,10 @@ import type {
 } from '@zed360/contracts';
 import {
   and,
+  businessMembers,
   businessLocations,
   businessNotificationEvents,
+  businessNotifications,
   businessResponses,
   businesses,
   businessServices,
@@ -20,6 +22,7 @@ import {
   districts,
   eq,
   interactions,
+  inArray,
   or,
   requestMatches,
   reviews,
@@ -149,7 +152,7 @@ export class RequestsService {
           notifiableBusinessIds.has(match.businessId),
         );
         if (notifiableMatches.length) {
-          await transaction
+          const events = await transaction
             .insert(businessNotificationEvents)
             .values(
               notifiableMatches.map((match) => ({
@@ -162,7 +165,44 @@ export class RequestsService {
                 data: { requestId: customerRequest.id, matchId: match.id },
               })),
             )
-            .onConflictDoNothing();
+            .onConflictDoNothing()
+            .returning({
+              id: businessNotificationEvents.id,
+              businessId: businessNotificationEvents.businessId,
+            });
+          if (events.length) {
+            const recipients = await transaction
+              .select({
+                businessId: businessMembers.businessId,
+                userId: businessMembers.userId,
+              })
+              .from(businessMembers)
+              .where(
+                and(
+                  inArray(
+                    businessMembers.businessId,
+                    events.map((event) => event.businessId),
+                  ),
+                  inArray(businessMembers.role, ['owner', 'manager']),
+                ),
+              );
+            const notifications = events.flatMap((event) =>
+              recipients
+                .filter(
+                  (recipient) => recipient.businessId === event.businessId,
+                )
+                .map((recipient) => ({
+                  eventId: event.id,
+                  recipientUserId: recipient.userId,
+                })),
+            );
+            if (notifications.length) {
+              await transaction
+                .insert(businessNotifications)
+                .values(notifications)
+                .onConflictDoNothing();
+            }
+          }
         }
       }
 
@@ -459,7 +499,7 @@ export class RequestsService {
           .update(customerRequests)
           .set({ status: 'resolved', updatedAt: now })
           .where(eq(customerRequests.id, request.id));
-        await transaction
+        const [event] = await transaction
           .insert(businessNotificationEvents)
           .values({
             businessId: eligibleResponse.businessId,
@@ -470,7 +510,30 @@ export class RequestsService {
             eventKey: `customer-selected:${request.id}:${eligibleResponse.businessId}`,
             data: { requestId: request.id },
           })
-          .onConflictDoNothing();
+          .onConflictDoNothing()
+          .returning({ id: businessNotificationEvents.id });
+        if (event) {
+          const recipients = await transaction
+            .select({ userId: businessMembers.userId })
+            .from(businessMembers)
+            .where(
+              and(
+                eq(businessMembers.businessId, eligibleResponse.businessId),
+                inArray(businessMembers.role, ['owner', 'manager']),
+              ),
+            );
+          if (recipients.length) {
+            await transaction
+              .insert(businessNotifications)
+              .values(
+                recipients.map((recipient) => ({
+                  eventId: event.id,
+                  recipientUserId: recipient.userId,
+                })),
+              )
+              .onConflictDoNothing();
+          }
+        }
       }
     });
 

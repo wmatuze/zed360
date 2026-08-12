@@ -20,8 +20,8 @@ information.
 
 Business events are stored separately from recipient notification rows. Event
 keys are unique, making creation idempotent when matching or selection logic is
-retried. Opening the notification centre materializes any missing recipient
-rows, including visible matches created before this feature was deployed.
+retried. Recipient rows are created when the event occurs, so opening the
+notification centre needs only one database read.
 
 This event table is the durable foundation for later delivery adapters. Email
 or WhatsApp delivery must use separate delivery-attempt records with retry and

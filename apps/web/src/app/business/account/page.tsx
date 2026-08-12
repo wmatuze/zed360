@@ -45,9 +45,14 @@ export default async function BusinessAccountPage({
   let account = null;
   let accountError = "";
   let unreadNotifications = 0;
-  try {
-    account = await fetchBusinessAccount(session.accessToken);
-  } catch (error) {
+  const [accountResult, notificationsResult] = await Promise.allSettled([
+    fetchBusinessAccount(session.accessToken),
+    fetchBusinessNotifications(session.accessToken),
+  ]);
+  if (accountResult.status === "fulfilled") {
+    account = accountResult.value;
+  } else {
+    const error = accountResult.reason;
     if (error instanceof BusinessAccountApiError && error.status === 401) {
       redirect("/business/sign-in?error=session_expired");
     }
@@ -56,12 +61,8 @@ export default async function BusinessAccountPage({
         ? error.message
         : "We could not load your business account right now.";
   }
-  try {
-    unreadNotifications = (
-      await fetchBusinessNotifications(session.accessToken)
-    ).unreadCount;
-  } catch {
-    // The account remains usable if the notification service is unavailable.
+  if (notificationsResult.status === "fulfilled") {
+    unreadNotifications = notificationsResult.value.unreadCount;
   }
 
   const { link } = await searchParams;
