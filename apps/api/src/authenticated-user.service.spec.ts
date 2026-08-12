@@ -9,13 +9,14 @@ describe('AuthenticatedUserService', () => {
   const originalUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const originalKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   const fetchMock = jest.fn();
-  const service = new AuthenticatedUserService();
+  let service: AuthenticatedUserService;
 
   beforeEach(() => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://project.supabase.co';
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'publishable-key';
     global.fetch = fetchMock;
     fetchMock.mockReset();
+    service = new AuthenticatedUserService();
   });
 
   afterAll(() => {
@@ -57,6 +58,24 @@ describe('AuthenticatedUserService', () => {
       UnauthorizedException,
     );
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('reuses a recent successful verification', async () => {
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          id: 'f8d18ef2-7f91-4a63-a40c-2017d7a02f07',
+          email: 'owner@example.com',
+          email_confirmed_at: '2026-08-10T08:00:00.000Z',
+        }),
+        { status: 200 },
+      ),
+    );
+
+    await service.verify('Bearer access-token');
+    await service.verify('Bearer access-token');
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it('rejects an unverified Supabase user', async () => {

@@ -11,7 +11,6 @@ import type {
 import {
   and,
   businessMembers,
-  businessLocations,
   businessNotificationEvents,
   businessNotifications,
   businessResponses,
@@ -26,6 +25,7 @@ import {
   or,
   requestMatches,
   reviews,
+  sql,
 } from '@zed360/database';
 import { DatabaseService } from './database.service';
 
@@ -99,21 +99,40 @@ export class RequestsService {
           businessReviewStatus: businesses.reviewStatus,
         })
         .from(businessServices)
-        .innerJoin(
-          businessLocations,
-          eq(businessLocations.businessId, businessServices.businessId),
-        )
         .innerJoin(businesses, eq(businesses.id, businessServices.businessId))
         .where(
           and(
             eq(businessServices.categoryId, request.categoryId),
             eq(businessServices.isAvailable, true),
-            eq(businessLocations.districtId, request.districtId),
-            eq(businessLocations.isActive, true),
             or(eq(businesses.status, 'draft'), eq(businesses.status, 'active')),
+            sql`(
+              exists (
+                select 1 from business_locations match_location
+                where match_location.business_id = ${businesses.id}
+                  and match_location.district_id = ${request.districtId}
+                  and match_location.is_active = true
+              )
+              or exists (
+                select 1
+                from business_service_fulfillment_options match_option
+                left join business_service_coverage_areas match_area
+                  on match_area.fulfillment_option_id = match_option.id
+                where match_option.business_service_id = ${businessServices.id}
+                  and match_option.is_active = true
+                  and (
+                    match_option.coverage_scope in ('nationwide', 'remote')
+                    or match_area.district_id = ${request.districtId}
+                    or match_area.province_id = (
+                      select match_district.province_id
+                      from districts match_district
+                      where match_district.id = ${request.districtId}
+                    )
+                  )
+              )
+            )`,
           ),
         )
-        .groupBy(businesses.id, businesses.status);
+        .groupBy(businesses.id, businesses.status, businesses.reviewStatus);
 
       if (candidates.length > 0) {
         const matches = await transaction
@@ -126,7 +145,7 @@ export class RequestsService {
               score: candidate.businessStatus === 'active' ? '1.000' : '0.800',
               reasons: [
                 'category_exact',
-                'district_exact',
+                'service_area_match',
                 candidate.businessStatus === 'active'
                   ? 'business_active'
                   : 'business_pending_review',

@@ -19,8 +19,43 @@ type SupabaseUserResponse = {
 
 @Injectable()
 export class AuthenticatedUserService {
+  private readonly verificationCache = new Map<
+    string,
+    { expiresAt: number; result: Promise<AuthenticatedUser> }
+  >();
+
   async verify(authorization?: string): Promise<AuthenticatedUser> {
     const token = this.bearerToken(authorization);
+    if (this.verificationCache.size >= 500) {
+      const now = Date.now();
+      for (const [key, entry] of this.verificationCache) {
+        if (entry.expiresAt <= now) this.verificationCache.delete(key);
+      }
+      const oldestKey = this.verificationCache.keys().next().value as
+        string | undefined;
+      if (this.verificationCache.size >= 500 && oldestKey) {
+        this.verificationCache.delete(oldestKey);
+      }
+    }
+    const cached = this.verificationCache.get(token);
+    if (cached && cached.expiresAt > Date.now()) return cached.result;
+
+    const result = this.verifyWithSupabase(token);
+    this.verificationCache.set(token, {
+      expiresAt: Date.now() + 30_000,
+      result,
+    });
+    try {
+      return await result;
+    } catch (error) {
+      if (this.verificationCache.get(token)?.result === result) {
+        this.verificationCache.delete(token);
+      }
+      throw error;
+    }
+  }
+
+  private async verifyWithSupabase(token: string): Promise<AuthenticatedUser> {
     loadApiEnvironment();
 
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

@@ -60,7 +60,7 @@ export default async function ServiceCoveragePage({
           Where and how can customers receive your services?
         </h1>
         <p className="mt-5 max-w-3xl leading-7 text-white/48">
-          Configure each service accurately. Zed360 will show this as owner-provided information and use it for delivery-aware matching later.
+          Configure each service accurately. Zed360 shows this as owner-provided information and uses it for location-aware matching.
         </p>
 
         {errorMessage ? (
