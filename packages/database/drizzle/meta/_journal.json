@@ -57,6 +57,13 @@
       "when": 1786459819731,
       "tag": "0007_mean_hellcat",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1786569527910,
+      "tag": "0008_early_zzzax",
+      "breakpoints": true
     }
   ]
 }

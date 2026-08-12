@@ -27,6 +27,8 @@ import { MediaReviewsService } from './media-reviews.service';
 import { AdminCustomerReviewsController } from './admin-customer-reviews.controller';
 import { CustomerReviewsController } from './customer-reviews.controller';
 import { CustomerReviewsService } from './customer-reviews.service';
+import { BusinessNotificationsController } from './business-notifications.controller';
+import { BusinessNotificationsService } from './business-notifications.service';
 
 @Module({
   imports: [],
@@ -34,6 +36,7 @@ import { CustomerReviewsService } from './customer-reviews.service';
     AppController,
     AdminCustomerReviewsController,
     BusinessAccountsController,
+    BusinessNotificationsController,
     BusinessReviewsController,
     BusinessRequestsController,
     BusinessServiceCoverageController,
@@ -49,6 +52,7 @@ import { CustomerReviewsService } from './customer-reviews.service';
     AppService,
     AuthenticatedUserService,
     BusinessApplicationsService,
+    BusinessNotificationsService,
     BusinessCatalogService,
     MediaReviewsService,
     BusinessAccountsService,

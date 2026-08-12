@@ -124,6 +124,11 @@ export const reviewModerationStatus = pgEnum("review_moderation_status", [
   "approved",
   "rejected",
 ]);
+export const businessNotificationType = pgEnum("business_notification_type", [
+  "request_matched",
+  "customer_selected",
+  "business_review_decision",
+]);
 
 export const users = pgTable(
   "users",
@@ -257,6 +262,62 @@ export const businessMembers = pgTable(
     uniqueIndex("business_members_one_owner_unique")
       .on(table.businessId)
       .where(sql`${table.role} = 'owner'`),
+  ],
+);
+
+export const businessNotificationEvents = pgTable(
+  "business_notification_events",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    businessId: uuid("business_id")
+      .notNull()
+      .references(() => businesses.id, { onDelete: "cascade" }),
+    type: businessNotificationType("type").notNull(),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    actionUrl: text("action_url"),
+    eventKey: text("event_key").notNull(),
+    data: jsonb("data").$type<Record<string, unknown>>().default({}).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("business_notification_events_key_unique").on(table.eventKey),
+    index("business_notification_events_business_created_idx").on(
+      table.businessId,
+      table.createdAt,
+    ),
+  ],
+);
+
+export const businessNotifications = pgTable(
+  "business_notifications",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    eventId: uuid("event_id")
+      .notNull()
+      .references(() => businessNotificationEvents.id, {
+        onDelete: "cascade",
+      }),
+    recipientUserId: uuid("recipient_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("business_notifications_event_recipient_unique").on(
+      table.eventId,
+      table.recipientUserId,
+    ),
+    index("business_notifications_recipient_read_idx").on(
+      table.recipientUserId,
+      table.readAt,
+      table.createdAt,
+    ),
   ],
 );
 

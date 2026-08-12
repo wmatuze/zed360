@@ -8,6 +8,7 @@ import {
   getVerifiedBusinessSession,
 } from "@/lib/business-account";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { fetchBusinessNotifications } from "@/lib/business-notifications";
 import { claimBusiness, signOut } from "./actions";
 import { ClaimButton } from "./claim-button";
 
@@ -43,9 +44,15 @@ export default async function BusinessAccountPage({
 
   let account = null;
   let accountError = "";
-  try {
-    account = await fetchBusinessAccount(session.accessToken);
-  } catch (error) {
+  let unreadNotifications = 0;
+  const [accountResult, notificationsResult] = await Promise.allSettled([
+    fetchBusinessAccount(session.accessToken),
+    fetchBusinessNotifications(session.accessToken),
+  ]);
+  if (accountResult.status === "fulfilled") {
+    account = accountResult.value;
+  } else {
+    const error = accountResult.reason;
     if (error instanceof BusinessAccountApiError && error.status === 401) {
       redirect("/business/sign-in?error=session_expired");
     }
@@ -53,6 +60,9 @@ export default async function BusinessAccountPage({
       error instanceof BusinessAccountApiError
         ? error.message
         : "We could not load your business account right now.";
+  }
+  if (notificationsResult.status === "fulfilled") {
+    unreadNotifications = notificationsResult.value.unreadCount;
   }
 
   const { link } = await searchParams;
@@ -64,11 +74,16 @@ export default async function BusinessAccountPage({
         <Link className="flex items-center gap-3" href="/">
           <BrandLogo />
         </Link>
-        <form action={signOut}>
-          <button className="button button-quiet" type="submit">
-            Sign out
-          </button>
-        </form>
+        <div className="flex items-center gap-3">
+          <Link className="button button-quiet" href="/business/notifications">
+            Notifications{unreadNotifications ? ` (${unreadNotifications})` : ""}
+          </Link>
+          <form action={signOut}>
+            <button className="button button-quiet" type="submit">
+              Sign out
+            </button>
+          </form>
+        </div>
       </header>
 
       <section className="mx-auto w-full max-w-5xl pb-20 pt-16 lg:pt-24">

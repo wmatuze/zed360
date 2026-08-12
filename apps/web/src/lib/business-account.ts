@@ -15,17 +15,13 @@ export class BusinessAccountApiError extends Error {
 export async function getVerifiedBusinessSession() {
   const supabase = await createClient();
   const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-
-  if (error || !user?.id || !user.email || !user.email_confirmed_at) {
-    return null;
-  }
-
-  const {
     data: { session },
   } = await supabase.auth.getSession();
+  const user = session?.user;
+
+  if (!user?.id || !user.email || !user.email_confirmed_at) {
+    return null;
+  }
   if (!session?.access_token) return null;
 
   return {

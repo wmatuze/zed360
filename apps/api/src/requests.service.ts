@@ -10,7 +10,9 @@ import type {
 } from '@zed360/contracts';
 import {
   and,
-  businessLocations,
+  businessMembers,
+  businessNotificationEvents,
+  businessNotifications,
   businessResponses,
   businesses,
   businessServices,
@@ -19,9 +21,11 @@ import {
   districts,
   eq,
   interactions,
+  inArray,
   or,
   requestMatches,
   reviews,
+  sql,
 } from '@zed360/database';
 import { DatabaseService } from './database.service';
 
@@ -32,7 +36,7 @@ export class RequestsService {
   async create(request: CreateCustomerRequest) {
     const [[category], [district]] = await Promise.all([
       this.database.db
-        .select({ id: categories.id })
+        .select({ id: categories.id, parentId: categories.parentId })
         .from(categories)
         .where(
           and(
@@ -92,26 +96,56 @@ export class RequestsService {
         .select({
           businessId: businesses.id,
           businessStatus: businesses.status,
+          businessReviewStatus: businesses.reviewStatus,
         })
         .from(businessServices)
-        .innerJoin(
-          businessLocations,
-          eq(businessLocations.businessId, businessServices.businessId),
-        )
         .innerJoin(businesses, eq(businesses.id, businessServices.businessId))
         .where(
           and(
-            eq(businessServices.categoryId, request.categoryId),
+            or(
+              eq(businessServices.categoryId, request.categoryId),
+              category.parentId
+                ? eq(businessServices.categoryId, category.parentId)
+                : undefined,
+              sql`exists (
+                select 1 from categories match_service_category
+                where match_service_category.id = ${businessServices.categoryId}
+                  and match_service_category.parent_id = ${request.categoryId}
+              )`,
+            ),
             eq(businessServices.isAvailable, true),
-            eq(businessLocations.districtId, request.districtId),
-            eq(businessLocations.isActive, true),
             or(eq(businesses.status, 'draft'), eq(businesses.status, 'active')),
+            sql`(
+              exists (
+                select 1 from business_locations match_location
+                where match_location.business_id = ${businesses.id}
+                  and match_location.district_id = ${request.districtId}
+                  and match_location.is_active = true
+              )
+              or exists (
+                select 1
+                from business_service_fulfillment_options match_option
+                left join business_service_coverage_areas match_area
+                  on match_area.fulfillment_option_id = match_option.id
+                where match_option.business_service_id = ${businessServices.id}
+                  and match_option.is_active = true
+                  and (
+                    match_option.coverage_scope in ('nationwide', 'remote')
+                    or match_area.district_id = ${request.districtId}
+                    or match_area.province_id = (
+                      select match_district.province_id
+                      from districts match_district
+                      where match_district.id = ${request.districtId}
+                    )
+                  )
+              )
+            )`,
           ),
         )
-        .groupBy(businesses.id, businesses.status);
+        .groupBy(businesses.id, businesses.status, businesses.reviewStatus);
 
       if (candidates.length > 0) {
-        await transaction
+        const matches = await transaction
           .insert(requestMatches)
           .values(
             candidates.map((candidate) => ({
@@ -121,14 +155,84 @@ export class RequestsService {
               score: candidate.businessStatus === 'active' ? '1.000' : '0.800',
               reasons: [
                 'category_exact',
-                'district_exact',
+                'service_area_match',
                 candidate.businessStatus === 'active'
                   ? 'business_active'
                   : 'business_pending_review',
               ],
             })),
           )
-          .onConflictDoNothing();
+          .onConflictDoNothing()
+          .returning({
+            id: requestMatches.id,
+            businessId: requestMatches.businessId,
+          });
+
+        const notifiableBusinessIds = new Set(
+          candidates
+            .filter(
+              (candidate) =>
+                candidate.businessStatus === 'active' &&
+                candidate.businessReviewStatus === 'approved',
+            )
+            .map((candidate) => candidate.businessId),
+        );
+        const notifiableMatches = matches.filter((match) =>
+          notifiableBusinessIds.has(match.businessId),
+        );
+        if (notifiableMatches.length) {
+          const events = await transaction
+            .insert(businessNotificationEvents)
+            .values(
+              notifiableMatches.map((match) => ({
+                businessId: match.businessId,
+                type: 'request_matched' as const,
+                title: 'New matched request',
+                body: request.summary,
+                actionUrl: '/business/requests',
+                eventKey: `request-match:${match.id}`,
+                data: { requestId: customerRequest.id, matchId: match.id },
+              })),
+            )
+            .onConflictDoNothing()
+            .returning({
+              id: businessNotificationEvents.id,
+              businessId: businessNotificationEvents.businessId,
+            });
+          if (events.length) {
+            const recipients = await transaction
+              .select({
+                businessId: businessMembers.businessId,
+                userId: businessMembers.userId,
+              })
+              .from(businessMembers)
+              .where(
+                and(
+                  inArray(
+                    businessMembers.businessId,
+                    events.map((event) => event.businessId),
+                  ),
+                  inArray(businessMembers.role, ['owner', 'manager']),
+                ),
+              );
+            const notifications = events.flatMap((event) =>
+              recipients
+                .filter(
+                  (recipient) => recipient.businessId === event.businessId,
+                )
+                .map((recipient) => ({
+                  eventId: event.id,
+                  recipientUserId: recipient.userId,
+                })),
+            );
+            if (notifications.length) {
+              await transaction
+                .insert(businessNotifications)
+                .values(notifications)
+                .onConflictDoNothing();
+            }
+          }
+        }
       }
 
       return customerRequest;
@@ -424,6 +528,41 @@ export class RequestsService {
           .update(customerRequests)
           .set({ status: 'resolved', updatedAt: now })
           .where(eq(customerRequests.id, request.id));
+        const [event] = await transaction
+          .insert(businessNotificationEvents)
+          .values({
+            businessId: eligibleResponse.businessId,
+            type: 'customer_selected',
+            title: 'A customer selected your business',
+            body: 'Your response was selected for a customer request.',
+            actionUrl: '/business/notifications',
+            eventKey: `customer-selected:${request.id}:${eligibleResponse.businessId}`,
+            data: { requestId: request.id },
+          })
+          .onConflictDoNothing()
+          .returning({ id: businessNotificationEvents.id });
+        if (event) {
+          const recipients = await transaction
+            .select({ userId: businessMembers.userId })
+            .from(businessMembers)
+            .where(
+              and(
+                eq(businessMembers.businessId, eligibleResponse.businessId),
+                inArray(businessMembers.role, ['owner', 'manager']),
+              ),
+            );
+          if (recipients.length) {
+            await transaction
+              .insert(businessNotifications)
+              .values(
+                recipients.map((recipient) => ({
+                  eventId: event.id,
+                  recipientUserId: recipient.userId,
+                })),
+              )
+              .onConflictDoNothing();
+          }
+        }
       }
     });
 

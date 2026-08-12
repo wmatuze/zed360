@@ -60,9 +60,14 @@ export default async function BusinessRequestsPage() {
         <Link className="flex items-center gap-3" href="/">
           <BrandLogo />
         </Link>
-        <Link className="button button-quiet" href="/business/account">
-          Business account
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link className="button button-quiet" href="/business/notifications">
+            Notifications
+          </Link>
+          <Link className="button button-quiet" href="/business/account">
+            Business account
+          </Link>
+        </div>
       </header>
 
       <section className="mx-auto w-full max-w-5xl pb-20 pt-16 lg:pt-24">
