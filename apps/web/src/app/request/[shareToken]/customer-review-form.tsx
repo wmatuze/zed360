@@ -1,6 +1,9 @@
 "use client";
 
-import type { SharedCustomerRequest } from "@zed360/contracts";
+import {
+  customerReviewSchema,
+  type SharedCustomerRequest,
+} from "@zed360/contracts";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -22,6 +25,7 @@ export function CustomerReviewForm({
   shareToken: string;
 }) {
   const router = useRouter();
+  const [currentReview, setCurrentReview] = useState(review);
   const [rating, setRating] = useState(review?.rating ?? 5);
   const [body, setBody] = useState(review?.body ?? "");
   const [pending, setPending] = useState(false);
@@ -52,6 +56,11 @@ export function CustomerReviewForm({
             : "Your review could not be saved.",
         );
       }
+      const savedReview = customerReviewSchema.safeParse(result);
+      if (!savedReview.success) {
+        throw new Error("The review was saved, but its status could not be displayed.");
+      }
+      setCurrentReview(savedReview.data);
       setMessage("Review submitted for moderation.");
       router.refresh();
     } catch (submissionError) {
@@ -76,9 +85,9 @@ export function CustomerReviewForm({
             Review {businessName}
           </h2>
         </div>
-        {review ? (
+        {currentReview ? (
           <span className="rounded-full border border-white/12 px-3 py-1 text-xs text-white/60">
-            {statusLabels[review.moderationStatus]}
+            {statusLabels[currentReview.moderationStatus]}
           </span>
         ) : null}
       </div>
@@ -87,9 +96,10 @@ export function CustomerReviewForm({
         comment is optional. Reviews are checked before appearing publicly.
       </p>
 
-      {review?.moderationStatus === "rejected" && review.moderationNote ? (
+      {currentReview?.moderationStatus === "rejected" &&
+      currentReview.moderationNote ? (
         <div className="mt-4 rounded-xl border border-red-300/20 bg-red-300/8 p-4 text-sm text-red-100/80">
-          Review note: {review.moderationNote}
+          Review note: {currentReview.moderationNote}
         </div>
       ) : null}
 
@@ -125,11 +135,11 @@ export function CustomerReviewForm({
         <button className="button button-primary mt-4" disabled={pending}>
           {pending
             ? "Submitting…"
-            : review
+            : currentReview
               ? "Update review"
               : "Submit review"}
         </button>
-        {review?.moderationStatus === "approved" ? (
+        {currentReview?.moderationStatus === "approved" ? (
           <p className="mt-3 text-xs leading-5 text-white/38">
             Updating a published review sends it through moderation again.
           </p>
