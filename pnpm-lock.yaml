@@ -26,6 +26,9 @@ importers:
       '@nestjs/platform-express':
         specifier: ^11.0.1
         version: 11.1.28(@nestjs/common@11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.28)
+      '@supabase/supabase-js':
+        specifier: 2.112.2
+        version: 2.112.2
       '@zed360/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts

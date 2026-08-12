@@ -22,11 +22,12 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@zed360/contracts": "workspace:*",
-    "@zed360/database": "workspace:*",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
+    "@supabase/supabase-js": "2.112.2",
+    "@zed360/contracts": "workspace:*",
+    "@zed360/database": "workspace:*",
     "dotenv": "^17.0.0",
     "drizzle-orm": "^0.45.0",
     "reflect-metadata": "^0.2.2",

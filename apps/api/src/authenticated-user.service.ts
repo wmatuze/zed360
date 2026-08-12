@@ -3,18 +3,13 @@ import {
   ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { createClient } from '@supabase/supabase-js';
 import { loadApiEnvironment } from './environment';
 
 export type AuthenticatedUser = {
   id: string;
   email: string;
   emailVerifiedAt: Date;
-};
-
-type SupabaseUserResponse = {
-  id?: unknown;
-  email?: unknown;
-  email_confirmed_at?: unknown;
 };
 
 @Injectable()
@@ -66,38 +61,41 @@ export class AuthenticatedUserService {
       );
     }
 
-    let response: Response;
+    let claimsResult: Awaited<
+      ReturnType<ReturnType<typeof createClient>['auth']['getClaims']>
+    >;
     try {
-      response = await fetch(`${url.replace(/\/$/, '')}/auth/v1/user`, {
-        headers: {
-          apikey: publishableKey,
-          authorization: `Bearer ${token}`,
+      const supabase = createClient(url, publishableKey, {
+        auth: {
+          autoRefreshToken: false,
+          detectSessionInUrl: false,
+          persistSession: false,
         },
-        signal: AbortSignal.timeout(10_000),
       });
+      claimsResult = await supabase.auth.getClaims(token);
     } catch {
       throw new ServiceUnavailableException(
         'Business authentication could not be verified right now.',
       );
     }
 
-    if (!response.ok) {
+    if (claimsResult.error) {
       throw new UnauthorizedException('Your sign-in session is invalid.');
     }
 
-    const user = (await response.json()) as SupabaseUserResponse;
+    const claims = claimsResult.data?.claims;
     if (
-      typeof user.id !== 'string' ||
-      typeof user.email !== 'string' ||
-      typeof user.email_confirmed_at !== 'string'
+      typeof claims?.sub !== 'string' ||
+      typeof claims.email !== 'string' ||
+      typeof claims.iat !== 'number'
     ) {
       throw new UnauthorizedException('A verified email address is required.');
     }
 
     return {
-      id: user.id,
-      email: user.email.trim().toLowerCase(),
-      emailVerifiedAt: new Date(user.email_confirmed_at),
+      id: claims.sub,
+      email: claims.email.trim().toLowerCase(),
+      emailVerifiedAt: new Date(claims.iat * 1000),
     };
   }
 
