@@ -12,7 +12,12 @@ describe('BusinessProfileManagementController', () => {
   const decide = jest.fn().mockResolvedValue({});
   const controller = new BusinessProfileManagementController(
     { verify } as unknown as AuthenticatedUserService,
-    { get, submit, list, decide } as unknown as BusinessProfileManagementService,
+    {
+      get,
+      submit,
+      list,
+      decide,
+    } as unknown as BusinessProfileManagementService,
   );
   const businessId = 'b69a05f3-c203-41b0-94ce-e3ab8af41771';
 
@@ -22,11 +27,20 @@ describe('BusinessProfileManagementController', () => {
   });
 
   it('rejects an invalid business id', async () => {
-    await expect(controller.get('Bearer token', 'invalid')).rejects.toThrow(BadRequestException);
+    await expect(controller.get('Bearer token', 'invalid')).rejects.toThrow(
+      BadRequestException,
+    );
   });
 
   it('validates a profile update before submitting it', async () => {
-    await controller.submit('Bearer token', businessId, { email: 'public@example.com', website: 'https://example.com' });
-    expect(submit).toHaveBeenCalledWith(user, businessId, expect.objectContaining({ email: 'public@example.com' }));
+    await controller.submit('Bearer token', businessId, {
+      email: 'public@example.com',
+      website: 'https://example.com',
+    });
+    expect(submit).toHaveBeenCalledWith(
+      user,
+      businessId,
+      expect.objectContaining({ email: 'public@example.com' }),
+    );
   });
 });

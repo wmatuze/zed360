@@ -22,6 +22,12 @@ const fulfillmentLabels = {
   remote: "Remote or online",
 } as const;
 
+const availabilityLabels = {
+  available: "Available",
+  busy: "Busy",
+  temporarily_unavailable: "Temporarily unavailable",
+} as const;
+
 type DirectorySearchParams = {
   q?: string;
   category?: string;
@@ -273,6 +279,13 @@ export default async function BusinessesPage({
                 <h2 className="mt-5 text-xl font-semibold tracking-[-0.03em] transition group-hover:text-[var(--lime)]">
                   {business.name}
                 </h2>
+                <p
+                  className={`mt-2 text-xs ${business.availabilityFreshness === "current" && business.availability === "available" ? "text-[var(--lime)]" : "text-white/38"}`}
+                >
+                  {business.availabilityFreshness === "current"
+                    ? availabilityLabels[business.availability]
+                    : "Availability not recently confirmed"}
+                </p>
                 <p className="mt-2 line-clamp-3 text-sm leading-6 text-white/48">
                   {business.description || business.serviceNames.join(" · ")}
                 </p>

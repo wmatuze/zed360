@@ -30,6 +30,14 @@ import { DatabaseService } from './database.service';
 import { publicMediaUrl } from './media-storage';
 
 const pageSize = 18;
+const DAY = 24 * 60 * 60 * 1000;
+
+function freshness(value: Date | null, maximumAgeDays: number) {
+  if (!value) return 'unconfirmed' as const;
+  return Date.now() - value.getTime() <= maximumAgeDays * DAY
+    ? ('current' as const)
+    : ('stale' as const);
+}
 
 function optionalNumber(value: string | null) {
   return value === null ? null : Number(value);
@@ -60,6 +68,9 @@ export class PublicBusinessesService {
           logoUrl: businesses.logoUrl,
           coverUrl: businesses.coverUrl,
           lastConfirmedAt: businesses.lastConfirmedAt,
+          availability: businesses.availabilityStatus,
+          availabilityNote: businesses.availabilityNote,
+          availabilityUpdatedAt: businesses.availabilityUpdatedAt,
         })
         .from(businesses)
         .where(where)
@@ -141,6 +152,10 @@ export class PublicBusinessesService {
               )
             : business.coverUrl,
           lastConfirmedAt: business.lastConfirmedAt?.toISOString() ?? null,
+          availabilityUpdatedAt:
+            business.availabilityUpdatedAt?.toISOString() ?? null,
+          availabilityFreshness: freshness(business.availabilityUpdatedAt, 7),
+          profileFreshness: freshness(business.lastConfirmedAt, 90),
           trust: this.trustFor(business.id, related.verifications),
           primaryLocation,
           categories: categories.filter(
@@ -173,6 +188,9 @@ export class PublicBusinessesService {
         logoUrl: businesses.logoUrl,
         coverUrl: businesses.coverUrl,
         lastConfirmedAt: businesses.lastConfirmedAt,
+        availability: businesses.availabilityStatus,
+        availabilityNote: businesses.availabilityNote,
+        availabilityUpdatedAt: businesses.availabilityUpdatedAt,
       })
       .from(businesses)
       .where(
@@ -204,6 +222,10 @@ export class PublicBusinessesService {
         ? publicMediaUrl(approvedCover.storageBucket, approvedCover.storagePath)
         : business.coverUrl,
       lastConfirmedAt: business.lastConfirmedAt?.toISOString() ?? null,
+      availabilityUpdatedAt:
+        business.availabilityUpdatedAt?.toISOString() ?? null,
+      availabilityFreshness: freshness(business.availabilityUpdatedAt, 7),
+      profileFreshness: freshness(business.lastConfirmedAt, 90),
       trust: this.trustFor(business.id, related.verifications),
       locations: related.locations.map((location) => ({
         id: location.id,
