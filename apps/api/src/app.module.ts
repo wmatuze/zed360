@@ -31,6 +31,8 @@ import { BusinessNotificationsController } from './business-notifications.contro
 import { BusinessNotificationsService } from './business-notifications.service';
 import { BusinessDashboardController } from './business-dashboard.controller';
 import { BusinessDashboardService } from './business-dashboard.service';
+import { BusinessProfileManagementController } from './business-profile-management.controller';
+import { BusinessProfileManagementService } from './business-profile-management.service';
 
 @Module({
   imports: [],
@@ -39,6 +41,7 @@ import { BusinessDashboardService } from './business-dashboard.service';
     AdminCustomerReviewsController,
     BusinessAccountsController,
     BusinessDashboardController,
+    BusinessProfileManagementController,
     BusinessNotificationsController,
     BusinessReviewsController,
     BusinessRequestsController,
@@ -56,6 +59,7 @@ import { BusinessDashboardService } from './business-dashboard.service';
     AuthenticatedUserService,
     BusinessApplicationsService,
     BusinessDashboardService,
+    BusinessProfileManagementService,
     BusinessNotificationsService,
     BusinessCatalogService,
     MediaReviewsService,

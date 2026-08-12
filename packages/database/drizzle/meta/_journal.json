@@ -64,6 +64,13 @@
       "when": 1786569527910,
       "tag": "0008_early_zzzax",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1786576004925,
+      "tag": "0009_solid_hannibal_king",
+      "breakpoints": true
     }
   ]
 }
