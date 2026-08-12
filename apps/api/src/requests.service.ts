@@ -36,7 +36,7 @@ export class RequestsService {
   async create(request: CreateCustomerRequest) {
     const [[category], [district]] = await Promise.all([
       this.database.db
-        .select({ id: categories.id })
+        .select({ id: categories.id, parentId: categories.parentId })
         .from(categories)
         .where(
           and(
@@ -102,7 +102,17 @@ export class RequestsService {
         .innerJoin(businesses, eq(businesses.id, businessServices.businessId))
         .where(
           and(
-            eq(businessServices.categoryId, request.categoryId),
+            or(
+              eq(businessServices.categoryId, request.categoryId),
+              category.parentId
+                ? eq(businessServices.categoryId, category.parentId)
+                : undefined,
+              sql`exists (
+                select 1 from categories match_service_category
+                where match_service_category.id = ${businessServices.categoryId}
+                  and match_service_category.parent_id = ${request.categoryId}
+              )`,
+            ),
             eq(businessServices.isAvailable, true),
             or(eq(businesses.status, 'draft'), eq(businesses.status, 'active')),
             sql`(

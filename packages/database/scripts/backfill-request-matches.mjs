@@ -36,7 +36,19 @@ try {
     .from(customerRequests)
     .innerJoin(
       businessServices,
-      eq(businessServices.categoryId, customerRequests.categoryId),
+      sql`(
+        ${businessServices.categoryId} = ${customerRequests.categoryId}
+        or ${businessServices.categoryId} = (
+          select requested_category.parent_id
+          from categories requested_category
+          where requested_category.id = ${customerRequests.categoryId}
+        )
+        or exists (
+          select 1 from categories service_category
+          where service_category.id = ${businessServices.categoryId}
+            and service_category.parent_id = ${customerRequests.categoryId}
+        )
+      )`,
     )
     .innerJoin(businesses, eq(businesses.id, businessServices.businessId))
     .where(
