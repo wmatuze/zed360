@@ -11,6 +11,7 @@ import {
   RequestClosureControls,
   ResponseOutcomeControls,
 } from "./request-outcome-controls";
+import { CustomerReviewForm } from "./customer-review-form";
 
 export const metadata: Metadata = { title: "Your request responses" };
 export const dynamic = "force-dynamic";
@@ -154,6 +155,14 @@ export default async function SharedRequestPage({
               ? `You selected ${selectedBusiness.business.name}. Your responses remain available on this private page.`
               : "Your responses remain available on this private page."}
           </div>
+        ) : null}
+
+        {data.request.status === "resolved" && selectedBusiness ? (
+          <CustomerReviewForm
+            businessName={selectedBusiness.business.name}
+            review={data.review}
+            shareToken={shareToken}
+          />
         ) : null}
 
         <div className="mt-12 flex items-end justify-between gap-5">

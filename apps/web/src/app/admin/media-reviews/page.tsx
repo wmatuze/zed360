@@ -66,6 +66,9 @@ export default async function MediaReviewsPage({
           </span>
         </Link>
         <div className="flex items-center gap-3">
+          <Link className="button button-quiet" href="/admin/customer-reviews">
+            Customer reviews
+          </Link>
           <Link className="button button-quiet" href="/admin/reviews">
             Business reviews
           </Link>

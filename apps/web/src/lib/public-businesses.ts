@@ -67,10 +67,7 @@ export const fetchPublicBusinessProfile = cache(
     const response = await fetch(
       `${apiUrl}/businesses/${encodeURIComponent(slug)}`,
       {
-        next: {
-          revalidate: 300,
-          tags: ["public-businesses", `business-${slug}`],
-        },
+        cache: "no-store",
       },
     );
     return parseResponse(

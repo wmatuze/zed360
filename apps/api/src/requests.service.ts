@@ -21,6 +21,7 @@ import {
   interactions,
   or,
   requestMatches,
+  reviews,
 } from '@zed360/database';
 import { DatabaseService } from './database.service';
 
@@ -209,6 +210,26 @@ export class RequestsService {
       .from(interactions)
       .where(eq(interactions.requestId, request.id));
 
+    const [review] = await this.database.db
+      .select({
+        id: reviews.id,
+        rating: reviews.rating,
+        body: reviews.body,
+        moderationStatus: reviews.moderationStatus,
+        moderationNote: reviews.moderationNote,
+        createdAt: reviews.createdAt,
+        updatedAt: reviews.updatedAt,
+      })
+      .from(reviews)
+      .innerJoin(interactions, eq(reviews.interactionId, interactions.id))
+      .where(
+        and(
+          eq(interactions.requestId, request.id),
+          eq(interactions.outcomeConfirmed, true),
+        ),
+      )
+      .limit(1);
+
     const timing = request.answers.timing;
     const validTiming =
       timing === 'as_soon_as_possible' ||
@@ -263,6 +284,13 @@ export class RequestsService {
           interactionRows.find((interaction) => interaction.outcomeConfirmed)
             ?.businessId ?? null,
       },
+      review: review
+        ? {
+            ...review,
+            createdAt: review.createdAt.toISOString(),
+            updatedAt: review.updatedAt.toISOString(),
+          }
+        : null,
     };
   }
 

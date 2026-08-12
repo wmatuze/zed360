@@ -20,7 +20,9 @@ import {
   districts,
   eq,
   inArray,
+  interactions,
   provinces,
+  reviews,
   sql,
 } from '@zed360/database';
 import type { SQL } from 'drizzle-orm';
@@ -267,6 +269,18 @@ export class PublicBusinessesService {
           .filter((asset) => asset.productId === product.id)
           .map((asset) => this.publicMedia(asset)),
       })),
+      reviewSummary: this.reviewSummary(
+        related.reviews.filter((review) => review.businessId === business.id),
+      ),
+      reviews: related.reviews
+        .filter((review) => review.businessId === business.id)
+        .map((review) => ({
+          id: review.id,
+          rating: review.rating,
+          body: review.body,
+          createdAt: review.createdAt.toISOString(),
+          verifiedInteraction: true as const,
+        })),
     };
   }
 
@@ -401,6 +415,7 @@ export class PublicBusinessesService {
       verificationRows,
       productRows,
       mediaRows,
+      reviewRows,
     ] = await Promise.all([
       this.database.db
         .select({
@@ -483,6 +498,25 @@ export class PublicBusinessesService {
           asc(businessMediaAssets.sortOrder),
           asc(businessMediaAssets.createdAt),
         ),
+      this.database.db
+        .select({
+          id: reviews.id,
+          businessId: reviews.businessId,
+          rating: reviews.rating,
+          body: reviews.body,
+          createdAt: reviews.createdAt,
+        })
+        .from(reviews)
+        .innerJoin(interactions, eq(reviews.interactionId, interactions.id))
+        .where(
+          and(
+            inArray(reviews.businessId, businessIds),
+            eq(reviews.moderationStatus, 'approved'),
+            eq(reviews.isPublished, true),
+            eq(interactions.outcomeConfirmed, true),
+          ),
+        )
+        .orderBy(desc(reviews.createdAt)),
     ]);
 
     const serviceIds = serviceRows.map((service) => service.id);
@@ -567,6 +601,21 @@ export class PublicBusinessesService {
       verifications: verificationRows,
       products: productRows,
       media: mediaRows,
+      reviews: reviewRows,
+    };
+  }
+
+  private reviewSummary(reviews: Array<{ rating: number }>): {
+    averageRating: number | null;
+    reviewCount: number;
+  } {
+    if (!reviews.length) return { averageRating: null, reviewCount: 0 };
+    const average =
+      reviews.reduce((total, review) => total + review.rating, 0) /
+      reviews.length;
+    return {
+      averageRating: Math.round(average * 10) / 10,
+      reviewCount: reviews.length,
     };
   }
 

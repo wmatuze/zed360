@@ -573,6 +573,56 @@ export const adminMediaReviewQueueSchema = z.object({
 
 export type AdminMediaReviewQueue = z.infer<typeof adminMediaReviewQueueSchema>;
 
+export const reviewModerationStatusSchema = z.enum([
+  "pending",
+  "approved",
+  "rejected",
+]);
+
+export const submitCustomerReviewSchema = z.object({
+  rating: z.coerce.number().int().min(1).max(5),
+  body: z.string().trim().max(1200).optional().or(z.literal("")),
+});
+
+export type SubmitCustomerReview = z.infer<typeof submitCustomerReviewSchema>;
+
+export const customerReviewSchema = z.object({
+  id: z.string().uuid(),
+  rating: z.number().int().min(1).max(5),
+  body: z.string().nullable(),
+  moderationStatus: reviewModerationStatusSchema,
+  moderationNote: z.string().nullable(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+
+export const submitCustomerReviewDecisionSchema = z
+  .object({
+    decision: z.enum(["approved", "rejected"]),
+    note: z.string().trim().max(500).optional().or(z.literal("")),
+  })
+  .refine(({ decision, note }) => decision !== "rejected" || Boolean(note), {
+    path: ["note"],
+    message: "Explain why this review is being rejected.",
+  });
+
+export type SubmitCustomerReviewDecision = z.infer<
+  typeof submitCustomerReviewDecisionSchema
+>;
+
+export const adminCustomerReviewQueueSchema = z.object({
+  viewerRole: z.enum(["admin", "reviewer"]),
+  reviews: z.array(
+    customerReviewSchema.extend({
+      business: z.object({ id: z.string().uuid(), name: z.string() }),
+    }),
+  ),
+});
+
+export type AdminCustomerReviewQueue = z.infer<
+  typeof adminCustomerReviewQueueSchema
+>;
+
 export const publicBusinessDirectoryQuerySchema = z.object({
   q: z.string().trim().max(100).optional(),
   category: z.string().trim().max(120).optional(),
@@ -642,6 +692,14 @@ const publicBusinessProductSchema = businessCatalogProductSchema
   .omit({ status: true, isPublished: true, lastConfirmedAt: true, media: true })
   .extend({ media: z.array(publicBusinessMediaSchema) });
 
+const publicCustomerReviewSchema = z.object({
+  id: z.string().uuid(),
+  rating: z.number().int().min(1).max(5),
+  body: z.string().nullable(),
+  createdAt: z.string().datetime(),
+  verifiedInteraction: z.literal(true),
+});
+
 export const publicBusinessSummarySchema = z.object({
   id: z.string().uuid(),
   slug: z.string(),
@@ -686,6 +744,11 @@ export const publicBusinessProfileSchema = z.object({
   services: z.array(publicBusinessServiceSchema),
   gallery: z.array(publicBusinessMediaSchema),
   products: z.array(publicBusinessProductSchema),
+  reviewSummary: z.object({
+    averageRating: z.number().min(1).max(5).nullable(),
+    reviewCount: z.number().int().nonnegative(),
+  }),
+  reviews: z.array(publicCustomerReviewSchema),
 });
 
 export type PublicBusinessProfile = z.infer<typeof publicBusinessProfileSchema>;
@@ -833,6 +896,7 @@ export const sharedCustomerRequestSchema = z.object({
     contactedBusinessIds: z.array(z.string().uuid()),
     selectedBusinessId: z.string().uuid().nullable(),
   }),
+  review: customerReviewSchema.nullable(),
 });
 
 export type SharedCustomerRequest = z.infer<typeof sharedCustomerRequestSchema>;

@@ -50,6 +50,13 @@
       "when": 1786446620412,
       "tag": "0006_jazzy_lake",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1786459819731,
+      "tag": "0007_mean_hellcat",
+      "breakpoints": true
     }
   ]
 }
