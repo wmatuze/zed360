@@ -237,6 +237,64 @@ export const businessAccountSchema = z.object({
 
 export type BusinessAccount = z.infer<typeof businessAccountSchema>;
 
+export const businessDashboardSchema = z.object({
+  totals: z.object({
+    openMatches: z.number().int().nonnegative(),
+    responsesSent: z.number().int().nonnegative(),
+    customerSelections: z.number().int().nonnegative(),
+    unreadNotifications: z.number().int().nonnegative(),
+  }),
+  businesses: z.array(
+    z.object({
+      id: z.string().uuid(),
+      name: z.string(),
+      slug: z.string(),
+      status: z.enum(["draft", "active", "suspended", "closed"]),
+      reviewStatus: businessReviewStatusSchema,
+      role: z.enum(["owner", "manager", "staff"]),
+      metrics: z.object({
+        openMatches: z.number().int().nonnegative(),
+        responsesSent: z.number().int().nonnegative(),
+        customerSelections: z.number().int().nonnegative(),
+        publishedProducts: z.number().int().nonnegative(),
+        pendingMedia: z.number().int().nonnegative(),
+        publishedReviews: z.number().int().nonnegative(),
+      }),
+      setup: z.object({
+        approved: z.boolean(),
+        hasAvailableService: z.boolean(),
+        hasCoverage: z.boolean(),
+        hasPublishedProduct: z.boolean(),
+        hasApprovedMedia: z.boolean(),
+      }),
+    }),
+  ),
+  recentRequests: z.array(
+    z.object({
+      matchId: z.string().uuid(),
+      businessName: z.string(),
+      summary: z.string(),
+      categoryName: z.string(),
+      districtName: z.string().nullable(),
+      hasResponse: z.boolean(),
+      createdAt: z.string().datetime(),
+    }),
+  ),
+  recentNotifications: z.array(
+    z.object({
+      id: z.string().uuid(),
+      businessName: z.string(),
+      title: z.string(),
+      body: z.string(),
+      actionUrl: z.string().nullable(),
+      readAt: z.string().datetime().nullable(),
+      createdAt: z.string().datetime(),
+    }),
+  ),
+});
+
+export type BusinessDashboard = z.infer<typeof businessDashboardSchema>;
+
 export const serviceFulfillmentModeSchema = z.enum([
   "at_business",
   "customer_pickup",

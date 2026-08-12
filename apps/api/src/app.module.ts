@@ -29,6 +29,8 @@ import { CustomerReviewsController } from './customer-reviews.controller';
 import { CustomerReviewsService } from './customer-reviews.service';
 import { BusinessNotificationsController } from './business-notifications.controller';
 import { BusinessNotificationsService } from './business-notifications.service';
+import { BusinessDashboardController } from './business-dashboard.controller';
+import { BusinessDashboardService } from './business-dashboard.service';
 
 @Module({
   imports: [],
@@ -36,6 +38,7 @@ import { BusinessNotificationsService } from './business-notifications.service';
     AppController,
     AdminCustomerReviewsController,
     BusinessAccountsController,
+    BusinessDashboardController,
     BusinessNotificationsController,
     BusinessReviewsController,
     BusinessRequestsController,
@@ -52,6 +55,7 @@ import { BusinessNotificationsService } from './business-notifications.service';
     AppService,
     AuthenticatedUserService,
     BusinessApplicationsService,
+    BusinessDashboardService,
     BusinessNotificationsService,
     BusinessCatalogService,
     MediaReviewsService,
