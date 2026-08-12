@@ -173,6 +173,7 @@ export default async function BusinessDashboardPage() {
                         <>
                           <Link className="button button-quiet" href={`/business/${business.id}/catalog`}>Storefront</Link>
                           <Link className="button button-quiet" href={`/business/${business.id}/coverage`}>Coverage</Link>
+                          <Link className="button button-quiet" href={`/business/${business.id}/profile`}>Edit profile</Link>
                         </>
                       ) : null}
                     </div>

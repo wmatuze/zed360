@@ -129,6 +129,10 @@ export const businessNotificationType = pgEnum("business_notification_type", [
   "customer_selected",
   "business_review_decision",
 ]);
+export const businessProfileRevisionStatus = pgEnum(
+  "business_profile_revision_status",
+  ["pending", "approved", "rejected"],
+);
 
 export const users = pgTable(
   "users",
@@ -262,6 +266,42 @@ export const businessMembers = pgTable(
     uniqueIndex("business_members_one_owner_unique")
       .on(table.businessId)
       .where(sql`${table.role} = 'owner'`),
+  ],
+);
+
+export const businessProfileRevisions = pgTable(
+  "business_profile_revisions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    businessId: uuid("business_id")
+      .notNull()
+      .references(() => businesses.id, { onDelete: "cascade" }),
+    submittedByUserId: uuid("submitted_by_user_id")
+      .notNull()
+      .references(() => users.id),
+    status: businessProfileRevisionStatus("status").default("pending").notNull(),
+    proposed: jsonb("proposed")
+      .$type<{
+        description: string | null;
+        phone: string | null;
+        whatsapp: string | null;
+        email: string | null;
+        website: string | null;
+      }>()
+      .notNull(),
+    reviewNote: text("review_note"),
+    reviewedByUserId: uuid("reviewed_by_user_id").references(() => users.id),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("business_profile_revisions_one_pending_unique")
+      .on(table.businessId)
+      .where(sql`${table.status} = 'pending'`),
+    index("business_profile_revisions_status_created_idx").on(
+      table.status,
+      table.createdAt,
+    ),
   ],
 );
 

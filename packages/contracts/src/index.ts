@@ -295,6 +295,63 @@ export const businessDashboardSchema = z.object({
 
 export type BusinessDashboard = z.infer<typeof businessDashboardSchema>;
 
+export const saveBusinessProfileSchema = z.object({
+  description: z.string().trim().max(2000).optional().or(z.literal("")),
+  phone: z.string().trim().max(30).optional().or(z.literal("")),
+  whatsapp: z.string().trim().max(30).optional().or(z.literal("")),
+  email: z.string().trim().email().max(254).optional().or(z.literal("")),
+  website: z.string().trim().url().max(500).optional().or(z.literal("")),
+});
+export type SaveBusinessProfile = z.infer<typeof saveBusinessProfileSchema>;
+
+const businessProfileFieldsSchema = z.object({
+  description: z.string().nullable(),
+  phone: z.string().nullable(),
+  whatsapp: z.string().nullable(),
+  email: z.string().nullable(),
+  website: z.string().nullable(),
+});
+
+export const businessProfileManagementSchema = z.object({
+  business: z.object({ id: z.string().uuid(), name: z.string(), slug: z.string() }),
+  current: businessProfileFieldsSchema,
+  pending: z
+    .object({
+      id: z.string().uuid(),
+      proposed: businessProfileFieldsSchema,
+      createdAt: z.string().datetime(),
+    })
+    .nullable(),
+  latestDecision: z
+    .object({ status: z.enum(["approved", "rejected"]), note: z.string().nullable() })
+    .nullable(),
+});
+export type BusinessProfileManagement = z.infer<
+  typeof businessProfileManagementSchema
+>;
+
+export const businessProfileDecisionSchema = z
+  .object({
+    decision: z.enum(["approved", "rejected"]),
+    note: z.string().trim().max(1000).optional().or(z.literal("")),
+  })
+  .refine(({ decision, note }) => decision === "approved" || Boolean(note), {
+    path: ["note"],
+    message: "Explain why the profile changes were rejected.",
+  });
+export type BusinessProfileDecision = z.infer<
+  typeof businessProfileDecisionSchema
+>;
+export const adminBusinessProfileRevisionQueueSchema = z.object({
+  viewerRole: z.enum(["admin", "reviewer"]),
+  revisions: z.array(z.object({
+    id: z.string().uuid(), businessId: z.string().uuid(), businessName: z.string(),
+    current: businessProfileFieldsSchema, proposed: businessProfileFieldsSchema,
+    createdAt: z.string().datetime(),
+  })),
+});
+export type AdminBusinessProfileRevisionQueue = z.infer<typeof adminBusinessProfileRevisionQueueSchema>;
+
 export const serviceFulfillmentModeSchema = z.enum([
   "at_business",
   "customer_pickup",
