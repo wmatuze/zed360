@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { BrandLogo } from "@/components/brand-logo";
 import {
   fetchPublicBusinessDirectory,
   fetchPublicReferenceData,
@@ -80,12 +81,7 @@ export default async function BusinessesPage({
     <main className="min-h-screen bg-[var(--ink)] text-white">
       <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-6 sm:px-8 lg:px-10">
         <Link className="flex items-center gap-3" href="/">
-          <span className="brand-mark" aria-hidden="true">
-            Z
-          </span>
-          <span className="text-xl font-semibold tracking-[-0.04em]">
-            Zed360
-          </span>
+          <BrandLogo />
         </Link>
         <div className="flex items-center gap-3">
           <Link

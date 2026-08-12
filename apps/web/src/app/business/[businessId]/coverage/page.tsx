@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BrandLogo } from "@/components/brand-logo";
 import { redirect } from "next/navigation";
 import { getVerifiedBusinessSession } from "@/lib/business-account";
 import {
@@ -48,8 +49,7 @@ export default async function ServiceCoveragePage({
     <main className="min-h-screen bg-[var(--ink)] px-5 py-6 text-white sm:px-8 lg:px-10">
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between">
         <Link className="flex items-center gap-3" href="/">
-          <span className="brand-mark" aria-hidden="true">Z</span>
-          <span className="text-xl font-semibold tracking-[-0.04em]">Zed360</span>
+          <BrandLogo />
         </Link>
         <Link className="button button-quiet" href="/business/account">Business account</Link>
       </header>
