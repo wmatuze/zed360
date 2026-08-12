@@ -11,6 +11,7 @@ import type {
 import {
   and,
   businessLocations,
+  businessNotificationEvents,
   businessResponses,
   businesses,
   businessServices,
@@ -92,6 +93,7 @@ export class RequestsService {
         .select({
           businessId: businesses.id,
           businessStatus: businesses.status,
+          businessReviewStatus: businesses.reviewStatus,
         })
         .from(businessServices)
         .innerJoin(
@@ -111,7 +113,7 @@ export class RequestsService {
         .groupBy(businesses.id, businesses.status);
 
       if (candidates.length > 0) {
-        await transaction
+        const matches = await transaction
           .insert(requestMatches)
           .values(
             candidates.map((candidate) => ({
@@ -128,7 +130,40 @@ export class RequestsService {
               ],
             })),
           )
-          .onConflictDoNothing();
+          .onConflictDoNothing()
+          .returning({
+            id: requestMatches.id,
+            businessId: requestMatches.businessId,
+          });
+
+        const notifiableBusinessIds = new Set(
+          candidates
+            .filter(
+              (candidate) =>
+                candidate.businessStatus === 'active' &&
+                candidate.businessReviewStatus === 'approved',
+            )
+            .map((candidate) => candidate.businessId),
+        );
+        const notifiableMatches = matches.filter((match) =>
+          notifiableBusinessIds.has(match.businessId),
+        );
+        if (notifiableMatches.length) {
+          await transaction
+            .insert(businessNotificationEvents)
+            .values(
+              notifiableMatches.map((match) => ({
+                businessId: match.businessId,
+                type: 'request_matched' as const,
+                title: 'New matched request',
+                body: request.summary,
+                actionUrl: '/business/requests',
+                eventKey: `request-match:${match.id}`,
+                data: { requestId: customerRequest.id, matchId: match.id },
+              })),
+            )
+            .onConflictDoNothing();
+        }
       }
 
       return customerRequest;
@@ -424,6 +459,18 @@ export class RequestsService {
           .update(customerRequests)
           .set({ status: 'resolved', updatedAt: now })
           .where(eq(customerRequests.id, request.id));
+        await transaction
+          .insert(businessNotificationEvents)
+          .values({
+            businessId: eligibleResponse.businessId,
+            type: 'customer_selected',
+            title: 'A customer selected your business',
+            body: 'Your response was selected for a customer request.',
+            actionUrl: '/business/notifications',
+            eventKey: `customer-selected:${request.id}:${eligibleResponse.businessId}`,
+            data: { requestId: request.id },
+          })
+          .onConflictDoNothing();
       }
     });
 

@@ -8,6 +8,7 @@ import {
   getVerifiedBusinessSession,
 } from "@/lib/business-account";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { fetchBusinessNotifications } from "@/lib/business-notifications";
 import { claimBusiness, signOut } from "./actions";
 import { ClaimButton } from "./claim-button";
 
@@ -43,6 +44,7 @@ export default async function BusinessAccountPage({
 
   let account = null;
   let accountError = "";
+  let unreadNotifications = 0;
   try {
     account = await fetchBusinessAccount(session.accessToken);
   } catch (error) {
@@ -54,6 +56,13 @@ export default async function BusinessAccountPage({
         ? error.message
         : "We could not load your business account right now.";
   }
+  try {
+    unreadNotifications = (
+      await fetchBusinessNotifications(session.accessToken)
+    ).unreadCount;
+  } catch {
+    // The account remains usable if the notification service is unavailable.
+  }
 
   const { link } = await searchParams;
   const linkMessage = link ? linkMessages[link] : undefined;
@@ -64,11 +73,16 @@ export default async function BusinessAccountPage({
         <Link className="flex items-center gap-3" href="/">
           <BrandLogo />
         </Link>
-        <form action={signOut}>
-          <button className="button button-quiet" type="submit">
-            Sign out
-          </button>
-        </form>
+        <div className="flex items-center gap-3">
+          <Link className="button button-quiet" href="/business/notifications">
+            Notifications{unreadNotifications ? ` (${unreadNotifications})` : ""}
+          </Link>
+          <form action={signOut}>
+            <button className="button button-quiet" type="submit">
+              Sign out
+            </button>
+          </form>
+        </div>
       </header>
 
       <section className="mx-auto w-full max-w-5xl pb-20 pt-16 lg:pt-24">

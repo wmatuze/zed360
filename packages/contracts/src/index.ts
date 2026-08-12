@@ -901,6 +901,32 @@ export const sharedCustomerRequestSchema = z.object({
 
 export type SharedCustomerRequest = z.infer<typeof sharedCustomerRequestSchema>;
 
+export const businessNotificationTypeSchema = z.enum([
+  "request_matched",
+  "customer_selected",
+  "business_review_decision",
+]);
+
+export const businessNotificationSchema = z.object({
+  id: z.string().uuid(),
+  type: businessNotificationTypeSchema,
+  title: z.string(),
+  body: z.string(),
+  actionUrl: z.string().nullable(),
+  business: z.object({ id: z.string().uuid(), name: z.string() }),
+  readAt: z.string().datetime().nullable(),
+  createdAt: z.string().datetime(),
+});
+
+export const businessNotificationListSchema = z.object({
+  notifications: z.array(businessNotificationSchema),
+  unreadCount: z.number().int().nonnegative(),
+});
+
+export type BusinessNotificationList = z.infer<
+  typeof businessNotificationListSchema
+>;
+
 export const submitBusinessReviewSchema = z
   .object({
     decision: businessReviewDecisionSchema,
