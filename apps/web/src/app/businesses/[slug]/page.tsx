@@ -24,6 +24,12 @@ const scopeLabels = {
   remote: "Available remotely",
 } as const;
 
+const availabilityLabels = {
+  available: "Available",
+  busy: "Busy — response may take longer",
+  temporarily_unavailable: "Temporarily unavailable",
+} as const;
+
 type ProfilePageProps = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({
@@ -163,6 +169,13 @@ export default async function BusinessProfilePage({
                       : "verified reviews"}
                   </span>
                 ) : null}
+                <span
+                  className={`rounded-full border px-3 py-1 text-xs ${business.availabilityFreshness === "current" && business.availability === "available" ? "border-[var(--lime)]/25 bg-[var(--lime)]/8 text-[var(--lime)]" : "border-white/10 bg-white/5 text-white/55"}`}
+                >
+                  {business.availabilityFreshness === "current"
+                    ? availabilityLabels[business.availability]
+                    : "Availability not recently confirmed"}
+                </span>
               </div>
               <h1 className="mt-5 text-balance text-4xl font-semibold tracking-[-0.055em] sm:text-6xl">
                 {business.name}
@@ -171,6 +184,21 @@ export default async function BusinessProfilePage({
                 {business.description ||
                   "Explore this business's services and current service coverage."}
               </p>
+              {business.availabilityFreshness === "current" &&
+              business.availabilityNote ? (
+                <p className="mt-3 text-sm text-white/45">
+                  {business.availabilityNote}
+                </p>
+              ) : null}
+              {business.profileFreshness === "current" &&
+              business.lastConfirmedAt ? (
+                <p className="mt-3 text-xs text-white/30">
+                  Profile confirmed{" "}
+                  {new Intl.DateTimeFormat("en-ZM", {
+                    dateStyle: "medium",
+                  }).format(new Date(business.lastConfirmedAt))}
+                </p>
+              ) : null}
               {primaryLocation?.district ? (
                 <p className="mt-4 text-sm text-white/38">
                   Based in {primaryLocation.district.name},{" "}
@@ -401,8 +429,8 @@ export default async function BusinessProfilePage({
                       Verified reviews
                     </h2>
                     <p className="mt-2 text-sm text-white/42">
-                      From customers who selected this business through a
-                      Zed360 request.
+                      From customers who selected this business through a Zed360
+                      request.
                     </p>
                   </div>
                   <span className="text-sm font-semibold text-[var(--lime)]">

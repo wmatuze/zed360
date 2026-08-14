@@ -133,6 +133,10 @@ export const businessProfileRevisionStatus = pgEnum(
   "business_profile_revision_status",
   ["pending", "approved", "rejected"],
 );
+export const businessAvailabilityStatus = pgEnum(
+  "business_availability_status",
+  ["available", "busy", "temporarily_unavailable"],
+);
 
 export const users = pgTable(
   "users",
@@ -238,6 +242,13 @@ export const businesses = pgTable(
     website: text("website"),
     logoUrl: text("logo_url"),
     coverUrl: text("cover_url"),
+    availabilityStatus: businessAvailabilityStatus("availability_status")
+      .default("available")
+      .notNull(),
+    availabilityNote: text("availability_note"),
+    availabilityUpdatedAt: timestamp("availability_updated_at", {
+      withTimezone: true,
+    }),
     lastConfirmedAt: timestamp("last_confirmed_at", { withTimezone: true }),
     ...timestamps,
   },
@@ -279,7 +290,9 @@ export const businessProfileRevisions = pgTable(
     submittedByUserId: uuid("submitted_by_user_id")
       .notNull()
       .references(() => users.id),
-    status: businessProfileRevisionStatus("status").default("pending").notNull(),
+    status: businessProfileRevisionStatus("status")
+      .default("pending")
+      .notNull(),
     proposed: jsonb("proposed")
       .$type<{
         description: string | null;

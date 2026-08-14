@@ -252,6 +252,14 @@ export const businessDashboardSchema = z.object({
       status: z.enum(["draft", "active", "suspended", "closed"]),
       reviewStatus: businessReviewStatusSchema,
       role: z.enum(["owner", "manager", "staff"]),
+      presence: z.object({
+        availability: z.enum(["available", "busy", "temporarily_unavailable"]),
+        availabilityNote: z.string().nullable(),
+        availabilityUpdatedAt: z.string().datetime().nullable(),
+        availabilityFreshness: z.enum(["current", "stale", "unconfirmed"]),
+        profileLastConfirmedAt: z.string().datetime().nullable(),
+        profileFreshness: z.enum(["current", "stale", "unconfirmed"]),
+      }),
       metrics: z.object({
         openMatches: z.number().int().nonnegative(),
         responsesSent: z.number().int().nonnegative(),
@@ -295,6 +303,41 @@ export const businessDashboardSchema = z.object({
 
 export type BusinessDashboard = z.infer<typeof businessDashboardSchema>;
 
+export const businessAvailabilityStatusSchema = z.enum([
+  "available",
+  "busy",
+  "temporarily_unavailable",
+]);
+
+export const updateBusinessPresenceSchema = z.object({
+  availability: businessAvailabilityStatusSchema,
+  note: z.string().trim().max(240).optional().or(z.literal("")),
+});
+export type UpdateBusinessPresence = z.infer<
+  typeof updateBusinessPresenceSchema
+>;
+
+const freshnessStateSchema = z.enum(["current", "stale", "unconfirmed"]);
+
+export const businessPresenceSchema = z.object({
+  business: z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+    slug: z.string(),
+  }),
+  availability: z.object({
+    status: businessAvailabilityStatusSchema,
+    note: z.string().nullable(),
+    updatedAt: z.string().datetime().nullable(),
+    freshness: freshnessStateSchema,
+  }),
+  profile: z.object({
+    lastConfirmedAt: z.string().datetime().nullable(),
+    freshness: freshnessStateSchema,
+  }),
+});
+export type BusinessPresence = z.infer<typeof businessPresenceSchema>;
+
 export const saveBusinessProfileSchema = z.object({
   description: z.string().trim().max(2000).optional().or(z.literal("")),
   phone: z.string().trim().max(30).optional().or(z.literal("")),
@@ -313,7 +356,11 @@ const businessProfileFieldsSchema = z.object({
 });
 
 export const businessProfileManagementSchema = z.object({
-  business: z.object({ id: z.string().uuid(), name: z.string(), slug: z.string() }),
+  business: z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+    slug: z.string(),
+  }),
   current: businessProfileFieldsSchema,
   pending: z
     .object({
@@ -323,7 +370,10 @@ export const businessProfileManagementSchema = z.object({
     })
     .nullable(),
   latestDecision: z
-    .object({ status: z.enum(["approved", "rejected"]), note: z.string().nullable() })
+    .object({
+      status: z.enum(["approved", "rejected"]),
+      note: z.string().nullable(),
+    })
     .nullable(),
 });
 export type BusinessProfileManagement = z.infer<
@@ -344,13 +394,20 @@ export type BusinessProfileDecision = z.infer<
 >;
 export const adminBusinessProfileRevisionQueueSchema = z.object({
   viewerRole: z.enum(["admin", "reviewer"]),
-  revisions: z.array(z.object({
-    id: z.string().uuid(), businessId: z.string().uuid(), businessName: z.string(),
-    current: businessProfileFieldsSchema, proposed: businessProfileFieldsSchema,
-    createdAt: z.string().datetime(),
-  })),
+  revisions: z.array(
+    z.object({
+      id: z.string().uuid(),
+      businessId: z.string().uuid(),
+      businessName: z.string(),
+      current: businessProfileFieldsSchema,
+      proposed: businessProfileFieldsSchema,
+      createdAt: z.string().datetime(),
+    }),
+  ),
 });
-export type AdminBusinessProfileRevisionQueue = z.infer<typeof adminBusinessProfileRevisionQueueSchema>;
+export type AdminBusinessProfileRevisionQueue = z.infer<
+  typeof adminBusinessProfileRevisionQueueSchema
+>;
 
 export const serviceFulfillmentModeSchema = z.enum([
   "at_business",
@@ -823,6 +880,11 @@ export const publicBusinessSummarySchema = z.object({
   logoUrl: z.string().nullable(),
   coverUrl: z.string().nullable(),
   lastConfirmedAt: z.string().datetime().nullable(),
+  availability: businessAvailabilityStatusSchema,
+  availabilityNote: z.string().nullable(),
+  availabilityUpdatedAt: z.string().datetime().nullable(),
+  availabilityFreshness: freshnessStateSchema,
+  profileFreshness: freshnessStateSchema,
   trust: publicBusinessTrustSchema,
   primaryLocation: publicBusinessLocationSchema.nullable(),
   categories: z.array(z.object({ name: z.string(), slug: z.string() })),
@@ -854,6 +916,11 @@ export const publicBusinessProfileSchema = z.object({
   logoUrl: z.string().nullable(),
   coverUrl: z.string().nullable(),
   lastConfirmedAt: z.string().datetime().nullable(),
+  availability: businessAvailabilityStatusSchema,
+  availabilityNote: z.string().nullable(),
+  availabilityUpdatedAt: z.string().datetime().nullable(),
+  availabilityFreshness: freshnessStateSchema,
+  profileFreshness: freshnessStateSchema,
   trust: publicBusinessTrustSchema,
   locations: z.array(publicBusinessLocationSchema),
   services: z.array(publicBusinessServiceSchema),

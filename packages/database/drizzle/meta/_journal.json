@@ -71,6 +71,13 @@
       "when": 1786576004925,
       "tag": "0009_solid_hannibal_king",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1786577190967,
+      "tag": "0010_unique_toxin",
+      "breakpoints": true
     }
   ]
 }

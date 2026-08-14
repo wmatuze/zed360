@@ -14,7 +14,9 @@ export class BusinessDashboardService {
     const rows = (await this.database.client`
       with member_businesses as (
         select business.id, business.name, business.slug, business.status,
-               business.review_status, membership.role
+               business.review_status, membership.role,
+               business.availability_status, business.availability_note,
+               business.availability_updated_at, business.last_confirmed_at
         from business_members membership
         inner join businesses business on business.id = membership.business_id
         where membership.user_id = ${user.id}
@@ -133,6 +135,22 @@ export class BusinessDashboardService {
             'status', stats.status,
             'reviewStatus', stats.review_status,
             'role', stats.role,
+            'presence', jsonb_build_object(
+              'availability', stats.availability_status,
+              'availabilityNote', stats.availability_note,
+              'availabilityUpdatedAt', case when stats.availability_updated_at is null then null
+                else to_char(stats.availability_updated_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') end,
+              'availabilityFreshness', case
+                when stats.availability_updated_at is null then 'unconfirmed'
+                when stats.availability_updated_at >= now() - interval '7 days' then 'current'
+                else 'stale' end,
+              'profileLastConfirmedAt', case when stats.last_confirmed_at is null then null
+                else to_char(stats.last_confirmed_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') end,
+              'profileFreshness', case
+                when stats.last_confirmed_at is null then 'unconfirmed'
+                when stats.last_confirmed_at >= now() - interval '90 days' then 'current'
+                else 'stale' end
+            ),
             'metrics', jsonb_build_object(
               'openMatches', stats.open_matches,
               'responsesSent', stats.responses_sent,

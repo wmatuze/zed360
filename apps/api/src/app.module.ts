@@ -33,6 +33,8 @@ import { BusinessDashboardController } from './business-dashboard.controller';
 import { BusinessDashboardService } from './business-dashboard.service';
 import { BusinessProfileManagementController } from './business-profile-management.controller';
 import { BusinessProfileManagementService } from './business-profile-management.service';
+import { BusinessPresenceController } from './business-presence.controller';
+import { BusinessPresenceService } from './business-presence.service';
 
 @Module({
   imports: [],
@@ -42,6 +44,7 @@ import { BusinessProfileManagementService } from './business-profile-management.
     BusinessAccountsController,
     BusinessDashboardController,
     BusinessProfileManagementController,
+    BusinessPresenceController,
     BusinessNotificationsController,
     BusinessReviewsController,
     BusinessRequestsController,
@@ -60,6 +63,7 @@ import { BusinessProfileManagementService } from './business-profile-management.
     BusinessApplicationsService,
     BusinessDashboardService,
     BusinessProfileManagementService,
+    BusinessPresenceService,
     BusinessNotificationsService,
     BusinessCatalogService,
     MediaReviewsService,

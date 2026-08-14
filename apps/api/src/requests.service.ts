@@ -115,6 +115,7 @@ export class RequestsService {
             ),
             eq(businessServices.isAvailable, true),
             or(eq(businesses.status, 'draft'), eq(businesses.status, 'active')),
+            sql`${businesses.availabilityStatus} <> 'temporarily_unavailable'`,
             sql`(
               exists (
                 select 1 from business_locations match_location
