@@ -81,7 +81,7 @@ export default async function MediaReviewsPage({
         <div className="mt-5 flex flex-wrap items-end justify-between gap-5">
           <div>
             <h1 className="text-4xl font-semibold tracking-[-0.055em] sm:text-5xl">
-              Media review queue.
+              Identity media review.
             </h1>
             <p className="mt-4 max-w-2xl leading-7 text-white/48">
               Check that each image is relevant, safe, and accurately described
@@ -112,7 +112,7 @@ export default async function MediaReviewsPage({
         ) : null}
         {queue?.media.length === 0 ? (
           <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.035] p-6 text-white/55">
-            There are no images awaiting review.
+            There are no logo or cover images awaiting review.
           </div>
         ) : null}
 

@@ -302,6 +302,13 @@ export const businessProfileRevisions = pgTable(
         website: string | null;
       }>()
       .notNull(),
+    previous: jsonb("previous").$type<{
+      description: string | null;
+      phone: string | null;
+      whatsapp: string | null;
+      email: string | null;
+      website: string | null;
+    }>(),
     reviewNote: text("review_note"),
     reviewedByUserId: uuid("reviewed_by_user_id").references(() => users.id),
     reviewedAt: timestamp("reviewed_at", { withTimezone: true }),

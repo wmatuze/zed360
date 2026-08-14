@@ -338,13 +338,24 @@ export const businessPresenceSchema = z.object({
 });
 export type BusinessPresence = z.infer<typeof businessPresenceSchema>;
 
-export const saveBusinessProfileSchema = z.object({
-  description: z.string().trim().max(2000).optional().or(z.literal("")),
-  phone: z.string().trim().max(30).optional().or(z.literal("")),
-  whatsapp: z.string().trim().max(30).optional().or(z.literal("")),
-  email: z.string().trim().email().max(254).optional().or(z.literal("")),
-  website: z.string().trim().url().max(500).optional().or(z.literal("")),
-});
+export const saveBusinessProfileSchema = z
+  .object({
+    description: z.string().trim().max(2000).optional().or(z.literal("")),
+    phone: z.string().trim().max(30).optional().or(z.literal("")),
+    whatsapp: z.string().trim().max(30).optional().or(z.literal("")),
+    email: z.string().trim().email().max(254).optional().or(z.literal("")),
+    website: z.string().trim().url().max(500).optional().or(z.literal("")),
+  })
+  .refine(
+    ({ website }) =>
+      !website ||
+      (URL.canParse(website) &&
+        ["http:", "https:"].includes(new URL(website).protocol)),
+    {
+      path: ["website"],
+      message: "Website links must use http or https.",
+    },
+  );
 export type SaveBusinessProfile = z.infer<typeof saveBusinessProfileSchema>;
 
 const businessProfileFieldsSchema = z.object({

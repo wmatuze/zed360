@@ -115,3 +115,15 @@ export async function registerBusinessMedia(
   );
   return parseResponse(response, businessCatalogSchema);
 }
+
+export async function deleteBusinessMedia(
+  accessToken: string,
+  businessId: string,
+  mediaId: string,
+): Promise<BusinessCatalog> {
+  const response = await fetch(
+    endpoint(businessId, `/media/${mediaId}`),
+    authorized(accessToken, { method: "DELETE" }),
+  );
+  return parseResponse(response, businessCatalogSchema);
+}

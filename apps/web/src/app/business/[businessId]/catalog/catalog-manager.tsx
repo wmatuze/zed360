@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import {
   completeMediaUpload,
   prepareMediaUpload,
+  removeMedia,
   saveProduct,
   type CatalogActionState,
 } from "./actions";
@@ -300,9 +301,23 @@ function MediaUploadForm({
         />
       </label>
       <p className="text-xs leading-5 text-white/35">
-        JPG, PNG, or WebP only; maximum 5 MB. Images stay hidden from public
-        profiles until Zed360 reviews them.
+        JPG, PNG, or WebP only; maximum 5 MB. Gallery, work-sample, and product
+        images publish after validation. Logos and covers require Zed360 review.
       </p>
+      {purpose === "logo" ? (
+        <p className="text-xs leading-5 text-white/45">
+          Use an official symbol, wordmark, or business-name mark you are
+          authorized to use. A square image is preferred. Product photos,
+          portraits, advertisements, and imitation verification badges are not
+          logos.
+        </p>
+      ) : null}
+      {purpose === "cover" ? (
+        <p className="text-xs leading-5 text-white/45">
+          Use a wide image that genuinely represents the business, its premises,
+          work, or products. Avoid contact-number posters and misleading badges.
+        </p>
+      ) : null}
       {message ? (
         <p
           className={`text-sm ${isError ? "text-red-200/80" : "text-[var(--lime)]"}`}
@@ -315,13 +330,39 @@ function MediaUploadForm({
         className="button button-primary w-fit"
         disabled={uploading || (purpose === "product" && !products.length)}
       >
-        {uploading ? "Uploading..." : "Upload for review"}
+        {uploading
+          ? "Uploading..."
+          : purpose === "logo" || purpose === "cover"
+            ? "Upload for review"
+            : "Upload and publish"}
       </button>
     </form>
   );
 }
 
-function MediaCard({ media }: { media: BusinessCatalog["media"][number] }) {
+function MediaCard({
+  businessId,
+  media,
+}: {
+  businessId: string;
+  media: BusinessCatalog["media"][number];
+}) {
+  const router = useRouter();
+  const [removing, setRemoving] = useState(false);
+  const [removeMessage, setRemoveMessage] = useState("");
+
+  async function remove() {
+    if (
+      !window.confirm("Remove this image from Zed360? This cannot be undone.")
+    )
+      return;
+    setRemoving(true);
+    setRemoveMessage("");
+    const result = await removeMedia(businessId, media.id);
+    setRemoving(false);
+    if (result.status === "success") router.refresh();
+    else setRemoveMessage(result.message);
+  }
   return (
     <article className="overflow-hidden rounded-2xl border border-white/10 bg-black/15">
       <div className="relative aspect-[4/3] bg-white/5">
@@ -353,7 +394,20 @@ function MediaCard({ media }: { media: BusinessCatalog["media"][number] }) {
         </div>
         {media.moderationNote ? (
           <p className="mt-2 text-xs leading-5 text-white/42">
-            Review note: {media.moderationNote}
+            Status note: {media.moderationNote}
+          </p>
+        ) : null}
+        <button
+          className="mt-4 text-xs font-semibold text-red-200/70 hover:text-red-100 disabled:opacity-40"
+          disabled={removing}
+          onClick={remove}
+          type="button"
+        >
+          {removing ? "Removing..." : "Remove image"}
+        </button>
+        {removeMessage ? (
+          <p className="mt-2 text-xs text-red-200/75" role="status">
+            {removeMessage}
           </p>
         ) : null}
       </div>
@@ -418,7 +472,11 @@ export function CatalogManager({ catalog }: { catalog: BusinessCatalog }) {
           <h2 className="text-2xl font-semibold">Your images</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {allMedia.map((media) => (
-              <MediaCard key={media.id} media={media} />
+              <MediaCard
+                businessId={catalog.business.id}
+                key={media.id}
+                media={media}
+              />
             ))}
           </div>
         </section>

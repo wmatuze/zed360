@@ -80,10 +80,10 @@ export default async function CustomerReviewModerationPage({
         <div className="mt-5 flex flex-wrap items-end justify-between gap-5">
           <div>
             <h1 className="text-4xl font-semibold tracking-[-0.055em] sm:text-5xl">
-              Customer review queue.
+              Flagged customer reviews.
             </h1>
             <p className="mt-4 max-w-2xl leading-7 text-white/48">
-              Moderate reviews from customers with confirmed Zed360
+              Review exceptions from customers with confirmed Zed360
               interactions. Approval confirms policy compliance, not the truth
               of every claim.
             </p>

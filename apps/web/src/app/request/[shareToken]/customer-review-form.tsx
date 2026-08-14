@@ -58,10 +58,16 @@ export function CustomerReviewForm({
       }
       const savedReview = customerReviewSchema.safeParse(result);
       if (!savedReview.success) {
-        throw new Error("The review was saved, but its status could not be displayed.");
+        throw new Error(
+          "The review was saved, but its status could not be displayed.",
+        );
       }
       setCurrentReview(savedReview.data);
-      setMessage("Review submitted for moderation.");
+      setMessage(
+        savedReview.data.moderationStatus === "approved"
+          ? "Review published."
+          : "Review saved and sent for a safety check.",
+      );
       router.refresh();
     } catch (submissionError) {
       setError(
@@ -81,9 +87,7 @@ export function CustomerReviewForm({
           <p className="text-xs font-semibold uppercase tracking-[0.13em] text-[var(--lime)]">
             Verified interaction
           </p>
-          <h2 className="mt-2 text-xl font-semibold">
-            Review {businessName}
-          </h2>
+          <h2 className="mt-2 text-xl font-semibold">Review {businessName}</h2>
         </div>
         {currentReview ? (
           <span className="rounded-full border border-white/12 px-3 py-1 text-xs text-white/60">
@@ -93,7 +97,8 @@ export function CustomerReviewForm({
       </div>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-white/48">
         Your rating is linked to a business you selected through Zed360. A
-        comment is optional. Reviews are checked before appearing publicly.
+        comment is optional. Eligible reviews publish immediately unless a
+        safety check needs human attention.
       </p>
 
       {currentReview?.moderationStatus === "rejected" &&
@@ -141,7 +146,8 @@ export function CustomerReviewForm({
         </button>
         {currentReview?.moderationStatus === "approved" ? (
           <p className="mt-3 text-xs leading-5 text-white/38">
-            Updating a published review sends it through moderation again.
+            Updates normally publish immediately. Content containing contact
+            details, external links, or spam patterns may need a safety check.
           </p>
         ) : null}
         {message ? (

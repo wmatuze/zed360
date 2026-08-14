@@ -13,6 +13,7 @@ import { getVerifiedBusinessSession } from "@/lib/business-account";
 import {
   BusinessCatalogApiError,
   registerBusinessMedia,
+  deleteBusinessMedia,
   requestBusinessMediaUpload,
   saveBusinessProduct,
 } from "@/lib/business-catalog";
@@ -148,8 +149,27 @@ export async function completeMediaUpload(
   revalidateCatalog(businessId);
   return {
     status: "success",
-    message: "Image uploaded and sent for Zed360 review.",
+    message:
+      parsed.data.purpose === "logo" || parsed.data.purpose === "cover"
+        ? "Identity image uploaded for Zed360 review."
+        : "Image uploaded and published.",
   };
+}
+
+export async function removeMedia(
+  businessId: string,
+  mediaId: string,
+): Promise<CatalogActionState> {
+  const session = await getVerifiedBusinessSession();
+  if (!session)
+    return { status: "error", message: "Sign in again to remove this image." };
+  try {
+    await deleteBusinessMedia(session.accessToken, businessId, mediaId);
+  } catch (error) {
+    return catalogError(error, "The image could not be removed.");
+  }
+  revalidateCatalog(businessId);
+  return { status: "success", message: "Image removed." };
 }
 
 function catalogError(error: unknown, fallback: string): CatalogActionState {
