@@ -15,6 +15,7 @@ describe('BusinessCatalogController', () => {
   const updateProduct = jest.fn();
   const createUploadIntent = jest.fn();
   const completeUpload = jest.fn();
+  const removeMedia = jest.fn();
   const controller = new BusinessCatalogController(
     { verify } as unknown as AuthenticatedUserService,
     {
@@ -23,6 +24,7 @@ describe('BusinessCatalogController', () => {
       updateProduct,
       createUploadIntent,
       completeUpload,
+      removeMedia,
     } as unknown as BusinessCatalogService,
   );
   const businessId = 'ef7e5e78-5c1d-49b8-87aa-296145c2fc05';
@@ -70,5 +72,16 @@ describe('BusinessCatalogController', () => {
         altText: 'Brown safety boot',
       }),
     ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('authenticates an owner before removing business media', async () => {
+    const mediaId = 'e0ca3364-73a6-4268-8e30-6e358d4a6d2a';
+    await controller.removeMedia('Bearer token', businessId, mediaId);
+    expect(removeMedia).toHaveBeenCalledWith(
+      user,
+      businessId,
+      mediaId,
+      'Bearer token',
+    );
   });
 });

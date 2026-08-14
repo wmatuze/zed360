@@ -38,6 +38,8 @@ specific check performed.
 - Gallery, work-sample, and product images after file-safety validation.
 - Business description, public phone, WhatsApp, email, and website.
 - Confirmation that existing profile information is still current.
+- Removal of media owned by the business; adding a replacement logo or cover
+  still requires identity review.
 - A review from a confirmed Zed360 interaction when it passes normal validation
   and has not been flagged.
 

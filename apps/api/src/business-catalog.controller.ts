@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Headers,
   Param,
@@ -84,6 +85,18 @@ export class BusinessCatalogController {
     const media = this.parse(completeBusinessMediaUploadSchema, body);
     const user = await this.authentication.verify(authorization);
     return this.catalog.completeUpload(user, businessId, media);
+  }
+
+  @Delete('media/:mediaId')
+  async removeMedia(
+    @Headers('authorization') authorization: string | undefined,
+    @Param('businessId') businessId: string,
+    @Param('mediaId') mediaId: string,
+  ) {
+    this.requireUuid(businessId);
+    this.requireUuid(mediaId);
+    const user = await this.authentication.verify(authorization);
+    return this.catalog.removeMedia(user, businessId, mediaId, authorization);
   }
 
   private requireUuid(value: string) {

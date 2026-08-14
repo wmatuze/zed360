@@ -21,7 +21,11 @@ import {
 import { randomUUID } from 'node:crypto';
 import type { AuthenticatedUser } from './authenticated-user.service';
 import { DatabaseService } from './database.service';
-import { businessMediaBucket, publicMediaUrl } from './media-storage';
+import {
+  businessMediaBucket,
+  publicMediaUrl,
+  removeBusinessMediaObject,
+} from './media-storage';
 
 const extensions = {
   'image/jpeg': 'jpg',
@@ -184,6 +188,45 @@ export class BusinessCatalogService {
         ? null
         : 'Published automatically after file validation.',
     });
+    return this.getCatalog(user, businessId);
+  }
+
+  async removeMedia(
+    user: AuthenticatedUser,
+    businessId: string,
+    mediaId: string,
+    authorization: string | undefined,
+  ) {
+    await this.requireManager(user, businessId);
+    const [asset] = await this.database.db
+      .select({
+        id: businessMediaAssets.id,
+        storageBucket: businessMediaAssets.storageBucket,
+        storagePath: businessMediaAssets.storagePath,
+      })
+      .from(businessMediaAssets)
+      .where(
+        and(
+          eq(businessMediaAssets.id, mediaId),
+          eq(businessMediaAssets.businessId, businessId),
+        ),
+      )
+      .limit(1);
+    if (!asset) throw new NotFoundException('Image not found.');
+
+    await removeBusinessMediaObject(
+      authorization,
+      asset.storageBucket,
+      asset.storagePath,
+    );
+    await this.database.db
+      .delete(businessMediaAssets)
+      .where(
+        and(
+          eq(businessMediaAssets.id, mediaId),
+          eq(businessMediaAssets.businessId, businessId),
+        ),
+      );
     return this.getCatalog(user, businessId);
   }
 

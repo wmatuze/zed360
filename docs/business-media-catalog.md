@@ -84,3 +84,26 @@ Supabase currently limits that feature by plan and charges separately beyond
 quota. The first release serves owner-compressed originals and can introduce
 responsive transformations after usage is measured. See
 [Supabase image transformations](https://supabase.com/docs/guides/storage/serving/image-transformations).
+
+## Logo and cover standards
+
+A logo may be an official symbol, wordmark, or business-name mark the business
+is authorized to use. Square artwork is preferred for profile cards, but a
+legitimate horizontal wordmark is acceptable. A product photograph, portrait,
+premises photograph, advertisement, contact-number poster, or imitation PACRA,
+Zed360, or verification badge does not qualify as a logo.
+
+A cover should be a wide image that genuinely represents the business, its
+premises, work, or products. Approval checks relevance and identity safety; it
+does not certify ownership of every intellectual-property element or endorse
+the business.
+
+## Owner removal
+
+An owner or manager can permanently remove any pending, approved, or rejected
+image from the storefront manager. The API verifies membership, deletes the
+object through the signed-in user's Storage permission, and removes its database
+metadata. Removal is immediate and does not require moderation. If an active
+logo or cover is removed, the public profile returns to its default appearance
+until a replacement is approved. Removing a product image does not remove the
+product itself.
