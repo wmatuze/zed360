@@ -78,6 +78,13 @@
       "when": 1786577190967,
       "tag": "0010_unique_toxin",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1786701460160,
+      "tag": "0011_outstanding_giant_man",
+      "breakpoints": true
     }
   ]
 }

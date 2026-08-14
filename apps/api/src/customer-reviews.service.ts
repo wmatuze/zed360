@@ -21,6 +21,25 @@ import type { AuthenticatedUser } from './authenticated-user.service';
 import { DatabaseService } from './database.service';
 import { PlatformAuthorizationService } from './platform-authorization.service';
 
+export function reviewModeration(body: string | undefined): {
+  status: 'approved' | 'pending';
+  note: string | null;
+} {
+  if (!body) return { status: 'approved', note: null };
+  const flags = [
+    /https?:\/\/|www\./i.test(body) ? 'external link' : null,
+    /\b[^\s@]+@[^\s@]+\.[^\s@]+\b/i.test(body) ? 'email address' : null,
+    /(?:\+?\d[\s().-]?){9,}/.test(body) ? 'phone number' : null,
+    /(.)\1{7,}/i.test(body) ? 'repeated characters' : null,
+  ].filter((flag): flag is string => Boolean(flag));
+  return flags.length
+    ? {
+        status: 'pending',
+        note: `Automatically flagged for review: ${flags.join(', ')}.`,
+      }
+    : { status: 'approved', note: null };
+}
+
 @Injectable()
 export class CustomerReviewsService {
   constructor(
@@ -58,6 +77,7 @@ export class CustomerReviewsService {
     }
 
     const now = new Date();
+    const moderation = reviewModeration(review.body);
     const [saved] = await this.database.db
       .insert(reviews)
       .values({
@@ -65,19 +85,21 @@ export class CustomerReviewsService {
         businessId: eligibleInteraction.businessId,
         rating: review.rating,
         body: review.body || null,
-        moderationStatus: 'pending',
-        isPublished: false,
+        moderationStatus: moderation.status,
+        moderationNote: moderation.note,
+        reviewedAt: null,
+        isPublished: moderation.status === 'approved',
       })
       .onConflictDoUpdate({
         target: reviews.interactionId,
         set: {
           rating: review.rating,
           body: review.body || null,
-          moderationStatus: 'pending',
-          moderationNote: null,
+          moderationStatus: moderation.status,
+          moderationNote: moderation.note,
           reviewedByUserId: null,
           reviewedAt: null,
-          isPublished: false,
+          isPublished: moderation.status === 'approved',
           updatedAt: now,
         },
       })

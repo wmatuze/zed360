@@ -300,8 +300,8 @@ function MediaUploadForm({
         />
       </label>
       <p className="text-xs leading-5 text-white/35">
-        JPG, PNG, or WebP only; maximum 5 MB. Images stay hidden from public
-        profiles until Zed360 reviews them.
+        JPG, PNG, or WebP only; maximum 5 MB. Gallery, work-sample, and product
+        images publish after validation. Logos and covers require Zed360 review.
       </p>
       {message ? (
         <p
@@ -315,7 +315,11 @@ function MediaUploadForm({
         className="button button-primary w-fit"
         disabled={uploading || (purpose === "product" && !products.length)}
       >
-        {uploading ? "Uploading..." : "Upload for review"}
+        {uploading
+          ? "Uploading..."
+          : purpose === "logo" || purpose === "cover"
+            ? "Upload for review"
+            : "Upload and publish"}
       </button>
     </form>
   );
@@ -353,7 +357,7 @@ function MediaCard({ media }: { media: BusinessCatalog["media"][number] }) {
         </div>
         {media.moderationNote ? (
           <p className="mt-2 text-xs leading-5 text-white/42">
-            Review note: {media.moderationNote}
+            Status note: {media.moderationNote}
           </p>
         ) : null}
       </div>

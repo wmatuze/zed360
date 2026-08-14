@@ -1,0 +1,1 @@
+ALTER TABLE "business_profile_revisions" ADD COLUMN "previous" jsonb;

@@ -14,8 +14,10 @@ place orders, hold stock, or guarantee owner-supplied prices and availability.
 - `business_media_assets` stores curated metadata and an object-storage path.
   Image bytes never pass through PostgreSQL.
 - Product records can be archived instead of deleted.
-- Images begin as `pending` and are excluded from public APIs until a Zed360
-  reviewer approves them.
+- Logo and cover images begin as `pending` and are excluded from public APIs
+  until a Zed360 reviewer approves them.
+- Gallery, work-sample, and product images publish immediately after the
+  existing file type, size, path, ownership, and metadata validation succeeds.
 - Approving a new logo or cover image replaces the previous approved image of
   the same type. Gallery, work-sample, and product images can have multiple
   approved entries.
@@ -62,8 +64,10 @@ browser.
    under that business's folder.
 3. The signed upload URL is created using the owner's Supabase session.
 4. The browser uploads directly to Storage.
-5. The API records metadata as `pending`.
-6. A reviewer approves or rejects it at `/admin/media-reviews`.
+5. The API records identity images as `pending` and other valid images as
+   `approved` with an automatic-publication audit note.
+6. A reviewer approves or rejects pending logos and covers at
+   `/admin/media-reviews`.
 7. Only approved media is returned by public business APIs.
 
 Signed upload URLs are short-lived and require `INSERT` permission when they are

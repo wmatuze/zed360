@@ -79,18 +79,14 @@ registration, decide ownership, suspend a business, reject an appeal, or make
 another consequential trust decision. Those outcomes require authoritative
 evidence and a human decision.
 
-## Transition from the current build
+## Implementation status
 
-The current early build is intentionally more conservative than this target:
-
-- profile description and contact edits currently await admin approval;
-- all public media currently awaits admin approval; and
-- all customer reviews currently await admin approval.
-
-The next moderation-efficiency work should replace those blanket queues with
-the rules above. Existing review history must be preserved during the change.
-Until that work is implemented and tested, the current conservative workflows
-remain active.
+Routine profile edits now publish with before-and-after audit history. Gallery,
+work-sample, and product images publish after file and ownership validation;
+logos and covers remain human-reviewed. Eligible interaction-linked reviews
+publish immediately unless deterministic checks flag contact details, external
+links, or repeated-character spam for a human decision. Existing moderation
+records and legacy pending items remain preserved.
 
 ## Operating principle
 

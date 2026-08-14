@@ -72,7 +72,7 @@ export class BusinessProfileManagementService {
     businessId: string,
     profile: SaveBusinessProfile,
   ) {
-    await this.requireManager(user, businessId);
+    const business = await this.requireManager(user, businessId);
     const proposed = {
       description: nullable(profile.description),
       phone: nullable(profile.phone),
@@ -80,26 +80,43 @@ export class BusinessProfileManagementService {
       email: nullable(profile.email),
       website: nullable(profile.website),
     };
-    const [existing] = await this.database.db
-      .select({ id: businessProfileRevisions.id })
-      .from(businessProfileRevisions)
-      .where(
-        and(
-          eq(businessProfileRevisions.businessId, businessId),
-          eq(businessProfileRevisions.status, 'pending'),
-        ),
-      )
-      .limit(1);
-    if (existing) {
-      await this.database.db
+    const previous = {
+      description: business.description,
+      phone: business.phone,
+      whatsapp: business.whatsapp,
+      email: business.email,
+      website: business.website,
+    };
+    const now = new Date();
+    await this.database.db.transaction(async (transaction) => {
+      await transaction
         .update(businessProfileRevisions)
-        .set({ proposed, submittedByUserId: user.id, updatedAt: new Date() })
-        .where(eq(businessProfileRevisions.id, existing.id));
-    } else {
-      await this.database.db
-        .insert(businessProfileRevisions)
-        .values({ businessId, submittedByUserId: user.id, proposed });
-    }
+        .set({
+          status: 'rejected',
+          reviewNote: 'Superseded by a newer self-service profile update.',
+          reviewedAt: now,
+          updatedAt: now,
+        })
+        .where(
+          and(
+            eq(businessProfileRevisions.businessId, businessId),
+            eq(businessProfileRevisions.status, 'pending'),
+          ),
+        );
+      await transaction.insert(businessProfileRevisions).values({
+        businessId,
+        submittedByUserId: user.id,
+        previous,
+        proposed,
+        status: 'approved',
+        reviewNote: 'Published automatically from an owner or manager update.',
+        reviewedAt: now,
+      });
+      await transaction
+        .update(businesses)
+        .set({ ...proposed, lastConfirmedAt: now, updatedAt: now })
+        .where(eq(businesses.id, businessId));
+    });
     return this.get(user, businessId);
   }
 

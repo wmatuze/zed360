@@ -148,7 +148,10 @@ export async function completeMediaUpload(
   revalidateCatalog(businessId);
   return {
     status: "success",
-    message: "Image uploaded and sent for Zed360 review.",
+    message:
+      parsed.data.purpose === "logo" || parsed.data.purpose === "cover"
+        ? "Identity image uploaded for Zed360 review."
+        : "Image uploaded and published.",
   };
 }
 

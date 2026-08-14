@@ -29,6 +29,12 @@ const extensions = {
   'image/webp': 'webp',
 } as const;
 
+export function requiresMediaReview(
+  purpose: CompleteBusinessMediaUpload['purpose'],
+) {
+  return purpose === 'logo' || purpose === 'cover';
+}
+
 function optionalNumber(value: string | null) {
   return value === null ? null : Number(value);
 }
@@ -159,6 +165,7 @@ export class BusinessCatalogService {
       throw new ForbiddenException('The uploaded image path is invalid.');
     }
 
+    const needsReview = requiresMediaReview(media.purpose);
     await this.database.db.insert(businessMediaAssets).values({
       businessId,
       productId: media.productId,
@@ -172,7 +179,10 @@ export class BusinessCatalogService {
       title: media.title || undefined,
       altText: media.altText,
       caption: media.caption || undefined,
-      moderationStatus: 'pending',
+      moderationStatus: needsReview ? 'pending' : 'approved',
+      moderationNote: needsReview
+        ? null
+        : 'Published automatically after file validation.',
     });
     return this.getCatalog(user, businessId);
   }
