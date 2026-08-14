@@ -35,6 +35,8 @@ import { BusinessProfileManagementController } from './business-profile-manageme
 import { BusinessProfileManagementService } from './business-profile-management.service';
 import { BusinessPresenceController } from './business-presence.controller';
 import { BusinessPresenceService } from './business-presence.service';
+import { ContentReportsController } from './content-reports.controller';
+import { ContentReportsService } from './content-reports.service';
 
 @Module({
   imports: [],
@@ -50,6 +52,7 @@ import { BusinessPresenceService } from './business-presence.service';
     BusinessRequestsController,
     BusinessServiceCoverageController,
     CustomerReviewsController,
+    ContentReportsController,
     BusinessApplicationsController,
     BusinessCatalogController,
     MediaReviewsController,
@@ -72,6 +75,7 @@ import { BusinessPresenceService } from './business-presence.service';
     BusinessRequestsService,
     BusinessServiceCoverageService,
     CustomerReviewsService,
+    ContentReportsService,
     DatabaseService,
     ReferenceDataService,
     RequestsService,

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
+import { ReportContent } from "@/components/report-content";
 import { notFound } from "next/navigation";
 import {
   fetchPublicBusinessProfile,
@@ -473,6 +474,11 @@ export default async function BusinessProfilePage({
                           Rating only
                         </p>
                       )}
+                      <ReportContent
+                        compact
+                        targetId={review.id}
+                        targetType="review"
+                      />
                     </article>
                   ))}
                 </div>
@@ -534,6 +540,9 @@ export default async function BusinessProfilePage({
                   Public contact details have not been added yet.
                 </p>
               ) : null}
+              <div className="mt-5 border-t border-white/8 pt-4">
+                <ReportContent targetId={business.id} targetType="business" />
+              </div>
             </div>
 
             {business.locations.length ? (

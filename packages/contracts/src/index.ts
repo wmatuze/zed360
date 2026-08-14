@@ -338,6 +338,59 @@ export const businessPresenceSchema = z.object({
 });
 export type BusinessPresence = z.infer<typeof businessPresenceSchema>;
 
+export const contentReportTargetTypeSchema = z.enum(["business", "review"]);
+export const contentReportReasonSchema = z.enum([
+  "misleading",
+  "scam_or_fraud",
+  "impersonation",
+  "prohibited_content",
+  "harassment",
+  "privacy",
+  "spam",
+  "other",
+]);
+
+export const submitContentReportSchema = z.object({
+  targetType: contentReportTargetTypeSchema,
+  targetId: z.string().uuid(),
+  reason: contentReportReasonSchema,
+  details: z.string().trim().min(20).max(1200),
+  reporterEmail: z
+    .string()
+    .trim()
+    .email()
+    .max(254)
+    .optional()
+    .or(z.literal("")),
+  website: z.literal("").optional(),
+});
+export type SubmitContentReport = z.infer<typeof submitContentReportSchema>;
+
+export const contentReportDecisionSchema = z.object({
+  decision: z.enum(["dismissed", "content_removed", "business_suspended"]),
+  note: z.string().trim().min(10).max(1200),
+});
+export type ContentReportDecision = z.infer<typeof contentReportDecisionSchema>;
+
+export const adminContentReportQueueSchema = z.object({
+  viewerRole: z.enum(["admin", "reviewer"]),
+  reports: z.array(
+    z.object({
+      id: z.string().uuid(),
+      targetType: contentReportTargetTypeSchema,
+      targetId: z.string().uuid(),
+      targetLabel: z.string(),
+      reason: contentReportReasonSchema,
+      details: z.string(),
+      reporterEmail: z.string().nullable(),
+      createdAt: z.string().datetime(),
+    }),
+  ),
+});
+export type AdminContentReportQueue = z.infer<
+  typeof adminContentReportQueueSchema
+>;
+
 export const saveBusinessProfileSchema = z
   .object({
     description: z.string().trim().max(2000).optional().or(z.literal("")),
