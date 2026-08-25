@@ -23,6 +23,10 @@ export async function decideReport(reportId: string, formData: FormData) {
       parsed.data,
     );
   } catch (error) {
+    if (error instanceof AdminContentReportApiError && error.status === 401)
+      redirect(
+        "/business/sign-in?next=/admin/content-reports&error=session_expired",
+      );
     if (error instanceof AdminContentReportApiError && error.status === 403)
       redirect("/admin/content-reports?result=forbidden");
     if (error instanceof AdminContentReportApiError && error.status === 409)
