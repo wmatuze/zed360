@@ -137,6 +137,25 @@ export const businessAvailabilityStatus = pgEnum(
   "business_availability_status",
   ["available", "busy", "temporarily_unavailable"],
 );
+export const contentReportTargetType = pgEnum("content_report_target_type", [
+  "business",
+  "review",
+]);
+export const contentReportReason = pgEnum("content_report_reason", [
+  "misleading",
+  "scam_or_fraud",
+  "impersonation",
+  "prohibited_content",
+  "harassment",
+  "privacy",
+  "spam",
+  "other",
+]);
+export const contentReportStatus = pgEnum("content_report_status", [
+  "open",
+  "dismissed",
+  "actioned",
+]);
 
 export const users = pgTable(
   "users",
@@ -378,6 +397,30 @@ export const businessNotifications = pgTable(
       table.readAt,
       table.createdAt,
     ),
+  ],
+);
+
+export const contentReports = pgTable(
+  "content_reports",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    targetType: contentReportTargetType("target_type").notNull(),
+    targetId: uuid("target_id").notNull(),
+    reason: contentReportReason("reason").notNull(),
+    details: text("details").notNull(),
+    reporterEmail: text("reporter_email"),
+    status: contentReportStatus("status").default("open").notNull(),
+    decisionNote: text("decision_note"),
+    reviewedByUserId: uuid("reviewed_by_user_id").references(() => users.id),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    index("content_reports_status_created_idx").on(
+      table.status,
+      table.createdAt,
+    ),
+    index("content_reports_target_idx").on(table.targetType, table.targetId),
   ],
 );
 
