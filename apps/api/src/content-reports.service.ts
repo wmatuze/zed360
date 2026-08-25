@@ -84,13 +84,16 @@ export class ContentReportsService {
       reason: SubmitContentReport['reason'];
       details: string;
       reporterEmail: string | null;
-      createdAt: Date;
+      createdAt: Date | string;
     }>;
     return {
       viewerRole,
       reports: rows.map((report) => ({
         ...report,
-        createdAt: report.createdAt.toISOString(),
+        createdAt:
+          report.createdAt instanceof Date
+            ? report.createdAt.toISOString()
+            : new Date(report.createdAt).toISOString(),
       })),
     };
   }
