@@ -136,7 +136,7 @@ export class BusinessNotificationsService {
       .update(businessNotifications)
       .set({
         archivedAt: now,
-        readAt: sql`coalesce(${businessNotifications.readAt}, ${now})`,
+        readAt: sql`coalesce(${businessNotifications.readAt}, now())`,
       })
       .where(
         and(
