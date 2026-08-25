@@ -377,10 +377,11 @@ export const adminContentReportQueueSchema = z.object({
   reports: z.array(
     z.object({
       id: z.string().uuid(),
-      targetType: contentReportTargetTypeSchema,
-      targetId: z.string().uuid(),
-      targetLabel: z.string(),
-      reason: contentReportReasonSchema,
+        targetType: contentReportTargetTypeSchema,
+        targetId: z.string().uuid(),
+        targetLabel: z.string(),
+        targetSlug: z.string().nullable(),
+        reason: contentReportReasonSchema,
       details: z.string(),
       reporterEmail: z.string().nullable(),
       createdAt: z.string().datetime(),

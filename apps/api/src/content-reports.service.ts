@@ -67,7 +67,11 @@ export class ContentReportsService {
              case report.target_type
                when 'business' then coalesce(target_business.name, 'Unavailable business')
                when 'review' then coalesce(review_business.name || ' customer review', 'Unavailable review')
-             end as "targetLabel"
+             end as "targetLabel",
+             case report.target_type
+               when 'business' then target_business.slug
+               when 'review' then review_business.slug
+             end as "targetSlug"
       from content_reports report
       left join businesses target_business
         on report.target_type = 'business' and target_business.id = report.target_id
@@ -81,6 +85,7 @@ export class ContentReportsService {
       targetType: 'business' | 'review';
       targetId: string;
       targetLabel: string;
+      targetSlug: string | null;
       reason: SubmitContentReport['reason'];
       details: string;
       reporterEmail: string | null;

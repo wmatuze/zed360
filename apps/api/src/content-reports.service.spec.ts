@@ -9,6 +9,7 @@ describe('ContentReportsService', () => {
           targetType: 'business',
           targetId: '0cbb7a2e-50f4-453d-a3e8-d581ca8dc23f',
           targetLabel: 'Example business',
+          targetSlug: 'example-business',
           reason: 'misleading',
           details: 'The public information appears to be inaccurate.',
           reporterEmail: null,
@@ -35,6 +36,7 @@ describe('ContentReportsService', () => {
       reports: [
         expect.objectContaining({
           createdAt: '2026-08-25T22:45:24.244Z',
+          targetSlug: 'example-business',
         }),
       ],
     });
