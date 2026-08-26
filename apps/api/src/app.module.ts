@@ -39,6 +39,8 @@ import { ContentReportsController } from './content-reports.controller';
 import { ContentReportsService } from './content-reports.service';
 import { BusinessOperatingHoursController } from './business-operating-hours.controller';
 import { BusinessOperatingHoursService } from './business-operating-hours.service';
+import { BusinessLocationsController } from './business-locations.controller';
+import { BusinessLocationsService } from './business-locations.service';
 
 @Module({
   imports: [],
@@ -50,6 +52,7 @@ import { BusinessOperatingHoursService } from './business-operating-hours.servic
     BusinessProfileManagementController,
     BusinessPresenceController,
     BusinessOperatingHoursController,
+    BusinessLocationsController,
     BusinessNotificationsController,
     BusinessReviewsController,
     BusinessRequestsController,
@@ -71,6 +74,7 @@ import { BusinessOperatingHoursService } from './business-operating-hours.servic
     BusinessProfileManagementService,
     BusinessPresenceService,
     BusinessOperatingHoursService,
+    BusinessLocationsService,
     BusinessNotificationsService,
     BusinessCatalogService,
     MediaReviewsService,

@@ -589,6 +589,11 @@ export default async function BusinessProfilePage({
                           .filter(Boolean)
                           .join(" · ")}
                       </p>
+                      {location.address ? (
+                        <p className="mt-1 text-xs leading-5 text-white/48">
+                          {location.address}
+                        </p>
+                      ) : null}
                       <p className="mt-2 text-xs text-white/55">
                         Today: {location.operatingHours.todayLabel}
                       </p>

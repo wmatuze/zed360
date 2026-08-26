@@ -124,6 +124,7 @@ export class PublicBusinessesService {
           ? {
               id: primaryLocationRow.id,
               name: primaryLocationRow.name,
+              address: primaryLocationRow.address,
               isPrimary: primaryLocationRow.isPrimary,
               district: primaryLocationRow.district,
               operatingHours: describeOperatingHours(
@@ -236,6 +237,7 @@ export class PublicBusinessesService {
       locations: related.locations.map((location) => ({
         id: location.id,
         name: location.name,
+        address: location.address,
         isPrimary: location.isPrimary,
         district: location.district,
         operatingHours: describeOperatingHours(
@@ -455,6 +457,7 @@ export class PublicBusinessesService {
           id: businessLocations.id,
           businessId: businessLocations.businessId,
           name: businessLocations.name,
+          address: businessLocations.address,
           isPrimary: businessLocations.isPrimary,
           openingHours: businessLocations.openingHours,
           districtName: districts.name,
@@ -615,6 +618,7 @@ export class PublicBusinessesService {
         id: location.id,
         businessId: location.businessId,
         name: location.name,
+        address: location.address,
         isPrimary: location.isPrimary,
         openingHours: location.openingHours,
         district:
