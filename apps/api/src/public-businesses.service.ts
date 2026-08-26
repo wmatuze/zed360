@@ -28,6 +28,7 @@ import {
 import type { SQL } from 'drizzle-orm';
 import { DatabaseService } from './database.service';
 import { publicMediaUrl } from './media-storage';
+import { describeOperatingHours } from './operating-hours';
 
 const pageSize = 18;
 const DAY = 24 * 60 * 60 * 1000;
@@ -125,6 +126,11 @@ export class PublicBusinessesService {
               name: primaryLocationRow.name,
               isPrimary: primaryLocationRow.isPrimary,
               district: primaryLocationRow.district,
+              operatingHours: describeOperatingHours(
+                primaryLocationRow.openingHours,
+                business.availability === 'temporarily_unavailable' &&
+                  freshness(business.availabilityUpdatedAt, 7) === 'current',
+              ),
             }
           : null;
         const businessMedia = related.media.filter(
@@ -232,6 +238,11 @@ export class PublicBusinessesService {
         name: location.name,
         isPrimary: location.isPrimary,
         district: location.district,
+        operatingHours: describeOperatingHours(
+          location.openingHours,
+          business.availability === 'temporarily_unavailable' &&
+            freshness(business.availabilityUpdatedAt, 7) === 'current',
+        ),
       })),
       services: related.services.map((service) => ({
         id: service.id,
@@ -445,6 +456,7 @@ export class PublicBusinessesService {
           businessId: businessLocations.businessId,
           name: businessLocations.name,
           isPrimary: businessLocations.isPrimary,
+          openingHours: businessLocations.openingHours,
           districtName: districts.name,
           districtSlug: districts.slug,
           provinceName: provinces.name,
@@ -604,6 +616,7 @@ export class PublicBusinessesService {
         businessId: location.businessId,
         name: location.name,
         isPrimary: location.isPrimary,
+        openingHours: location.openingHours,
         district:
           location.districtName &&
           location.districtSlug &&

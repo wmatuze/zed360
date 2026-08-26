@@ -283,6 +283,12 @@ export default async function BusinessDashboardPage() {
                           >
                             Availability
                           </Link>
+                          <Link
+                            className="button button-quiet"
+                            href={`/business/${business.id}/hours`}
+                          >
+                            Operating hours
+                          </Link>
                         </>
                       ) : null}
                     </div>

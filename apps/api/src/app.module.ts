@@ -37,6 +37,8 @@ import { BusinessPresenceController } from './business-presence.controller';
 import { BusinessPresenceService } from './business-presence.service';
 import { ContentReportsController } from './content-reports.controller';
 import { ContentReportsService } from './content-reports.service';
+import { BusinessOperatingHoursController } from './business-operating-hours.controller';
+import { BusinessOperatingHoursService } from './business-operating-hours.service';
 
 @Module({
   imports: [],
@@ -47,6 +49,7 @@ import { ContentReportsService } from './content-reports.service';
     BusinessDashboardController,
     BusinessProfileManagementController,
     BusinessPresenceController,
+    BusinessOperatingHoursController,
     BusinessNotificationsController,
     BusinessReviewsController,
     BusinessRequestsController,
@@ -67,6 +70,7 @@ import { ContentReportsService } from './content-reports.service';
     BusinessDashboardService,
     BusinessProfileManagementService,
     BusinessPresenceService,
+    BusinessOperatingHoursService,
     BusinessNotificationsService,
     BusinessCatalogService,
     MediaReviewsService,
