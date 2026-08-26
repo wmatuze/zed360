@@ -5,8 +5,12 @@ import {
   Get,
   Headers,
   Post,
+  Query,
 } from '@nestjs/common';
-import { claimBusinessSchema } from '@zed360/contracts';
+import {
+  businessApplicationClaimSchema,
+  claimBusinessSchema,
+} from '@zed360/contracts';
 import { AuthenticatedUserService } from './authenticated-user.service';
 import { BusinessAccountsService } from './business-accounts.service';
 
@@ -35,5 +39,31 @@ export class BusinessAccountsController {
 
     const user = await this.authentication.verify(authorization);
     return this.accounts.claimBusiness(user, parsed.data.businessId);
+  }
+
+  @Get('application-claims')
+  async previewApplicationClaim(
+    @Headers('authorization') authorization: string | undefined,
+    @Query() query: unknown,
+  ) {
+    const parsed = businessApplicationClaimSchema.safeParse(query);
+    if (!parsed.success) {
+      throw new BadRequestException('A valid application link is required.');
+    }
+    const user = await this.authentication.verify(authorization);
+    return this.accounts.previewApplicationClaim(user, parsed.data.token);
+  }
+
+  @Post('application-claims')
+  async confirmApplicationClaim(
+    @Headers('authorization') authorization: string | undefined,
+    @Body() body: unknown,
+  ) {
+    const parsed = businessApplicationClaimSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException('A valid application link is required.');
+    }
+    const user = await this.authentication.verify(authorization);
+    return this.accounts.confirmApplicationClaim(user, parsed.data.token);
   }
 }

@@ -22,6 +22,7 @@ type CreatedApplication = {
   status: "draft";
   createdAt: string;
   email: string;
+  claimToken: string;
 };
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/v1";
@@ -142,7 +143,10 @@ export function BusinessApplicationForm() {
         <p className="mt-4 text-sm text-white/42">
           Application reference: {application.id.slice(0, 8).toUpperCase()}
         </p>
-        <ApplicationVerificationStep email={application.email} />
+        <ApplicationVerificationStep
+          claimToken={application.claimToken}
+          email={application.email}
+        />
       </div>
     );
   }

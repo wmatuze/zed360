@@ -25,5 +25,5 @@ export async function saveProfile(businessId: string, formData: FormData) {
     redirect(`/business/${businessId}/profile?result=error`);
   }
   revalidatePath(`/business/${businessId}/profile`);
-  redirect(`/business/${businessId}/profile?result=published`);
+  redirect(`/business/${businessId}/profile?result=saved`);
 }

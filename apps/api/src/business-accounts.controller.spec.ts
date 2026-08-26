@@ -12,9 +12,16 @@ describe('BusinessAccountsController', () => {
   const verify = jest.fn();
   const getAccount = jest.fn();
   const claimBusiness = jest.fn();
+  const previewApplicationClaim = jest.fn();
+  const confirmApplicationClaim = jest.fn();
   const controller = new BusinessAccountsController(
     { verify } as unknown as AuthenticatedUserService,
-    { getAccount, claimBusiness } as unknown as BusinessAccountsService,
+    {
+      getAccount,
+      claimBusiness,
+      previewApplicationClaim,
+      confirmApplicationClaim,
+    } as unknown as BusinessAccountsService,
   );
 
   beforeEach(() => {
@@ -26,6 +33,18 @@ describe('BusinessAccountsController', () => {
     claimBusiness.mockReset().mockResolvedValue({
       businesses: [],
       claimableBusinesses: [],
+    });
+    previewApplicationClaim.mockReset().mockResolvedValue({
+      businessId: '4747cc34-0ec0-40df-8dc2-605612106077',
+      businessName: 'Copperbelt Solar Care',
+      submittedEmail: user.email,
+      status: 'ready',
+    });
+    confirmApplicationClaim.mockReset().mockResolvedValue({
+      businessId: '4747cc34-0ec0-40df-8dc2-605612106077',
+      businessName: 'Copperbelt Solar Care',
+      submittedEmail: user.email,
+      status: 'already_connected',
     });
   });
 
@@ -51,5 +70,33 @@ describe('BusinessAccountsController', () => {
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(verify).not.toHaveBeenCalled();
     expect(claimBusiness).not.toHaveBeenCalled();
+  });
+
+  it('previews only a valid application-scoped claim token', async () => {
+    const token = 'a'.repeat(43);
+
+    await controller.previewApplicationClaim('Bearer access-token', { token });
+
+    expect(verify).toHaveBeenCalledWith('Bearer access-token');
+    expect(previewApplicationClaim).toHaveBeenCalledWith(user, token);
+  });
+
+  it('confirms an application claim only after verifying the caller', async () => {
+    const token = 'b'.repeat(43);
+
+    await controller.confirmApplicationClaim('Bearer access-token', { token });
+
+    expect(verify).toHaveBeenCalledWith('Bearer access-token');
+    expect(confirmApplicationClaim).toHaveBeenCalledWith(user, token);
+  });
+
+  it('rejects a malformed application token before authentication', async () => {
+    await expect(
+      controller.confirmApplicationClaim('Bearer access-token', {
+        token: 'not-valid',
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(verify).not.toHaveBeenCalled();
+    expect(confirmApplicationClaim).not.toHaveBeenCalled();
   });
 });

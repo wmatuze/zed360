@@ -43,7 +43,13 @@ export class BusinessProfileManagementService {
     const pending = revisions.find(({ status }) => status === 'pending');
     const decided = revisions.find(({ status }) => status !== 'pending');
     return {
-      business: { id: business.id, name: business.name, slug: business.slug },
+      business: {
+        id: business.id,
+        name: business.name,
+        slug: business.slug,
+        status: business.status,
+        reviewStatus: business.reviewStatus,
+      },
       current: {
         description: business.description,
         phone: business.phone,
@@ -114,7 +120,15 @@ export class BusinessProfileManagementService {
       });
       await transaction
         .update(businesses)
-        .set({ ...proposed, lastConfirmedAt: now, updatedAt: now })
+        .set({
+          ...proposed,
+          reviewStatus:
+            business.reviewStatus === 'changes_requested'
+              ? 'pending'
+              : business.reviewStatus,
+          lastConfirmedAt: now,
+          updatedAt: now,
+        })
         .where(eq(businesses.id, businessId));
     });
     return this.get(user, businessId);
@@ -214,6 +228,8 @@ export class BusinessProfileManagementService {
         whatsapp: businesses.whatsapp,
         email: businesses.email,
         website: businesses.website,
+        status: businesses.status,
+        reviewStatus: businesses.reviewStatus,
         role: businessMembers.role,
       })
       .from(businessMembers)

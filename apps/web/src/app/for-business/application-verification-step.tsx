@@ -8,7 +8,13 @@ import {
 
 const initialState: SignInState = { status: "idle", message: "" };
 
-export function ApplicationVerificationStep({ email }: { email: string }) {
+export function ApplicationVerificationStep({
+  claimToken,
+  email,
+}: {
+  claimToken: string;
+  email: string;
+}) {
   const [state, action, pending] = useActionState(
     requestSignInLink,
     initialState,
@@ -17,7 +23,11 @@ export function ApplicationVerificationStep({ email }: { email: string }) {
   return (
     <form action={action} className="mt-6 border-t border-white/10 pt-6">
       <input name="email" type="hidden" value={email} />
-      <input name="next" type="hidden" value="/business/account" />
+      <input
+        name="next"
+        type="hidden"
+        value={`/business/claim?token=${encodeURIComponent(claimToken)}`}
+      />
 
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--lime)]">
         Next step

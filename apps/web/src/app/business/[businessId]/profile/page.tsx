@@ -18,6 +18,7 @@ export default async function BusinessProfilePage({
     redirect(`/business/sign-in?next=/business/${businessId}/profile`);
   const profile = await fetchBusinessProfile(session.accessToken, businessId);
   const values = profile.pending?.proposed ?? profile.current;
+  const isCorrection = profile.business.reviewStatus === "changes_requested";
   const save = saveProfile.bind(null, businessId);
   const result = (await searchParams).result;
   return (
@@ -35,15 +36,17 @@ export default async function BusinessProfilePage({
           <span /> Business profile
         </p>
         <h1 className="mt-5 text-4xl font-semibold tracking-[-.05em]">
-          Edit {profile.business.name}.
+          {isCorrection ? "Correct" : "Edit"} {profile.business.name}.
         </h1>
         <p className="mt-4 max-w-2xl leading-7 text-white/50">
-          Routine profile changes publish immediately. Zed360 keeps the previous
-          values and who changed them for accountability.
+          {isCorrection
+            ? "Update the information identified by Zed360. Saving these corrections returns the application to review; it does not publish the business."
+            : "Routine profile changes publish immediately. Zed360 keeps the previous values and who changed them for accountability."}
         </p>
-        {result === "published" ? (
+        {result === "saved" ? (
           <p className="mt-6 rounded-xl border border-[var(--lime)]/25 bg-[var(--lime)]/8 p-4 text-sm">
-            Profile changes published successfully.
+            Changes saved successfully. An application requiring corrections has
+            been returned to Zed360 review.
           </p>
         ) : null}
         {result === "invalid" || result === "error" ? (
@@ -111,7 +114,9 @@ export default async function BusinessProfilePage({
             </label>
           </div>
           <div>
-            <button className="button button-primary">Save and publish</button>
+            <button className="button button-primary">
+              {isCorrection ? "Save corrections for review" : "Save changes"}
+            </button>
           </div>
         </form>
       </section>

@@ -67,6 +67,11 @@ export default async function BusinessAccountPage({
 
   const { link } = await searchParams;
   const linkMessage = link ? linkMessages[link] : undefined;
+  const hasOperationalBusiness =
+    account?.businesses.some(
+      (business) =>
+        business.status === "active" && business.reviewStatus === "approved",
+    ) ?? false;
 
   return (
     <main className="min-h-screen bg-[var(--ink)] px-5 py-6 text-white sm:px-8 lg:px-10">
@@ -75,11 +80,14 @@ export default async function BusinessAccountPage({
           <BrandLogo />
         </Link>
         <div className="flex items-center gap-3">
-          <Link className="button button-quiet" href="/business/dashboard">
-            Dashboard
-          </Link>
+          {hasOperationalBusiness ? (
+            <Link className="button button-quiet" href="/business/dashboard">
+              Dashboard
+            </Link>
+          ) : null}
           <Link className="button button-quiet" href="/business/notifications">
-            Notifications{unreadNotifications ? ` (${unreadNotifications})` : ""}
+            Notifications
+            {unreadNotifications ? ` (${unreadNotifications})` : ""}
           </Link>
           <form action={signOut}>
             <button className="button button-quiet" type="submit">
@@ -97,8 +105,8 @@ export default async function BusinessAccountPage({
           Your business account.
         </h1>
         <p className="mt-5 max-w-xl leading-7 text-white/48">
-          Signed in as {session.email}. Link a submission made with this email,
-          then Zed360 can review it separately.
+          Signed in as {session.email}. Track applications and manage businesses
+          connected to this account.
         </p>
 
         {linkMessage ? (
@@ -143,11 +151,37 @@ export default async function BusinessAccountPage({
                         : reviewStatusLabels[business.reviewStatus]}{" "}
                     · {business.role}
                   </p>
-                  {business.status === "draft" ? (
+                  {business.reviewStatus === "pending" &&
+                  business.status === "draft" ? (
                     <p className="mt-4 text-sm leading-6 text-white/58">
-                      Your account is linked, but customer requests remain
-                      hidden until Zed360 approves the business.
+                      Your email is verified and this application is connected.
+                      Zed360 will review it before anything becomes public.
                     </p>
+                  ) : null}
+                  {business.reviewStatus === "changes_requested" ? (
+                    <div className="mt-4 rounded-xl border border-amber-200/20 bg-amber-200/8 p-4 text-sm leading-6 text-amber-50/75">
+                      <p className="font-semibold">Corrections are required</p>
+                      <p className="mt-1">
+                        Update the requested information so Zed360 can continue
+                        the review.
+                      </p>
+                      <Link
+                        className="button button-secondary mt-4"
+                        href={`/business/${business.id}/profile`}
+                      >
+                        Correct application →
+                      </Link>
+                    </div>
+                  ) : null}
+                  {business.reviewStatus === "rejected" ? (
+                    <div className="mt-4 rounded-xl border border-red-300/20 bg-red-300/8 p-4 text-sm leading-6 text-red-100/80">
+                      <p className="font-semibold">Application not approved</p>
+                      <p className="mt-1">
+                        This business will remain private. Do not submit a
+                        duplicate application; Zed360 can reopen this review if
+                        the decision needs reconsideration.
+                      </p>
+                    </div>
                   ) : null}
                   {business.status === "active" &&
                   business.reviewStatus === "approved" ? (
@@ -158,7 +192,9 @@ export default async function BusinessAccountPage({
                       View matched requests →
                     </Link>
                   ) : null}
-                  {business.role !== "staff" && business.status !== "closed" ? (
+                  {business.role !== "staff" &&
+                  business.status === "active" &&
+                  business.reviewStatus === "approved" ? (
                     <div className="mt-3 flex flex-col gap-3">
                       <Link
                         className="button button-secondary"
@@ -229,8 +265,7 @@ export default async function BusinessAccountPage({
             </p>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-white/48">
               Submit your business using the same email address you verified.
-              Phone-only submissions will need a separate manual ownership
-              check.
+              Older submissions can still be connected manually from this page.
             </p>
             <Link className="button button-primary mt-5" href="/for-business">
               Submit a business →
