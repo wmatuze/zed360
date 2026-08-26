@@ -30,6 +30,27 @@ const purposeLabels = {
   product: "Product image",
 } as const;
 
+type ProductPricingType = "fixed" | "from" | "range" | "contact";
+
+const pricingTypeLabels: Record<ProductPricingType, string> = {
+  fixed: "Fixed price",
+  from: "Starting from",
+  range: "Price range",
+  contact: "Contact for price",
+};
+
+function productPricingType(
+  product?: BusinessCatalog["products"][number],
+): ProductPricingType {
+  if (!product) return "fixed";
+  if (product.priceFrom === null && product.priceTo === null) return "contact";
+  if (product.priceFrom !== null && product.priceTo !== null) {
+    return product.priceFrom === product.priceTo ? "fixed" : "range";
+  }
+  if (product.priceFrom !== null) return "from";
+  return "range";
+}
+
 function ProductForm({
   businessId,
   product,
@@ -39,6 +60,9 @@ function ProductForm({
 }) {
   const action = saveProduct.bind(null, businessId, product?.id ?? null);
   const [state, formAction, pending] = useActionState(action, initialState);
+  const [pricingType, setPricingType] = useState<ProductPricingType>(() =>
+    productPricingType(product),
+  );
   return (
     <form action={formAction} className="grid gap-4">
       <div className="grid gap-4 sm:grid-cols-2">
@@ -78,28 +102,71 @@ function ProductForm({
       </label>
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="text-sm text-white/65">
-          Price from (ZMW)
-          <input
-            className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--lime)]/55"
-            defaultValue={product?.priceFrom ?? ""}
-            min="0"
-            name="priceFrom"
-            step="0.01"
-            type="number"
-          />
+          Pricing
+          <select
+            className="mt-2 w-full rounded-xl border border-white/10 bg-[#10141c] px-4 py-3 outline-none focus:border-[var(--lime)]/55"
+            name="pricingType"
+            onChange={(event) =>
+              setPricingType(event.target.value as ProductPricingType)
+            }
+            value={pricingType}
+          >
+            {Object.entries(pricingTypeLabels).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
         </label>
-        <label className="text-sm text-white/65">
-          Price to (ZMW)
-          <input
-            className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--lime)]/55"
-            defaultValue={product?.priceTo ?? ""}
-            min="0"
-            name="priceTo"
-            step="0.01"
-            type="number"
-          />
-        </label>
+        {pricingType === "fixed" || pricingType === "from" ? (
+          <label className="text-sm text-white/65">
+            {pricingType === "fixed" ? "Price (ZMW)" : "Starting price (ZMW)"}
+            <input
+              className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--lime)]/55"
+              defaultValue={product?.priceFrom ?? ""}
+              min="0"
+              name="price"
+              required
+              step="0.01"
+              type="number"
+            />
+          </label>
+        ) : null}
       </div>
+      {pricingType === "range" ? (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="text-sm text-white/65">
+            Minimum price (ZMW)
+            <input
+              className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--lime)]/55"
+              defaultValue={product?.priceFrom ?? ""}
+              min="0"
+              name="priceFrom"
+              required
+              step="0.01"
+              type="number"
+            />
+          </label>
+          <label className="text-sm text-white/65">
+            Maximum price (ZMW)
+            <input
+              className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--lime)]/55"
+              defaultValue={product?.priceTo ?? ""}
+              min="0"
+              name="priceTo"
+              required
+              step="0.01"
+              type="number"
+            />
+          </label>
+        </div>
+      ) : null}
+      {pricingType === "contact" ? (
+        <p className="rounded-xl border border-white/8 bg-black/15 p-4 text-sm leading-6 text-white/45">
+          No amount will be displayed. Customers will be invited to contact the
+          business for the current price.
+        </p>
+      ) : null}
       {product ? (
         <label className="text-sm text-white/65">
           Catalog status
@@ -422,50 +489,71 @@ export function CatalogManager({ catalog }: { catalog: BusinessCatalog }) {
   ];
   return (
     <div className="mt-10 space-y-8">
-      <section className="rounded-3xl border border-white/10 bg-white/[0.035] p-6 sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--lime)]">
-          Display-only products
-        </p>
-        <h2 className="mt-2 text-2xl font-semibold">Add a product</h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-white/45">
-          Products help customers discover what you sell. Payments and orders
-          stay directly between you and the customer.
-        </p>
-        <div className="mt-6">
-          <ProductForm businessId={catalog.business.id} />
-        </div>
-      </section>
-
-      {catalog.products.map((product) => (
-        <details
-          className="rounded-3xl border border-white/10 bg-white/[0.035] p-6 sm:p-8"
-          key={product.id}
-        >
-          <summary className="cursor-pointer list-none text-xl font-semibold">
-            {product.name}
-            <span className="ml-3 text-xs font-normal text-white/38">
-              {product.isPublished ? "Published" : "Private draft"} ·{" "}
-              {availabilityLabels[product.availability]}
-            </span>
-          </summary>
+      <div className="grid items-start gap-6 lg:grid-cols-2">
+        <section className="rounded-3xl border border-white/10 bg-white/[0.035] p-6 sm:p-7">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--lime)]">
+            Display-only products
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold">Add a product</h2>
+          <p className="mt-2 text-sm leading-6 text-white/45">
+            Products help customers discover what you sell. Payments and orders
+            stay directly between you and the customer.
+          </p>
           <div className="mt-6">
-            <ProductForm businessId={catalog.business.id} product={product} />
+            <ProductForm businessId={catalog.business.id} />
           </div>
-        </details>
-      ))}
+        </section>
 
-      <section className="rounded-3xl border border-white/10 bg-white/[0.035] p-6 sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--lime)]">
-          Visual storefront
-        </p>
-        <h2 className="mt-2 text-2xl font-semibold">Upload an image</h2>
-        <div className="mt-6">
-          <MediaUploadForm
-            businessId={catalog.business.id}
-            products={catalog.products}
-          />
-        </div>
-      </section>
+        <section className="rounded-3xl border border-white/10 bg-white/[0.035] p-6 sm:p-7">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--lime)]">
+            Visual storefront
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold">Upload an image</h2>
+          <p className="mt-2 text-sm leading-6 text-white/45">
+            Add product photos, work samples, and profile images customers can
+            trust.
+          </p>
+          <div className="mt-6">
+            <MediaUploadForm
+              businessId={catalog.business.id}
+              products={catalog.products}
+            />
+          </div>
+        </section>
+      </div>
+
+      {catalog.products.length ? (
+        <section>
+          <div className="flex items-end justify-between gap-4">
+            <h2 className="text-2xl font-semibold">Your products</h2>
+            <span className="text-sm text-white/38">
+              {catalog.products.length} total
+            </span>
+          </div>
+          <div className="mt-4 grid items-start gap-4 lg:grid-cols-2">
+            {catalog.products.map((product) => (
+              <details
+                className="rounded-2xl border border-white/10 bg-white/[0.035] p-5 sm:p-6"
+                key={product.id}
+              >
+                <summary className="cursor-pointer list-none text-lg font-semibold">
+                  {product.name}
+                  <span className="ml-3 text-xs font-normal text-white/38">
+                    {product.isPublished ? "Published" : "Private draft"} ·{" "}
+                    {availabilityLabels[product.availability]}
+                  </span>
+                </summary>
+                <div className="mt-6">
+                  <ProductForm
+                    businessId={catalog.business.id}
+                    product={product}
+                  />
+                </div>
+              </details>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {allMedia.length ? (
         <section>

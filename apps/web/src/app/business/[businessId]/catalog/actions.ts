@@ -29,17 +29,43 @@ function optionalNumber(formData: FormData, name: string) {
   return value ? Number(value) : undefined;
 }
 
+function productPrices(formData: FormData) {
+  const pricingType = String(formData.get("pricingType") ?? "");
+  if (pricingType === "contact") return {};
+  if (pricingType === "fixed" || pricingType === "from") {
+    const price = optionalNumber(formData, "price");
+    if (price === undefined) {
+      return { error: "Enter the product price." } as const;
+    }
+    return pricingType === "fixed"
+      ? { priceFrom: price, priceTo: price }
+      : { priceFrom: price };
+  }
+  if (pricingType === "range") {
+    const priceFrom = optionalNumber(formData, "priceFrom");
+    const priceTo = optionalNumber(formData, "priceTo");
+    if (priceFrom === undefined || priceTo === undefined) {
+      return { error: "Enter both the minimum and maximum price." } as const;
+    }
+    return { priceFrom, priceTo };
+  }
+  return { error: "Choose a valid pricing option." } as const;
+}
+
 export async function saveProduct(
   businessId: string,
   productId: string | null,
   _previous: CatalogActionState,
   formData: FormData,
 ): Promise<CatalogActionState> {
+  const prices = productPrices(formData);
+  if ("error" in prices && prices.error) {
+    return { status: "error", message: prices.error };
+  }
   const parsed = saveBusinessProductSchema.safeParse({
     name: formData.get("name"),
     description: formData.get("description"),
-    priceFrom: optionalNumber(formData, "priceFrom"),
-    priceTo: optionalNumber(formData, "priceTo"),
+    ...prices,
     availability: formData.get("availability"),
     status: formData.get("status") || "active",
     isPublished: formData.get("isPublished") === "on",

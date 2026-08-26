@@ -50,18 +50,25 @@ export async function generateMetadata({
   }
 }
 
-function moneyRange(minimum: number | null, maximum: number | null) {
+function moneyRange(
+  minimum: number | null,
+  maximum: number | null,
+  emptyLabel: string | null = null,
+) {
   const money = (value: number) =>
     new Intl.NumberFormat("en-ZM", {
       style: "currency",
       currency: "ZMW",
-      maximumFractionDigits: 0,
+      minimumFractionDigits: Number.isInteger(value) ? 0 : 2,
+      maximumFractionDigits: 2,
     }).format(value);
+  if (minimum !== null && maximum !== null && minimum === maximum)
+    return money(minimum);
   if (minimum !== null && maximum !== null)
     return `${money(minimum)} – ${money(maximum)}`;
   if (minimum !== null) return `From ${money(minimum)}`;
   if (maximum !== null) return `Up to ${money(maximum)}`;
-  return null;
+  return emptyLabel;
 }
 
 function whatsappHref(value: string) {
@@ -332,6 +339,7 @@ export default async function BusinessProfilePage({
                     const price = moneyRange(
                       product.priceFrom,
                       product.priceTo,
+                      "Contact for price",
                     );
                     return (
                       <article
