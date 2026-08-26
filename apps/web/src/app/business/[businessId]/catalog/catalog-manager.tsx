@@ -30,6 +30,27 @@ const purposeLabels = {
   product: "Product image",
 } as const;
 
+type ProductPricingType = "fixed" | "from" | "range" | "contact";
+
+const pricingTypeLabels: Record<ProductPricingType, string> = {
+  fixed: "Fixed price",
+  from: "Starting from",
+  range: "Price range",
+  contact: "Contact for price",
+};
+
+function productPricingType(
+  product?: BusinessCatalog["products"][number],
+): ProductPricingType {
+  if (!product) return "fixed";
+  if (product.priceFrom === null && product.priceTo === null) return "contact";
+  if (product.priceFrom !== null && product.priceTo !== null) {
+    return product.priceFrom === product.priceTo ? "fixed" : "range";
+  }
+  if (product.priceFrom !== null) return "from";
+  return "range";
+}
+
 function ProductForm({
   businessId,
   product,
@@ -39,6 +60,9 @@ function ProductForm({
 }) {
   const action = saveProduct.bind(null, businessId, product?.id ?? null);
   const [state, formAction, pending] = useActionState(action, initialState);
+  const [pricingType, setPricingType] = useState<ProductPricingType>(() =>
+    productPricingType(product),
+  );
   return (
     <form action={formAction} className="grid gap-4">
       <div className="grid gap-4 sm:grid-cols-2">
@@ -78,28 +102,71 @@ function ProductForm({
       </label>
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="text-sm text-white/65">
-          Price from (ZMW)
-          <input
-            className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--lime)]/55"
-            defaultValue={product?.priceFrom ?? ""}
-            min="0"
-            name="priceFrom"
-            step="0.01"
-            type="number"
-          />
+          Pricing
+          <select
+            className="mt-2 w-full rounded-xl border border-white/10 bg-[#10141c] px-4 py-3 outline-none focus:border-[var(--lime)]/55"
+            name="pricingType"
+            onChange={(event) =>
+              setPricingType(event.target.value as ProductPricingType)
+            }
+            value={pricingType}
+          >
+            {Object.entries(pricingTypeLabels).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
         </label>
-        <label className="text-sm text-white/65">
-          Price to (ZMW)
-          <input
-            className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--lime)]/55"
-            defaultValue={product?.priceTo ?? ""}
-            min="0"
-            name="priceTo"
-            step="0.01"
-            type="number"
-          />
-        </label>
+        {pricingType === "fixed" || pricingType === "from" ? (
+          <label className="text-sm text-white/65">
+            {pricingType === "fixed" ? "Price (ZMW)" : "Starting price (ZMW)"}
+            <input
+              className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--lime)]/55"
+              defaultValue={product?.priceFrom ?? ""}
+              min="0"
+              name="price"
+              required
+              step="0.01"
+              type="number"
+            />
+          </label>
+        ) : null}
       </div>
+      {pricingType === "range" ? (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="text-sm text-white/65">
+            Minimum price (ZMW)
+            <input
+              className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--lime)]/55"
+              defaultValue={product?.priceFrom ?? ""}
+              min="0"
+              name="priceFrom"
+              required
+              step="0.01"
+              type="number"
+            />
+          </label>
+          <label className="text-sm text-white/65">
+            Maximum price (ZMW)
+            <input
+              className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-[var(--lime)]/55"
+              defaultValue={product?.priceTo ?? ""}
+              min="0"
+              name="priceTo"
+              required
+              step="0.01"
+              type="number"
+            />
+          </label>
+        </div>
+      ) : null}
+      {pricingType === "contact" ? (
+        <p className="rounded-xl border border-white/8 bg-black/15 p-4 text-sm leading-6 text-white/45">
+          No amount will be displayed. Customers will be invited to contact the
+          business for the current price.
+        </p>
+      ) : null}
       {product ? (
         <label className="text-sm text-white/65">
           Catalog status
