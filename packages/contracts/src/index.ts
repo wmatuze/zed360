@@ -402,6 +402,41 @@ export type BusinessOperatingHours = z.infer<
   typeof businessOperatingHoursSchema
 >;
 
+export const saveBusinessLocationSchema = z.object({
+  name: z.string().trim().min(2).max(120),
+  address: z.string().trim().max(500).optional().or(z.literal("")),
+  districtId: z.string().uuid(),
+});
+export type SaveBusinessLocation = z.infer<typeof saveBusinessLocationSchema>;
+
+export const businessLocationStatusSchema = z.object({
+  isActive: z.boolean(),
+});
+
+export const businessLocationManagementSchema = z.object({
+  business: z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+    slug: z.string(),
+  }),
+  locations: z.array(
+    z.object({
+      id: z.string().uuid(),
+      name: z.string(),
+      address: z.string().nullable(),
+      districtId: z.string().uuid().nullable(),
+      districtName: z.string().nullable(),
+      provinceName: z.string().nullable(),
+      isPrimary: z.boolean(),
+      isActive: z.boolean(),
+      operatingHoursConfigured: z.boolean(),
+    }),
+  ),
+});
+export type BusinessLocationManagement = z.infer<
+  typeof businessLocationManagementSchema
+>;
+
 export const contentReportTargetTypeSchema = z.enum(["business", "review"]);
 export const contentReportReasonSchema = z.enum([
   "misleading",
@@ -945,6 +980,7 @@ const publicBusinessTrustSchema = z.object({
 const publicBusinessLocationSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
+  address: z.string().nullable(),
   isPrimary: z.boolean(),
   district: z
     .object({
