@@ -5,6 +5,7 @@ import {
   Headers,
   Param,
   Post,
+  Query,
 } from '@nestjs/common';
 import { AuthenticatedUserService } from './authenticated-user.service';
 import { BusinessNotificationsService } from './business-notifications.service';
@@ -20,9 +21,27 @@ export class BusinessNotificationsController {
   ) {}
 
   @Get()
-  async list(@Headers('authorization') authorization?: string) {
+  async list(
+    @Headers('authorization') authorization?: string,
+    @Query('view') view = 'inbox',
+    @Query('page') page = '1',
+  ) {
+    if (!['inbox', 'archived'].includes(view)) {
+      throw new BadRequestException('Choose a valid notification view.');
+    }
+    const pageNumber = Number(page);
+    if (
+      !Number.isInteger(pageNumber) ||
+      pageNumber < 1 ||
+      pageNumber > 10_000
+    ) {
+      throw new BadRequestException('Choose a valid notification page.');
+    }
     const user = await this.authentication.verify(authorization);
-    return this.notifications.list(user);
+    return this.notifications.list(user, {
+      view: view as 'inbox' | 'archived',
+      page: pageNumber,
+    });
   }
 
   @Post('read-all')
@@ -31,15 +50,45 @@ export class BusinessNotificationsController {
     return this.notifications.markAllRead(user);
   }
 
+  @Post('archive-read')
+  async archiveAllRead(@Headers('authorization') authorization?: string) {
+    const user = await this.authentication.verify(authorization);
+    return this.notifications.archiveAllRead(user);
+  }
+
+  @Post(':notificationId/archive')
+  async archive(
+    @Headers('authorization') authorization: string | undefined,
+    @Param('notificationId') notificationId: string,
+  ) {
+    this.requireNotificationId(notificationId);
+    const user = await this.authentication.verify(authorization);
+    return this.notifications.archive(user, notificationId);
+  }
+
+  @Post(':notificationId/restore')
+  async restore(
+    @Headers('authorization') authorization: string | undefined,
+    @Param('notificationId') notificationId: string,
+  ) {
+    this.requireNotificationId(notificationId);
+    const user = await this.authentication.verify(authorization);
+    return this.notifications.restore(user, notificationId);
+  }
+
   @Post(':notificationId/read')
   async markRead(
     @Headers('authorization') authorization: string | undefined,
     @Param('notificationId') notificationId: string,
   ) {
+    this.requireNotificationId(notificationId);
+    const user = await this.authentication.verify(authorization);
+    return this.notifications.markRead(user, notificationId);
+  }
+
+  private requireNotificationId(notificationId: string) {
     if (!uuidPattern.test(notificationId)) {
       throw new BadRequestException('A valid notification is required.');
     }
-    const user = await this.authentication.verify(authorization);
-    return this.notifications.markRead(user, notificationId);
   }
 }

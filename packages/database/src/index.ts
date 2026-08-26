@@ -8,4 +8,14 @@ export function createDatabase(databaseUrl: string) {
 }
 
 export * from "./schema.js";
-export { and, asc, desc, eq, inArray, or, sql } from "drizzle-orm";
+export {
+  and,
+  asc,
+  desc,
+  eq,
+  inArray,
+  isNotNull,
+  isNull,
+  or,
+  sql,
+} from "drizzle-orm";

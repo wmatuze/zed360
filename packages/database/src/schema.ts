@@ -383,6 +383,7 @@ export const businessNotifications = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     readAt: timestamp("read_at", { withTimezone: true }),
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -395,6 +396,11 @@ export const businessNotifications = pgTable(
     index("business_notifications_recipient_read_idx").on(
       table.recipientUserId,
       table.readAt,
+      table.createdAt,
+    ),
+    index("business_notifications_recipient_archive_idx").on(
+      table.recipientUserId,
+      table.archivedAt,
       table.createdAt,
     ),
   ],

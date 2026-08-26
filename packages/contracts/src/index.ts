@@ -1162,12 +1162,18 @@ export const businessNotificationSchema = z.object({
   actionUrl: z.string().nullable(),
   business: z.object({ id: z.string().uuid(), name: z.string() }),
   readAt: z.string().datetime().nullable(),
+  archivedAt: z.string().datetime().nullable(),
   createdAt: z.string().datetime(),
 });
 
 export const businessNotificationListSchema = z.object({
   notifications: z.array(businessNotificationSchema),
   unreadCount: z.number().int().nonnegative(),
+  totalCount: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  pageSize: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+  view: z.enum(["inbox", "archived"]),
 });
 
 export type BusinessNotificationList = z.infer<

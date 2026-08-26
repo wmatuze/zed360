@@ -92,6 +92,13 @@
       "when": 1786705720640,
       "tag": "0012_sour_exodus",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1787701065881,
+      "tag": "0013_minor_marauders",
+      "breakpoints": true
     }
   ]
 }

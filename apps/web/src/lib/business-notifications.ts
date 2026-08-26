@@ -16,9 +16,11 @@ export class BusinessNotificationsApiError extends Error {
 
 async function request(
   accessToken: string,
-  path = "",
+  view: "inbox" | "archived" = "inbox",
+  page = 1,
 ): Promise<BusinessNotificationList> {
-  const response = await fetch(`${apiUrl}/business-notifications${path}`, {
+  const query = new URLSearchParams({ view, page: String(page) });
+  const response = await fetch(`${apiUrl}/business-notifications?${query}`, {
     cache: "no-store",
     headers: { authorization: `Bearer ${accessToken}` },
   });
@@ -62,8 +64,11 @@ async function mutate(accessToken: string, path: string) {
   }
 }
 
-export const fetchBusinessNotifications = (accessToken: string) =>
-  request(accessToken);
+export const fetchBusinessNotifications = (
+  accessToken: string,
+  view: "inbox" | "archived" = "inbox",
+  page = 1,
+) => request(accessToken, view, page);
 
 export const markBusinessNotificationRead = (
   accessToken: string,
@@ -72,3 +77,16 @@ export const markBusinessNotificationRead = (
 
 export const markAllBusinessNotificationsRead = (accessToken: string) =>
   mutate(accessToken, "/read-all");
+
+export const archiveBusinessNotification = (
+  accessToken: string,
+  notificationId: string,
+) => mutate(accessToken, `/${notificationId}/archive`);
+
+export const restoreBusinessNotification = (
+  accessToken: string,
+  notificationId: string,
+) => mutate(accessToken, `/${notificationId}/restore`);
+
+export const archiveAllReadBusinessNotifications = (accessToken: string) =>
+  mutate(accessToken, "/archive-read");

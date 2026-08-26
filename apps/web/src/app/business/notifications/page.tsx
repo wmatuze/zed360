@@ -8,21 +8,32 @@ import {
   fetchBusinessNotifications,
 } from "@/lib/business-notifications";
 import {
+  archiveAllReadNotifications,
+  archiveNotification,
   markAllNotificationsRead,
   markNotificationRead,
+  restoreNotification,
 } from "./actions";
 
 export const metadata: Metadata = { title: "Business notifications" };
 export const dynamic = "force-dynamic";
 
-export default async function BusinessNotificationsPage() {
+export default async function BusinessNotificationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string; page?: string }>;
+}) {
+  const parameters = await searchParams;
+  const view = parameters.view === "archived" ? "archived" : "inbox";
+  const parsedPage = Number(parameters.page ?? "1");
+  const page = Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
   const session = await getVerifiedBusinessSession();
   if (!session) redirect("/business/sign-in?next=/business/notifications");
 
   let data = null;
   let errorMessage = "";
   try {
-    data = await fetchBusinessNotifications(session.accessToken);
+    data = await fetchBusinessNotifications(session.accessToken, view, page);
   } catch (error) {
     if (error instanceof BusinessNotificationsApiError && error.status === 401)
       redirect("/business/sign-in?error=session_expired");
@@ -62,12 +73,38 @@ export default async function BusinessNotificationsPage() {
               you own or manage.
             </p>
           </div>
-          {data?.unreadCount ? (
-            <form action={markAllNotificationsRead}>
-              <button className="button button-quiet">Mark all as read</button>
-            </form>
-          ) : null}
+          <div className="flex flex-wrap gap-2">
+            {view === "inbox" && data?.unreadCount ? (
+              <form action={markAllNotificationsRead}>
+                <button className="button button-quiet">Mark all as read</button>
+              </form>
+            ) : null}
+            {view === "inbox" &&
+            data &&
+            data.totalCount > data.unreadCount ? (
+              <form action={archiveAllReadNotifications}>
+                <button className="button button-quiet">
+                  Archive all read
+                </button>
+              </form>
+            ) : null}
+          </div>
         </div>
+
+        <nav className="mt-8 flex gap-2" aria-label="Notification views">
+          <Link
+            className={view === "inbox" ? "button button-primary" : "button button-quiet"}
+            href="/business/notifications"
+          >
+            Inbox{data && view === "inbox" ? ` (${data.totalCount})` : ""}
+          </Link>
+          <Link
+            className={view === "archived" ? "button button-primary" : "button button-quiet"}
+            href="/business/notifications?view=archived"
+          >
+            Archived{data && view === "archived" ? ` (${data.totalCount})` : ""}
+          </Link>
+        </nav>
 
         {errorMessage ? (
           <div className="mt-8 rounded-2xl border border-red-300/20 bg-red-300/8 p-5 text-sm text-red-100/80">
@@ -77,13 +114,17 @@ export default async function BusinessNotificationsPage() {
 
         {data?.notifications.length === 0 ? (
           <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.035] p-6 text-white/55">
-            You have no notifications yet.
+            {view === "archived"
+              ? "You have no archived notifications."
+              : "You have no notifications yet."}
           </div>
         ) : null}
 
         <div className="mt-8 divide-y divide-white/8 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025]">
           {data?.notifications.map((notification) => {
             const markRead = markNotificationRead.bind(null, notification.id);
+            const archive = archiveNotification.bind(null, notification.id);
+            const restore = restoreNotification.bind(null, notification.id);
             return (
               <article
                 className={`grid gap-3 px-4 py-4 sm:grid-cols-[1fr_auto] sm:items-center sm:px-5 ${notification.readAt ? "bg-transparent" : "bg-[var(--lime)]/7"}`}
@@ -127,11 +168,54 @@ export default async function BusinessNotificationsPage() {
                       </button>
                     </form>
                   ) : null}
+                  {view === "inbox" ? (
+                    <form action={archive}>
+                      <button className="button button-quiet px-4 py-2 text-sm">
+                        Archive
+                      </button>
+                    </form>
+                  ) : (
+                    <form action={restore}>
+                      <button className="button button-quiet px-4 py-2 text-sm">
+                        Restore
+                      </button>
+                    </form>
+                  )}
                 </div>
               </article>
             );
           })}
         </div>
+        {data && data.totalPages > 1 ? (
+          <nav
+            aria-label="Notification pages"
+            className="mt-6 flex items-center justify-between gap-4 text-sm"
+          >
+            {data.page > 1 ? (
+              <Link
+                className="button button-quiet"
+                href={`/business/notifications?view=${view}&page=${data.page - 1}`}
+              >
+                ← Previous
+              </Link>
+            ) : (
+              <span />
+            )}
+            <span className="text-white/45">
+              Page {data.page} of {data.totalPages}
+            </span>
+            {data.page < data.totalPages ? (
+              <Link
+                className="button button-quiet"
+                href={`/business/notifications?view=${view}&page=${data.page + 1}`}
+              >
+                Next →
+              </Link>
+            ) : (
+              <span />
+            )}
+          </nav>
+        ) : null}
       </section>
     </main>
   );

@@ -75,6 +75,7 @@ export class BusinessDashboardService {
               on unread_event.id = unread_notification.event_id
             where unread_event.business_id = member_business.id
               and unread_notification.recipient_user_id = ${user.id}
+              and unread_notification.archived_at is null
               and unread_notification.read_at is null) as unread_notifications
         from member_businesses member_business
       ),
@@ -117,6 +118,7 @@ export class BusinessDashboardService {
         inner join business_notification_events event on event.id = notification.event_id
         inner join member_businesses business on business.id = event.business_id
         where notification.recipient_user_id = ${user.id}
+          and notification.archived_at is null
         order by notification.created_at desc
         limit 5
       )
