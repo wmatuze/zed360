@@ -18,6 +18,7 @@ describe('BusinessApplicationsController', () => {
       serviceName: 'Solar installation',
       districtId: '2f509151-995a-4df4-a63a-3a5d65b487d8',
       phone: '+260 97 000 0000',
+      email: 'owner@copperbeltsolar.example',
       registrationStatus: 'not_registered',
       representativeConfirmed: true,
     };
@@ -36,6 +37,7 @@ describe('BusinessApplicationsController', () => {
         serviceName: 'Solar installation',
         districtId: '2f509151-995a-4df4-a63a-3a5d65b487d8',
         phone: '+260 97 000 0000',
+        email: 'owner@copperbeltsolar.example',
         registrationStatus: 'registered',
         representativeConfirmed: true,
       }),
@@ -43,13 +45,28 @@ describe('BusinessApplicationsController', () => {
     expect(create).not.toHaveBeenCalled();
   });
 
-  it('requires a contact method and representative confirmation', () => {
+  it('requires an owner email and representative confirmation', () => {
     expect(() =>
       controller.create({
         businessName: 'Copperbelt Solar Care',
         categoryId: 'dfaa1f8f-f66e-4af1-b093-60db594c62a0',
         serviceName: 'Solar installation',
         districtId: '2f509151-995a-4df4-a63a-3a5d65b487d8',
+      }),
+    ).toThrow(BadRequestException);
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('rejects a phone-only application because it cannot be claimed', () => {
+    expect(() =>
+      controller.create({
+        businessName: 'Copperbelt Solar Care',
+        categoryId: 'dfaa1f8f-f66e-4af1-b093-60db594c62a0',
+        serviceName: 'Solar installation',
+        districtId: '2f509151-995a-4df4-a63a-3a5d65b487d8',
+        phone: '+260 97 000 0000',
+        registrationStatus: 'not_registered',
+        representativeConfirmed: true,
       }),
     ).toThrow(BadRequestException);
     expect(create).not.toHaveBeenCalled();

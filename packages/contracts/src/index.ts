@@ -136,17 +136,13 @@ export const createBusinessApplicationSchema = z
     address: z.string().trim().max(500).optional(),
     phone: optionalContactText,
     whatsapp: optionalContactText,
-    email: z.string().trim().email().max(254).optional().or(z.literal("")),
+    email: z.string().trim().email().max(254),
     website: z.string().trim().url().max(500).optional().or(z.literal("")),
     registrationStatus: businessRegistrationStatusSchema,
     registeredLegalName: z.string().trim().max(160).optional(),
     registrationNumber: z.string().trim().max(80).optional(),
     entityType: businessEntityTypeSchema.optional(),
     representativeConfirmed: z.literal(true),
-  })
-  .refine(({ phone, whatsapp, email }) => phone || whatsapp || email, {
-    message: "Provide at least one phone number, WhatsApp number, or email",
-    path: ["phone"],
   })
   .superRefine((application, context) => {
     if (application.registrationStatus !== "registered") return;
@@ -1378,6 +1374,12 @@ export const adminBusinessReviewItemSchema = z.object({
     })
     .nullable(),
   contactVerified: z.boolean(),
+  approvalReadiness: z.object({
+    ready: z.boolean(),
+    missing: z.array(
+      z.enum(["linked_owner", "verified_contact", "ownership_application"]),
+    ),
+  }),
   latestReview: z
     .object({
       decision: businessReviewDecisionSchema,
