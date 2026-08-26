@@ -5,7 +5,10 @@ import {
   Param,
   Query,
 } from '@nestjs/common';
-import { publicBusinessDirectoryQuerySchema } from '@zed360/contracts';
+import {
+  publicBusinessComparisonQuerySchema,
+  publicBusinessDirectoryQuerySchema,
+} from '@zed360/contracts';
 import { PublicBusinessesService } from './public-businesses.service';
 
 @Controller('businesses')
@@ -25,6 +28,17 @@ export class PublicBusinessesController {
       });
     }
     return this.businesses.getDirectory(parsed.data);
+  }
+
+  @Get('compare')
+  compare(@Query() query: Record<string, unknown>) {
+    const parsed = publicBusinessComparisonQuerySchema.safeParse(query);
+    if (!parsed.success) {
+      throw new BadRequestException(
+        'Choose two or three valid businesses to compare.',
+      );
+    }
+    return this.businesses.compare(parsed.data.slugs);
   }
 
   @Get(':slug')

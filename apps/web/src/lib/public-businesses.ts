@@ -2,9 +2,11 @@ import "server-only";
 
 import {
   publicBusinessDirectorySchema,
+  publicBusinessComparisonSchema,
   publicBusinessProfileSchema,
   referenceDataSchema,
   type PublicBusinessDirectory,
+  type PublicBusinessComparison,
   type PublicBusinessProfile,
   type ReferenceData,
 } from "@zed360/contracts";
@@ -86,5 +88,19 @@ export async function fetchPublicReferenceData(): Promise<ReferenceData> {
     response,
     referenceDataSchema,
     "Search filters are temporarily unavailable.",
+  );
+}
+
+export async function fetchPublicBusinessComparison(
+  slugs: string[],
+): Promise<PublicBusinessComparison> {
+  const response = await fetch(
+    `${apiUrl}/businesses/compare?slugs=${encodeURIComponent(slugs.join(","))}`,
+    { cache: "no-store" },
+  );
+  return parseResponse(
+    response,
+    publicBusinessComparisonSchema,
+    "The selected businesses could not be compared.",
   );
 }
