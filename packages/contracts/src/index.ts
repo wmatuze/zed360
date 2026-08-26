@@ -338,6 +338,70 @@ export const businessPresenceSchema = z.object({
 });
 export type BusinessPresence = z.infer<typeof businessPresenceSchema>;
 
+export const operatingHoursDaySchema = z.discriminatedUnion("status", [
+  z.object({
+    dayOfWeek: z.number().int().min(0).max(6),
+    status: z.literal("closed"),
+  }),
+  z.object({
+    dayOfWeek: z.number().int().min(0).max(6),
+    status: z.literal("open_24_hours"),
+  }),
+  z
+    .object({
+      dayOfWeek: z.number().int().min(0).max(6),
+      status: z.literal("hours"),
+      opensAt: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
+      closesAt: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
+    })
+    .refine(({ opensAt, closesAt }) => opensAt !== closesAt, {
+      message: "Opening and closing times must be different.",
+      path: ["closesAt"],
+    }),
+]);
+export type OperatingHoursDay = z.infer<typeof operatingHoursDaySchema>;
+
+export const updateLocationOperatingHoursSchema = z
+  .object({ days: z.array(operatingHoursDaySchema).length(7) })
+  .superRefine(({ days }, context) => {
+    if (new Set(days.map(({ dayOfWeek }) => dayOfWeek)).size !== 7) {
+      context.addIssue({
+        code: "custom",
+        message: "Provide one schedule for every day of the week.",
+        path: ["days"],
+      });
+    }
+  });
+export type UpdateLocationOperatingHours = z.infer<
+  typeof updateLocationOperatingHoursSchema
+>;
+
+const locationOperatingHoursSchema = z.object({
+  configured: z.boolean(),
+  days: z.array(operatingHoursDaySchema).length(7),
+});
+
+export const businessOperatingHoursSchema = z.object({
+  business: z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+    slug: z.string(),
+  }),
+  timezone: z.literal("Africa/Lusaka"),
+  locations: z.array(
+    z.object({
+      id: z.string().uuid(),
+      name: z.string(),
+      isPrimary: z.boolean(),
+      districtName: z.string().nullable(),
+      operatingHours: locationOperatingHoursSchema,
+    }),
+  ),
+});
+export type BusinessOperatingHours = z.infer<
+  typeof businessOperatingHoursSchema
+>;
+
 export const contentReportTargetTypeSchema = z.enum(["business", "review"]);
 export const contentReportReasonSchema = z.enum([
   "misleading",
@@ -377,11 +441,11 @@ export const adminContentReportQueueSchema = z.object({
   reports: z.array(
     z.object({
       id: z.string().uuid(),
-        targetType: contentReportTargetTypeSchema,
-        targetId: z.string().uuid(),
-        targetLabel: z.string(),
-        targetSlug: z.string().nullable(),
-        reason: contentReportReasonSchema,
+      targetType: contentReportTargetTypeSchema,
+      targetId: z.string().uuid(),
+      targetLabel: z.string(),
+      targetSlug: z.string().nullable(),
+      reason: contentReportReasonSchema,
       details: z.string(),
       reporterEmail: z.string().nullable(),
       createdAt: z.string().datetime(),
@@ -890,6 +954,16 @@ const publicBusinessLocationSchema = z.object({
       provinceSlug: z.string(),
     })
     .nullable(),
+  operatingHours: locationOperatingHoursSchema.extend({
+    currentStatus: z.enum([
+      "open",
+      "closed",
+      "temporarily_unavailable",
+      "unknown",
+    ]),
+    currentLabel: z.string(),
+    todayLabel: z.string(),
+  }),
 });
 
 const publicBusinessCoverageAreaSchema = z.object({

@@ -31,6 +31,18 @@ const availabilityLabels = {
   temporarily_unavailable: "Temporarily unavailable",
 } as const;
 
+const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+function hoursLabel(
+  day:
+    | { status: "closed" | "open_24_hours" }
+    | { status: "hours"; opensAt: string; closesAt: string },
+) {
+  if (day.status === "hours") return `${day.opensAt} – ${day.closesAt}`;
+  if (day.status === "closed") return "Closed";
+  return "Open 24 hours";
+}
+
 type ProfilePageProps = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({
@@ -559,9 +571,16 @@ export default async function BusinessProfilePage({
                 <div className="mt-4 space-y-4">
                   {business.locations.map((location) => (
                     <div key={location.id}>
-                      <p className="text-sm font-semibold text-white/78">
-                        {location.name}
-                      </p>
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="text-sm font-semibold text-white/78">
+                          {location.name}
+                        </p>
+                        <span
+                          className={`shrink-0 rounded-full border px-2.5 py-1 text-[.68rem] ${location.operatingHours.currentStatus === "open" ? "border-[var(--lime)]/25 bg-[var(--lime)]/8 text-[var(--lime)]" : "border-white/10 bg-white/5 text-white/45"}`}
+                        >
+                          {location.operatingHours.currentLabel}
+                        </span>
+                      </div>
                       <p className="mt-1 text-xs leading-5 text-white/42">
                         {[
                           location.district?.name,
@@ -570,6 +589,26 @@ export default async function BusinessProfilePage({
                           .filter(Boolean)
                           .join(" · ")}
                       </p>
+                      <p className="mt-2 text-xs text-white/55">
+                        Today: {location.operatingHours.todayLabel}
+                      </p>
+                      {location.operatingHours.configured ? (
+                        <details className="mt-2 text-xs text-white/42">
+                          <summary className="cursor-pointer text-[var(--lime)]/75">
+                            View weekly hours
+                          </summary>
+                          <dl className="mt-3 grid grid-cols-[2.5rem_1fr] gap-x-3 gap-y-2">
+                            {location.operatingHours.days.map((day) => (
+                              <div className="contents" key={day.dayOfWeek}>
+                                <dt>{dayNames[day.dayOfWeek]}</dt>
+                                <dd className="text-white/60">
+                                  {hoursLabel(day)}
+                                </dd>
+                              </div>
+                            ))}
+                          </dl>
+                        </details>
+                      ) : null}
                     </div>
                   ))}
                 </div>
