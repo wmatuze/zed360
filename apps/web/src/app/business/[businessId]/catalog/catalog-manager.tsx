@@ -489,50 +489,71 @@ export function CatalogManager({ catalog }: { catalog: BusinessCatalog }) {
   ];
   return (
     <div className="mt-10 space-y-8">
-      <section className="rounded-3xl border border-white/10 bg-white/[0.035] p-6 sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--lime)]">
-          Display-only products
-        </p>
-        <h2 className="mt-2 text-2xl font-semibold">Add a product</h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-white/45">
-          Products help customers discover what you sell. Payments and orders
-          stay directly between you and the customer.
-        </p>
-        <div className="mt-6">
-          <ProductForm businessId={catalog.business.id} />
-        </div>
-      </section>
-
-      {catalog.products.map((product) => (
-        <details
-          className="rounded-3xl border border-white/10 bg-white/[0.035] p-6 sm:p-8"
-          key={product.id}
-        >
-          <summary className="cursor-pointer list-none text-xl font-semibold">
-            {product.name}
-            <span className="ml-3 text-xs font-normal text-white/38">
-              {product.isPublished ? "Published" : "Private draft"} ·{" "}
-              {availabilityLabels[product.availability]}
-            </span>
-          </summary>
+      <div className="grid items-start gap-6 lg:grid-cols-2">
+        <section className="rounded-3xl border border-white/10 bg-white/[0.035] p-6 sm:p-7">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--lime)]">
+            Display-only products
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold">Add a product</h2>
+          <p className="mt-2 text-sm leading-6 text-white/45">
+            Products help customers discover what you sell. Payments and orders
+            stay directly between you and the customer.
+          </p>
           <div className="mt-6">
-            <ProductForm businessId={catalog.business.id} product={product} />
+            <ProductForm businessId={catalog.business.id} />
           </div>
-        </details>
-      ))}
+        </section>
 
-      <section className="rounded-3xl border border-white/10 bg-white/[0.035] p-6 sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--lime)]">
-          Visual storefront
-        </p>
-        <h2 className="mt-2 text-2xl font-semibold">Upload an image</h2>
-        <div className="mt-6">
-          <MediaUploadForm
-            businessId={catalog.business.id}
-            products={catalog.products}
-          />
-        </div>
-      </section>
+        <section className="rounded-3xl border border-white/10 bg-white/[0.035] p-6 sm:p-7">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--lime)]">
+            Visual storefront
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold">Upload an image</h2>
+          <p className="mt-2 text-sm leading-6 text-white/45">
+            Add product photos, work samples, and profile images customers can
+            trust.
+          </p>
+          <div className="mt-6">
+            <MediaUploadForm
+              businessId={catalog.business.id}
+              products={catalog.products}
+            />
+          </div>
+        </section>
+      </div>
+
+      {catalog.products.length ? (
+        <section>
+          <div className="flex items-end justify-between gap-4">
+            <h2 className="text-2xl font-semibold">Your products</h2>
+            <span className="text-sm text-white/38">
+              {catalog.products.length} total
+            </span>
+          </div>
+          <div className="mt-4 grid items-start gap-4 lg:grid-cols-2">
+            {catalog.products.map((product) => (
+              <details
+                className="rounded-2xl border border-white/10 bg-white/[0.035] p-5 sm:p-6"
+                key={product.id}
+              >
+                <summary className="cursor-pointer list-none text-lg font-semibold">
+                  {product.name}
+                  <span className="ml-3 text-xs font-normal text-white/38">
+                    {product.isPublished ? "Published" : "Private draft"} ·{" "}
+                    {availabilityLabels[product.availability]}
+                  </span>
+                </summary>
+                <div className="mt-6">
+                  <ProductForm
+                    businessId={catalog.business.id}
+                    product={product}
+                  />
+                </div>
+              </details>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {allMedia.length ? (
         <section>
