@@ -108,7 +108,7 @@ export default async function BusinessesPage({
 
       <section className="mx-auto w-full max-w-7xl px-5 pb-20 pt-12 sm:px-8 lg:px-10 lg:pt-20">
         <p className="eyebrow">
-          <span /> Window shop across Zambia
+          <span /> Business discovery
         </p>
         <div className="mt-5 flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
           <div>
