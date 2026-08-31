@@ -42,8 +42,22 @@ export async function requestSignInLink(
     if (error) {
       console.error("[business-sign-in] Supabase rejected the OTP request", {
         code: error.code,
+        message: error.message,
         status: error.status,
       });
+
+      if (
+        error.status === 429 ||
+        error.code === "over_email_send_rate_limit" ||
+        /rate limit|security purposes/i.test(error.message)
+      ) {
+        return {
+          status: "error",
+          message:
+            "A sign-in email was requested recently. Wait about one minute, then request a new link.",
+        };
+      }
+
       return {
         status: "error",
         message:
