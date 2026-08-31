@@ -1110,6 +1110,36 @@ export const publicBusinessProfileSchema = z.object({
 
 export type PublicBusinessProfile = z.infer<typeof publicBusinessProfileSchema>;
 
+export const publicBusinessComparisonQuerySchema = z.object({
+  slugs: z
+    .string()
+    .trim()
+    .transform((value) => [
+      ...new Set(
+        value
+          .split(",")
+          .map((slug) => slug.trim())
+          .filter(Boolean),
+      ),
+    ])
+    .pipe(
+      z
+        .array(z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/))
+        .min(2)
+        .max(3),
+    ),
+});
+export type PublicBusinessComparisonQuery = z.infer<
+  typeof publicBusinessComparisonQuerySchema
+>;
+
+export const publicBusinessComparisonSchema = z.object({
+  businesses: z.array(publicBusinessProfileSchema).min(2).max(3),
+});
+export type PublicBusinessComparison = z.infer<
+  typeof publicBusinessComparisonSchema
+>;
+
 export const businessRequestMatchStatusSchema = z.enum([
   "queued",
   "sent",

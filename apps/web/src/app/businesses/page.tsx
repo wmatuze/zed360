@@ -3,6 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
 import {
+  CompareButton,
+  ComparisonTray,
+} from "@/components/business-comparison-controls";
+import {
   fetchPublicBusinessDirectory,
   fetchPublicReferenceData,
   PublicBusinessApiError,
@@ -229,89 +233,93 @@ export default async function BusinessesPage({
         {directory?.businesses.length ? (
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {directory.businesses.map((business) => (
-              <Link
-                className="group flex min-h-72 flex-col rounded-3xl border border-white/10 bg-white/[0.035] p-6 transition hover:-translate-y-1 hover:border-[var(--lime)]/35 hover:bg-white/[0.055]"
-                href={`/businesses/${business.slug}`}
-                key={business.id}
-              >
-                {business.coverUrl ? (
-                  <div className="relative mb-5 aspect-[16/7] overflow-hidden rounded-2xl bg-white/5">
-                    <Image
-                      alt=""
-                      className="object-cover"
-                      fill
-                      sizes="(max-width: 640px) 100vw, 33vw"
-                      src={business.coverUrl}
-                      unoptimized
-                    />
-                  </div>
-                ) : null}
-                <div className="flex items-start justify-between gap-4">
-                  {business.logoUrl ? (
-                    <span className="relative block h-12 w-12 shrink-0 overflow-hidden rounded-2xl bg-white/8">
+              <div className="relative" key={business.id}>
+                <Link
+                  className="group flex min-h-72 flex-col rounded-3xl border border-white/10 bg-white/[0.035] p-6 transition hover:-translate-y-1 hover:border-[var(--lime)]/35 hover:bg-white/[0.055]"
+                  href={`/businesses/${business.slug}`}
+                >
+                  {business.coverUrl ? (
+                    <div className="relative mb-5 aspect-[16/7] overflow-hidden rounded-2xl bg-white/5">
                       <Image
-                        alt={`${business.name} logo`}
+                        alt=""
                         className="object-cover"
                         fill
-                        sizes="48px"
-                        src={business.logoUrl}
+                        sizes="(max-width: 640px) 100vw, 33vw"
+                        src={business.coverUrl}
                         unoptimized
                       />
-                    </span>
-                  ) : (
-                    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[var(--lime)] text-lg font-bold text-[var(--ink)]">
-                      {business.name.slice(0, 1).toUpperCase()}
-                    </span>
-                  )}
-                  <div className="flex flex-wrap justify-end gap-2">
-                    {business.trust.contactVerified ? (
-                      <span className="rounded-full border border-[var(--lime)]/25 bg-[var(--lime)]/8 px-3 py-1 text-xs text-[var(--lime)]">
-                        Contact verified
+                    </div>
+                  ) : null}
+                  <div className="flex items-start justify-between gap-4">
+                    {business.logoUrl ? (
+                      <span className="relative block h-12 w-12 shrink-0 overflow-hidden rounded-2xl bg-white/8">
+                        <Image
+                          alt={`${business.name} logo`}
+                          className="object-cover"
+                          fill
+                          sizes="48px"
+                          src={business.logoUrl}
+                          unoptimized
+                        />
                       </span>
-                    ) : null}
-                    {business.trust.registrationVerified ? (
-                      <span className="rounded-full border border-[var(--sky)]/25 bg-[var(--sky)]/8 px-3 py-1 text-xs text-[var(--sky)]">
-                        Registration verified
+                    ) : (
+                      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[var(--lime)] text-lg font-bold text-[var(--ink)]">
+                        {business.name.slice(0, 1).toUpperCase()}
                       </span>
-                    ) : null}
+                    )}
+                    <div className="flex flex-wrap justify-end gap-2">
+                      {business.trust.contactVerified ? (
+                        <span className="rounded-full border border-[var(--lime)]/25 bg-[var(--lime)]/8 px-3 py-1 text-xs text-[var(--lime)]">
+                          Contact verified
+                        </span>
+                      ) : null}
+                      {business.trust.registrationVerified ? (
+                        <span className="rounded-full border border-[var(--sky)]/25 bg-[var(--sky)]/8 px-3 py-1 text-xs text-[var(--sky)]">
+                          Registration verified
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
-                </div>
-                <h2 className="mt-5 text-xl font-semibold tracking-[-0.03em] transition group-hover:text-[var(--lime)]">
-                  {business.name}
-                </h2>
-                <p
-                  className={`mt-2 text-xs ${business.availabilityFreshness === "current" && business.availability === "available" ? "text-[var(--lime)]" : "text-white/38"}`}
-                >
-                  {business.availabilityFreshness === "current"
-                    ? availabilityLabels[business.availability]
-                    : "Availability not recently confirmed"}
-                </p>
-                <p className="mt-2 line-clamp-3 text-sm leading-6 text-white/48">
-                  {business.description || business.serviceNames.join(" · ")}
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {business.categories.slice(0, 3).map((category) => (
-                    <span
-                      className="rounded-full bg-white/7 px-3 py-1 text-xs text-white/55"
-                      key={category.slug}
-                    >
-                      {category.name}
+                  <h2 className="mt-5 text-xl font-semibold tracking-[-0.03em] transition group-hover:text-[var(--lime)]">
+                    {business.name}
+                  </h2>
+                  <p
+                    className={`mt-2 text-xs ${business.availabilityFreshness === "current" && business.availability === "available" ? "text-[var(--lime)]" : "text-white/38"}`}
+                  >
+                    {business.availabilityFreshness === "current"
+                      ? availabilityLabels[business.availability]
+                      : "Availability not recently confirmed"}
+                  </p>
+                  <p className="mt-2 line-clamp-3 text-sm leading-6 text-white/48">
+                    {business.description || business.serviceNames.join(" · ")}
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {business.categories.slice(0, 3).map((category) => (
+                      <span
+                        className="rounded-full bg-white/7 px-3 py-1 text-xs text-white/55"
+                        key={category.slug}
+                      >
+                        {category.name}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-auto flex items-end justify-between gap-4 pb-12 pt-6 text-sm">
+                    <span className="text-white/42">
+                      {business.primaryLocation?.district?.name ??
+                        "Service location available"}
                     </span>
-                  ))}
-                </div>
-                <div className="mt-auto flex items-end justify-between gap-4 pt-6 text-sm">
-                  <span className="text-white/42">
-                    {business.primaryLocation?.district?.name ??
-                      "Service location available"}
-                  </span>
-                  <span className="font-semibold text-[var(--lime)]">
-                    View profile →
-                  </span>
-                </div>
-              </Link>
+                    <span className="font-semibold text-[var(--lime)]">
+                      View profile →
+                    </span>
+                  </div>
+                </Link>
+                <CompareButton name={business.name} slug={business.slug} />
+              </div>
             ))}
           </div>
         ) : null}
+
+        <ComparisonTray />
 
         {directory && directory.businesses.length === 0 ? (
           <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.035] p-8 text-center">

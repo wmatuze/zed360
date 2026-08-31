@@ -48,6 +48,12 @@ function optionalNumber(value: string | null) {
 export class PublicBusinessesService {
   constructor(private readonly database: DatabaseService) {}
 
+  async compare(slugs: string[]) {
+    return {
+      businesses: await Promise.all(slugs.map((slug) => this.getProfile(slug))),
+    };
+  }
+
   async getDirectory(
     query: PublicBusinessDirectoryQuery,
   ): Promise<PublicBusinessDirectory> {
