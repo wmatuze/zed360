@@ -235,7 +235,7 @@ export default async function BusinessesPage({
             {directory.businesses.map((business) => (
               <div className="relative" key={business.id}>
                 <Link
-                  className="group flex min-h-72 flex-col rounded-3xl border border-white/10 bg-white/[0.035] p-6 transition hover:-translate-y-1 hover:border-[var(--lime)]/35 hover:bg-white/[0.055]"
+                  className="group flex h-full min-h-72 flex-col rounded-3xl border border-white/10 bg-white/[0.035] p-6 transition hover:-translate-y-1 hover:border-[var(--lime)]/35 hover:bg-white/[0.055]"
                   href={`/businesses/${business.slug}`}
                 >
                   {business.coverUrl ? (

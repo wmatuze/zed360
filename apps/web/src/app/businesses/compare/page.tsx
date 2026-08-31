@@ -126,13 +126,13 @@ export default async function CompareBusinessesPage({
 
         {businesses.length ? (
           <div className="mt-10 overflow-x-auto pb-4">
-            <div className="grid min-w-max gap-4" style={columns}>
+            <div className="grid gap-4" style={columns}>
               {businesses.map((business) => (
                 <article
-                  className="w-full rounded-3xl border border-white/10 bg-white/[.035] p-6"
+                  className="w-full min-w-0 rounded-3xl border border-white/10 bg-white/[.035] p-6"
                   key={business.id}
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex min-w-0 items-center gap-4">
                     {business.logoUrl ? (
                       <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-white/8">
                         <Image
@@ -148,8 +148,10 @@ export default async function CompareBusinessesPage({
                         {business.name[0]?.toUpperCase()}
                       </span>
                     )}
-                    <div>
-                      <h2 className="text-xl font-semibold">{business.name}</h2>
+                    <div className="min-w-0">
+                      <h2 className="break-words text-xl font-semibold">
+                        {business.name}
+                      </h2>
                       <Link
                         className="text-xs text-[var(--lime)] hover:underline"
                         href={`/businesses/${business.slug}`}
@@ -331,7 +333,7 @@ function ComparisonSection({
   children: React.ReactNode;
 }) {
   return (
-    <section className="mt-7 min-w-max">
+    <section className="mt-7">
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-[.14em] text-[var(--lime)]">
         {title}
       </h2>
