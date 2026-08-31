@@ -1,4 +1,7 @@
-import { resolveReviewTransition } from './business-reviews.service';
+import {
+  resolveApprovalReadiness,
+  resolveReviewTransition,
+} from './business-reviews.service';
 
 describe('business review transitions', () => {
   it('does not allow the pending-review reject action after approval', () => {
@@ -70,5 +73,30 @@ describe('business review transitions', () => {
         'reinstated',
       ),
     ).toBeNull();
+  });
+});
+
+describe('business approval readiness', () => {
+  it('lists the checks that still prevent approval', () => {
+    expect(
+      resolveApprovalReadiness({
+        hasLinkedOwner: false,
+        hasVerifiedContact: false,
+        hasOwnershipApplication: true,
+      }),
+    ).toEqual({
+      ready: false,
+      missing: ['linked_owner', 'verified_contact'],
+    });
+  });
+
+  it('is ready only after every approval check passes', () => {
+    expect(
+      resolveApprovalReadiness({
+        hasLinkedOwner: true,
+        hasVerifiedContact: true,
+        hasOwnershipApplication: true,
+      }),
+    ).toEqual({ ready: true, missing: [] });
   });
 });

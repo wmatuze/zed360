@@ -52,6 +52,21 @@ type ReviewTransition = BusinessState & {
   requiresApprovalEvidence: boolean;
 };
 
+type ApprovalRequirement =
+  'linked_owner' | 'verified_contact' | 'ownership_application';
+
+export function resolveApprovalReadiness(checks: {
+  hasLinkedOwner: boolean;
+  hasVerifiedContact: boolean;
+  hasOwnershipApplication: boolean;
+}) {
+  const missing: ApprovalRequirement[] = [];
+  if (!checks.hasLinkedOwner) missing.push('linked_owner');
+  if (!checks.hasVerifiedContact) missing.push('verified_contact');
+  if (!checks.hasOwnershipApplication) missing.push('ownership_application');
+  return { ready: missing.length === 0, missing };
+}
+
 export function resolveReviewTransition(
   current: BusinessState,
   decision: SubmitBusinessReview['decision'],
@@ -272,6 +287,19 @@ export class BusinessReviewsService {
         const verifications = verificationRows.filter(
           (row) => row.businessId === business.id,
         );
+        const ownerEmail =
+          ownerRows.find((row) => row.businessId === business.id)?.email ??
+          null;
+        const contactVerified = verifications.some(
+          ({ type, status }) => type === 'contact' && status === 'verified',
+        );
+        const approvalReadiness = resolveApprovalReadiness({
+          hasLinkedOwner: Boolean(ownerEmail),
+          hasVerifiedContact: contactVerified,
+          hasOwnershipApplication: verifications.some(
+            ({ type }) => type === 'ownership',
+          ),
+        });
         const ownershipEvidence = verifications.find(
           ({ type }) => type === 'ownership',
         )?.evidence;
@@ -292,9 +320,7 @@ export class BusinessReviewsService {
             whatsapp: business.whatsapp,
             website: business.website,
           },
-          ownerEmail:
-            ownerRows.find((row) => row.businessId === business.id)?.email ??
-            null,
+          ownerEmail,
           services: serviceRows
             .filter((row) => row.businessId === business.id)
             .map(({ name, categoryName }) => ({ name, categoryName })),
@@ -307,9 +333,8 @@ export class BusinessReviewsService {
               provinceName,
             })),
           registration: registrationFromEvidence(ownershipEvidence),
-          contactVerified: verifications.some(
-            ({ type, status }) => type === 'contact' && status === 'verified',
-          ),
+          contactVerified,
+          approvalReadiness,
           latestReview: latestReview
             ? {
                 decision: latestReview.decision,

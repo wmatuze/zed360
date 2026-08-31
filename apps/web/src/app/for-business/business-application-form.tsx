@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { ApplicationVerificationStep } from "./application-verification-step";
 
 type District = { id: string; name: string; slug: string };
 type Province = {
@@ -20,6 +21,8 @@ type CreatedApplication = {
   id: string;
   status: "draft";
   createdAt: string;
+  email: string;
+  claimToken: string;
 };
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/v1";
@@ -86,7 +89,7 @@ export function BusinessApplicationForm() {
       address: value("address") || undefined,
       phone: value("phone") || undefined,
       whatsapp: value("whatsapp") || undefined,
-      email: value("email") || undefined,
+      email: value("email"),
       website: value("website") || undefined,
       registrationStatus,
       registeredLegalName: value("registeredLegalName") || undefined,
@@ -101,7 +104,10 @@ export function BusinessApplicationForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const result = (await response.json()) as CreatedApplication & {
+      const result = (await response.json()) as Omit<
+        CreatedApplication,
+        "email"
+      > & {
         message?: string;
       };
       if (!response.ok) {
@@ -109,7 +115,7 @@ export function BusinessApplicationForm() {
           result.message ?? "Your application could not be submitted.",
         );
       }
-      setApplication(result);
+      setApplication({ ...result, email: payload.email });
     } catch (error) {
       setSubmitError(
         error instanceof Error
@@ -128,15 +134,19 @@ export function BusinessApplicationForm() {
           ✓
         </span>
         <h2 className="mt-6 text-2xl font-semibold tracking-[-0.035em]">
-          Your business application is saved.
+          Application received.
         </h2>
         <p className="mt-3 leading-7 text-white/60">
-          The profile remains private while Zed360 reviews the information and
-          confirms that you represent the business.
+          Your business profile is saved privately. Verify your email before
+          Zed360 reviews it for publication.
         </p>
         <p className="mt-4 text-sm text-white/42">
           Application reference: {application.id.slice(0, 8).toUpperCase()}
         </p>
+        <ApplicationVerificationStep
+          claimToken={application.claimToken}
+          email={application.email}
+        />
       </div>
     );
   }
@@ -373,8 +383,8 @@ export function BusinessApplicationForm() {
           How should Zed360 contact you?
         </legend>
         <p className="mb-3 text-xs text-white/35">
-          Provide at least one contact method. It will not be published before
-          review.
+          Your email is required to securely connect this application to your
+          account. Contact details are not published before review.
         </p>
         <div className="grid gap-5 sm:grid-cols-2">
           <input
@@ -395,7 +405,8 @@ export function BusinessApplicationForm() {
             className={inputClass}
             maxLength={254}
             name="email"
-            placeholder="Email"
+            placeholder="Business email (required)"
+            required
             type="email"
           />
           <input

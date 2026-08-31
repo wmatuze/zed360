@@ -59,6 +59,16 @@ export default async function BusinessSignInPage({
               sign-in link to continue.
             </p>
           ) : null}
+          {parameters.error === "invalid_or_expired" ? (
+            <p
+              className="mb-4 rounded-xl border border-amber-200/20 bg-amber-200/8 px-4 py-3 text-sm text-amber-100/80"
+              role="alert"
+            >
+              That sign-in link has expired or was already used. Request a new
+              link below, then open only the newest email. Your pending business
+              connection will be preserved.
+            </p>
+          ) : null}
           <SignInForm nextPath={nextPath} />
         </div>
       </section>

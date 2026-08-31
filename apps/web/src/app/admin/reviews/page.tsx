@@ -201,6 +201,29 @@ export default async function AdminReviewsPage({
                   </span>
                 </div>
 
+                {business.status === "draft" &&
+                (business.reviewStatus === "pending" ||
+                  business.reviewStatus === "changes_requested") ? (
+                  <div
+                    className={`mt-5 rounded-xl border px-4 py-3 text-sm ${
+                      business.approvalReadiness.ready
+                        ? "border-[var(--lime)]/20 bg-[var(--lime)]/8 text-white/75"
+                        : "border-amber-200/20 bg-amber-200/8 text-amber-50/75"
+                    }`}
+                  >
+                    {business.approvalReadiness.ready
+                      ? "Ready for Zed360 review."
+                      : business.approvalReadiness.missing.includes(
+                            "linked_owner",
+                          ) ||
+                          business.approvalReadiness.missing.includes(
+                            "verified_contact",
+                          )
+                        ? "Waiting for the business owner to verify their email and link this application."
+                        : "This application is missing required ownership information."}
+                  </div>
+                ) : null}
+
                 <p className="mt-5 max-w-3xl text-sm leading-6 text-white/58">
                   {display(business.description)}
                 </p>
@@ -289,6 +312,7 @@ export default async function AdminReviewsPage({
                   </label>
                   <div className="mt-4">
                     <ReviewButtons
+                      approvalReady={business.approvalReadiness.ready}
                       reviewStatus={business.reviewStatus}
                       status={business.status}
                     />

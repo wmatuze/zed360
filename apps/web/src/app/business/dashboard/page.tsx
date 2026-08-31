@@ -52,6 +52,15 @@ export default async function BusinessDashboardPage() {
   }
 
   const totals = dashboard?.totals;
+  if (
+    dashboard &&
+    !dashboard.businesses.some(
+      (business) =>
+        business.status === "active" && business.reviewStatus === "approved",
+    )
+  ) {
+    redirect("/business/account");
+  }
   return (
     <main className="min-h-screen bg-[var(--ink)] px-5 py-6 text-white sm:px-8 lg:px-10">
       <header className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4">

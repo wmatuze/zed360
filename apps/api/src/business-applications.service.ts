@@ -12,7 +12,7 @@ import {
   eq,
   requestMatches,
 } from '@zed360/database';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { DatabaseService } from './database.service';
 
 function businessSlug(name: string) {
@@ -32,6 +32,10 @@ export class BusinessApplicationsService {
   constructor(private readonly database: DatabaseService) {}
 
   async create(application: CreateBusinessApplication) {
+    const claimToken = randomBytes(32).toString('base64url');
+    const claimTokenHash = createHash('sha256')
+      .update(claimToken)
+      .digest('hex');
     const [[category], [district]] = await Promise.all([
       this.database.db
         .select({ id: categories.id })
@@ -108,6 +112,7 @@ export class BusinessApplicationsService {
             source: 'business_application_self_attestation',
             representativeConfirmed: application.representativeConfirmed,
             registrationDeclaration,
+            claimTokenHash,
             submittedAt: new Date().toISOString(),
           },
         }),
@@ -169,6 +174,7 @@ export class BusinessApplicationsService {
       ...created,
       status: 'draft' as const,
       createdAt: created.createdAt.toISOString(),
+      claimToken,
     };
   }
 }

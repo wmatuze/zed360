@@ -88,9 +88,11 @@ function availableActions(
 export function ReviewButtons({
   status,
   reviewStatus,
+  approvalReady,
 }: {
   status: BusinessStatus;
   reviewStatus: ReviewStatus;
+  approvalReady: boolean;
 }) {
   const { pending } = useFormStatus();
   const actions = availableActions(status, reviewStatus);
@@ -106,7 +108,9 @@ export function ReviewButtons({
                 ? "button button-quiet disabled:cursor-not-allowed disabled:opacity-50"
                 : "rounded-xl border border-red-300/25 px-5 py-3 text-sm font-semibold text-red-100/80 transition hover:bg-red-300/10 disabled:cursor-not-allowed disabled:opacity-50"
           }
-          disabled={pending}
+          disabled={
+            pending || (action.decision === "approved" && !approvalReady)
+          }
           key={action.decision}
           name="decision"
           onClick={(event) => {
