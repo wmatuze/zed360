@@ -6,6 +6,7 @@ import {
   Headers,
   Post,
   Query,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   businessApplicationClaimSchema,
@@ -13,6 +14,42 @@ import {
 } from '@zed360/contracts';
 import { AuthenticatedUserService } from './authenticated-user.service';
 import { BusinessAccountsService } from './business-accounts.service';
+import { loadApiEnvironment } from './environment';
+import { timingSafeEqual } from 'node:crypto';
+
+function assertInternalRequest(providedSecret?: string) {
+  loadApiEnvironment();
+  const expectedSecret = process.env.INTERNAL_API_SECRET;
+  if (!expectedSecret || expectedSecret.length < 32 || !providedSecret) {
+    throw new UnauthorizedException('This operation is unavailable.');
+  }
+
+  const expected = Buffer.from(expectedSecret);
+  const provided = Buffer.from(providedSecret);
+  if (
+    expected.length !== provided.length ||
+    !timingSafeEqual(expected, provided)
+  ) {
+    throw new UnauthorizedException('This operation is unavailable.');
+  }
+}
+
+function parseEmail(body: unknown) {
+  if (typeof body !== 'object' || body === null || !('email' in body)) {
+    return null;
+  }
+  const value = (body as { email?: unknown }).email;
+  if (typeof value !== 'string') return null;
+  const email = value.trim();
+  if (
+    !email ||
+    email.length > 254 ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  ) {
+    return null;
+  }
+  return email;
+}
 
 @Controller('business-account')
 export class BusinessAccountsController {
@@ -20,6 +57,19 @@ export class BusinessAccountsController {
     private readonly authentication: AuthenticatedUserService,
     private readonly accounts: BusinessAccountsService,
   ) {}
+
+  @Post('sign-in-eligibility')
+  signInEligibility(
+    @Headers('x-zed360-internal-secret') internalSecret: string | undefined,
+    @Body() body: unknown,
+  ) {
+    assertInternalRequest(internalSecret);
+    const email = parseEmail(body);
+    if (!email) {
+      throw new BadRequestException('A valid email address is required.');
+    }
+    return this.accounts.getSignInEligibility(email);
+  }
 
   @Get()
   async getAccount(@Headers('authorization') authorization?: string) {

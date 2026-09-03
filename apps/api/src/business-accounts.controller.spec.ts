@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { AuthenticatedUserService } from './authenticated-user.service';
 import { BusinessAccountsController } from './business-accounts.controller';
 import { BusinessAccountsService } from './business-accounts.service';
@@ -11,6 +11,7 @@ describe('BusinessAccountsController', () => {
   };
   const verify = jest.fn();
   const getAccount = jest.fn();
+  const getSignInEligibility = jest.fn();
   const claimBusiness = jest.fn();
   const previewApplicationClaim = jest.fn();
   const confirmApplicationClaim = jest.fn();
@@ -18,6 +19,7 @@ describe('BusinessAccountsController', () => {
     { verify } as unknown as AuthenticatedUserService,
     {
       getAccount,
+      getSignInEligibility,
       claimBusiness,
       previewApplicationClaim,
       confirmApplicationClaim,
@@ -25,7 +27,13 @@ describe('BusinessAccountsController', () => {
   );
 
   beforeEach(() => {
+    process.env.INTERNAL_API_SECRET =
+      'test-internal-secret-that-is-long-enough';
     verify.mockReset().mockResolvedValue(user);
+    getSignInEligibility.mockReset().mockResolvedValue({
+      eligible: true,
+      mayCreateUser: true,
+    });
     getAccount.mockReset().mockResolvedValue({
       businesses: [],
       claimableBusinesses: [],
@@ -46,6 +54,22 @@ describe('BusinessAccountsController', () => {
       submittedEmail: user.email,
       status: 'already_connected',
     });
+  });
+
+  it('checks sign-in eligibility only for an authenticated internal request', async () => {
+    await expect(
+      controller.signInEligibility('test-internal-secret-that-is-long-enough', {
+        email: ' Owner@Example.com ',
+      }),
+    ).resolves.toEqual({ eligible: true, mayCreateUser: true });
+    expect(getSignInEligibility).toHaveBeenCalledWith('Owner@Example.com');
+  });
+
+  it('rejects public sign-in eligibility probes', async () => {
+    expect(() =>
+      controller.signInEligibility(undefined, { email: user.email }),
+    ).toThrow(UnauthorizedException);
+    expect(getSignInEligibility).not.toHaveBeenCalled();
   });
 
   it('verifies the bearer token before returning an account', async () => {
