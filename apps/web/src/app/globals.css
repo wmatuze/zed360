@@ -124,6 +124,39 @@ select {
   color: white;
 }
 
+.home-search {
+  display: grid;
+  gap: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 1.35rem;
+  background: rgba(19, 23, 32, 0.88);
+  padding: 0.7rem;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(18px);
+}
+.home-search-field { display: flex; min-width: 0; flex-direction: column; justify-content: center; gap: 0.3rem; padding: 0.55rem 0.8rem; text-align: left; }
+.home-search-field > span { color: rgba(255, 255, 255, 0.36); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.home-search-field input, .home-search-field select { width: 100%; border: 0; outline: 0; background: transparent; color: white; font: inherit; }
+.home-search-field input::placeholder { color: rgba(255, 255, 255, 0.27); }
+.home-search-field select { color-scheme: dark; cursor: pointer; }
+.home-search-button { width: 100%; border: 0; cursor: pointer; }
+.home-trust-point { display: flex; align-items: center; justify-content: center; gap: 0.55rem; border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 999px; background: rgba(255, 255, 255, 0.025); padding: 0.7rem 1rem; }
+.home-trust-point b { color: var(--lime); }
+.home-business-card { display: flex; min-height: 25rem; flex-direction: column; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.09); border-radius: 1.5rem; background: #11151d; transition: transform 180ms ease, border-color 180ms ease; }
+.home-business-card:hover { transform: translateY(-4px); border-color: rgba(184, 242, 56, 0.28); }
+.home-card-pattern { width: 100%; height: 100%; background: radial-gradient(circle at 75% 35%, rgba(119, 216, 255, 0.14), transparent 42%), linear-gradient(135deg, rgba(184, 242, 56, 0.09), transparent 55%), linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px); background-size: auto, auto, 28px 28px, 28px 28px; }
+.home-business-logo { position: absolute; bottom: 0.75rem; left: 1.25rem; display: grid; width: 3.25rem; height: 3.25rem; overflow: hidden; place-items: center; border: 3px solid #11151d; border-radius: 1rem; background: var(--lime); color: var(--ink); font-size: 0.74rem; font-weight: 800; }
+.verified-pill { flex: none; border: 1px solid rgba(184, 242, 56, 0.2); border-radius: 999px; background: rgba(184, 242, 56, 0.08); padding: 0.28rem 0.55rem; color: var(--lime); font-size: 0.64rem; font-weight: 700; }
+.home-empty-state { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 1.25rem; background: rgba(255, 255, 255, 0.025); padding: 1.25rem; color: rgba(255, 255, 255, 0.42); font-size: 0.88rem; }
+.home-empty-state a { color: var(--lime); font-weight: 650; }
+
+@media (max-width: 639px) {
+  .home-category-grid .category-card:nth-child(n + 7),
+  .home-business-grid .home-business-card:nth-child(n + 4) {
+    display: none;
+  }
+}
+
 .request-preview {
   width: min(100%, 31rem);
   overflow: hidden;
@@ -311,6 +344,9 @@ select {
 }
 
 @media (min-width: 768px) {
+  .home-search { grid-template-columns: minmax(0, 1.65fr) minmax(12rem, 0.75fr) auto; align-items: stretch; }
+  .home-search-field + .home-search-field { border-left: 1px solid rgba(255, 255, 255, 0.09); }
+  .home-search-button { width: auto; }
   .business-banner {
     flex-direction: row;
     align-items: end;
