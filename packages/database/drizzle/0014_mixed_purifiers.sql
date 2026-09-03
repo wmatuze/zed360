@@ -1,0 +1,1 @@
+ALTER TABLE "business_services" ADD COLUMN "status" "catalog_item_status" DEFAULT 'active' NOT NULL;

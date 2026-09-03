@@ -58,12 +58,14 @@ export class BusinessDashboardService {
               and dashboard_review.is_published = true) as published_reviews,
           exists (select 1 from business_services dashboard_service
             where dashboard_service.business_id = member_business.id
-              and dashboard_service.is_available = true) as has_available_service,
+              and dashboard_service.is_available = true
+              and dashboard_service.status = 'active') as has_available_service,
           exists (
             select 1 from business_service_fulfillment_options dashboard_coverage
             inner join business_services coverage_service
               on coverage_service.id = dashboard_coverage.business_service_id
             where coverage_service.business_id = member_business.id
+              and coverage_service.status = 'active'
               and dashboard_coverage.is_active = true
           ) as has_coverage,
           exists (select 1 from business_media_assets approved_media

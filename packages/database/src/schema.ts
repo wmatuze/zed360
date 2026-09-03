@@ -478,6 +478,7 @@ export const businessServices = pgTable(
       .$type<Record<string, unknown>>()
       .default({})
       .notNull(),
+    status: catalogItemStatus("status").default("active").notNull(),
     isAvailable: boolean("is_available").default(true).notNull(),
     lastConfirmedAt: timestamp("last_confirmed_at", { withTimezone: true }),
     ...timestamps,

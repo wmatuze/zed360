@@ -276,6 +276,12 @@ export default async function BusinessDashboardPage() {
                           </Link>
                           <Link
                             className="button button-quiet"
+                            href={`/business/${business.id}/services`}
+                          >
+                            Services
+                          </Link>
+                          <Link
+                            className="button button-quiet"
                             href={`/business/${business.id}/coverage`}
                           >
                             Coverage

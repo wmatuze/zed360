@@ -760,6 +760,55 @@ export const catalogAvailabilitySchema = z.enum([
 ]);
 
 export const catalogItemStatusSchema = z.enum(["active", "archived"]);
+
+export const saveBusinessServiceSchema = z
+  .object({
+    categoryId: z.string().uuid(),
+    name: z.string().trim().min(2).max(120),
+    description: z.string().trim().max(2000).optional().or(z.literal("")),
+    priceFrom: z.coerce.number().nonnegative().optional(),
+    priceTo: z.coerce.number().nonnegative().optional(),
+    isAvailable: z.boolean().default(true),
+    status: catalogItemStatusSchema.default("active"),
+  })
+  .refine(
+    ({ priceFrom, priceTo }) =>
+      priceFrom === undefined || priceTo === undefined || priceFrom <= priceTo,
+    {
+      path: ["priceTo"],
+      message: "Minimum price cannot be greater than maximum price.",
+    },
+  );
+
+export type SaveBusinessService = z.infer<typeof saveBusinessServiceSchema>;
+
+export const businessServiceManagementSchema = z.object({
+  business: z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+    slug: z.string(),
+  }),
+  services: z.array(
+    z.object({
+      id: z.string().uuid(),
+      categoryId: z.string().uuid(),
+      categoryName: z.string(),
+      name: z.string(),
+      description: z.string().nullable(),
+      priceFrom: z.number().nonnegative().nullable(),
+      priceTo: z.number().nonnegative().nullable(),
+      isAvailable: z.boolean(),
+      status: catalogItemStatusSchema,
+      lastConfirmedAt: z.string().datetime().nullable(),
+      coverageModes: z.number().int().nonnegative(),
+    }),
+  ),
+});
+
+export type BusinessServiceManagement = z.infer<
+  typeof businessServiceManagementSchema
+>;
+
 export const businessMediaPurposeSchema = z.enum([
   "logo",
   "cover",

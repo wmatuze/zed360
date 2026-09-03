@@ -45,7 +45,12 @@ export class BusinessServiceCoverageService {
       })
       .from(businessServices)
       .innerJoin(categories, eq(businessServices.categoryId, categories.id))
-      .where(eq(businessServices.businessId, businessId))
+      .where(
+        and(
+          eq(businessServices.businessId, businessId),
+          eq(businessServices.status, 'active'),
+        ),
+      )
       .orderBy(asc(businessServices.name));
 
     if (!services.length) return { business, services: [] };

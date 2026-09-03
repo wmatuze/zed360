@@ -65,7 +65,7 @@ describe('BusinessAccountsController', () => {
     expect(getSignInEligibility).toHaveBeenCalledWith('Owner@Example.com');
   });
 
-  it('rejects public sign-in eligibility probes', async () => {
+  it('rejects public sign-in eligibility probes', () => {
     expect(() =>
       controller.signInEligibility(undefined, { email: user.email }),
     ).toThrow(UnauthorizedException);
