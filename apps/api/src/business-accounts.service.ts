@@ -38,6 +38,31 @@ function hashClaimToken(token: string) {
 export class BusinessAccountsService {
   constructor(private readonly database: DatabaseService) {}
 
+  async getSignInEligibility(email: string) {
+    const normalizedEmail = email.trim().toLowerCase();
+    const [submittedBusiness] = await this.database.db
+      .select({ id: businesses.id })
+      .from(businesses)
+      .where(sql`lower(${businesses.email}) = ${normalizedEmail}`)
+      .limit(1);
+
+    if (submittedBusiness) {
+      return { eligible: true, mayCreateUser: true };
+    }
+
+    const [membership] = await this.database.db
+      .select({ businessId: businessMembers.businessId })
+      .from(users)
+      .innerJoin(businessMembers, eq(businessMembers.userId, users.id))
+      .where(sql`lower(${users.email}) = ${normalizedEmail}`)
+      .limit(1);
+
+    return {
+      eligible: Boolean(membership),
+      mayCreateUser: false,
+    };
+  }
+
   async getAccount(user: AuthenticatedUser): Promise<BusinessAccount> {
     await this.syncUser(user);
 
