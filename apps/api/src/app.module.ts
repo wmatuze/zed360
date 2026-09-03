@@ -41,6 +41,8 @@ import { BusinessOperatingHoursController } from './business-operating-hours.con
 import { BusinessOperatingHoursService } from './business-operating-hours.service';
 import { BusinessLocationsController } from './business-locations.controller';
 import { BusinessLocationsService } from './business-locations.service';
+import { BusinessServicesController } from './business-services.controller';
+import { BusinessServicesService } from './business-services.service';
 
 @Module({
   imports: [],
@@ -53,6 +55,7 @@ import { BusinessLocationsService } from './business-locations.service';
     BusinessPresenceController,
     BusinessOperatingHoursController,
     BusinessLocationsController,
+    BusinessServicesController,
     BusinessNotificationsController,
     BusinessReviewsController,
     BusinessRequestsController,
@@ -75,6 +78,7 @@ import { BusinessLocationsService } from './business-locations.service';
     BusinessPresenceService,
     BusinessOperatingHoursService,
     BusinessLocationsService,
+    BusinessServicesService,
     BusinessNotificationsService,
     BusinessCatalogService,
     MediaReviewsService,

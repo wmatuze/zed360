@@ -49,6 +49,7 @@ Better future matching and business visibility
 - [Ecosystem architecture](docs/architecture.md)
 - [Product principles](docs/product-principles.md)
 - [Business verification and PACRA integration](docs/business-verification.md)
+- [Business service management](docs/business-service-management.md)
 - [Supabase email authentication setup](docs/authentication-setup.md)
 - [Business review administration](docs/admin-review.md)
 - [Git branch and pull-request workflow](docs/git-workflow.md)

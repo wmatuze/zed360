@@ -114,6 +114,7 @@ export class RequestsService {
               )`,
             ),
             eq(businessServices.isAvailable, true),
+            eq(businessServices.status, 'active'),
             or(eq(businesses.status, 'draft'), eq(businesses.status, 'active')),
             sql`${businesses.availabilityStatus} <> 'temporarily_unavailable'`,
             sql`(

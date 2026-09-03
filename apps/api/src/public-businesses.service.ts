@@ -502,6 +502,7 @@ export class PublicBusinessesService {
           and(
             inArray(businessServices.businessId, businessIds),
             eq(businessServices.isAvailable, true),
+            eq(businessServices.status, 'active'),
           ),
         )
         .orderBy(asc(businessServices.name)),
