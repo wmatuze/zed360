@@ -110,7 +110,7 @@ export default async function Home() {
           <Link className="text-sm font-semibold text-[var(--lime)] hover:underline" href="/businesses">Browse the full directory →</Link>
         </div>
         {categories.length ? (
-          <div className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="home-category-grid mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {categories.map((category) => (
               <Link className="category-card" href={`/businesses?category=${encodeURIComponent(category.slug)}`} key={category.id}>
                 <span>{initials(category.name)}</span>
@@ -135,7 +135,7 @@ export default async function Home() {
             <Link className="text-sm font-semibold text-[var(--lime)] hover:underline" href="/businesses">View all businesses →</Link>
           </div>
           {businesses.length ? (
-            <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="home-business-grid mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {businesses.map((business) => {
                 const location = business.primaryLocation?.district;
                 const verified = business.trust.contactVerified || business.trust.registrationVerified;
@@ -143,7 +143,7 @@ export default async function Home() {
                   <Link className="home-business-card group" href={`/businesses/${business.slug}`} key={business.id}>
                     <div className="relative aspect-[16/8] overflow-hidden bg-white/5">
                       {business.coverUrl ? (
-                        <Image alt="" className="object-cover transition duration-300 group-hover:scale-[1.03]" fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" src={business.coverUrl} unoptimized />
+                        <Image alt="" className="object-contain transition duration-300 group-hover:scale-[1.02]" fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw" src={business.coverUrl} unoptimized />
                       ) : <div className="home-card-pattern" />}
                       <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#11151d] to-transparent" />
                       <span className="home-business-logo">
@@ -161,7 +161,7 @@ export default async function Home() {
                         <span className={business.availabilityFreshness === "current" && business.availability === "available" ? "text-[var(--lime)]" : "text-white/35"}>
                           {business.availabilityFreshness === "current" ? availabilityLabels[business.availability] : "View current details"}
                         </span>
-                        <b className="text-white/28 group-hover:text-[var(--lime)]">View profile →</b>
+                        <b className="text-white/40 group-hover:text-[var(--lime)]">View profile →</b>
                       </div>
                     </div>
                   </Link>
@@ -175,7 +175,7 @@ export default async function Home() {
       </section>
 
       <section className="border-b border-white/8" id="how-it-works">
-        <div className="mx-auto grid max-w-7xl gap-px px-5 py-2 sm:px-8 lg:grid-cols-3 lg:px-10">
+        <div className="mx-auto grid max-w-7xl gap-px px-5 py-2 sm:px-8 md:grid-cols-3 lg:px-10">
           {steps.map(([number, title, body]) => <article className="step-card" key={number}><span>{number}</span><h2>{title}</h2><p>{body}</p></article>)}
         </div>
       </section>
@@ -200,7 +200,7 @@ export default async function Home() {
             </ul></div>
           ))}
         </div>
-        <div className="mx-auto mt-12 flex max-w-7xl flex-col justify-between gap-3 border-t border-white/8 pt-6 text-xs text-white/28 sm:flex-row">
+        <div className="mx-auto mt-12 flex max-w-7xl flex-col justify-between gap-3 border-t border-white/8 pt-6 text-xs text-white/40 sm:flex-row">
           <span>© 2026 Zed360. Built for Zambia.</span><span>Discovery · Connection · Trust</span>
         </div>
       </footer>

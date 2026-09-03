@@ -150,6 +150,13 @@ select {
 .home-empty-state { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 1.25rem; background: rgba(255, 255, 255, 0.025); padding: 1.25rem; color: rgba(255, 255, 255, 0.42); font-size: 0.88rem; }
 .home-empty-state a { color: var(--lime); font-weight: 650; }
 
+@media (max-width: 639px) {
+  .home-category-grid .category-card:nth-child(n + 7),
+  .home-business-grid .home-business-card:nth-child(n + 4) {
+    display: none;
+  }
+}
+
 .request-preview {
   width: min(100%, 31rem);
   overflow: hidden;
