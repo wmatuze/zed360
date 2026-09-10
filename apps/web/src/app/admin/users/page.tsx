@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getVerifiedBusinessSession } from "@/lib/business-account";
+import { getVerifiedSession } from "@/lib/authenticated-session";
 import { AdminUsersApiError, fetchAdminUsers } from "@/lib/admin-users";
 import { manageUser } from "./actions";
 import { UserActionButton } from "./user-action-button";
@@ -30,15 +30,15 @@ export default async function AdminUsersPage({
   const params = await searchParams;
   const q = params.q?.trim() ?? "";
   const page = Math.max(1, Number(params.page) || 1);
-  const session = await getVerifiedBusinessSession();
-  if (!session) redirect("/business/sign-in?next=/admin/users");
+  const session = await getVerifiedSession();
+  if (!session) redirect("/admin/sign-in?next=/admin/users");
 
   let result;
   try {
     result = await fetchAdminUsers(session.accessToken, { q, page });
   } catch (error) {
     if (error instanceof AdminUsersApiError && error.status === 401) {
-      redirect("/business/sign-in?next=/admin/users&error=session_expired");
+      redirect("/admin/sign-in?next=/admin/users&error=session_expired");
     }
     const denied = error instanceof AdminUsersApiError && error.status === 403;
     return (

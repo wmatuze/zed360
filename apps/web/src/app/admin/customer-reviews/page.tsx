@@ -4,7 +4,7 @@ import {
   AdminCustomerReviewApiError,
   fetchAdminCustomerReviews,
 } from "@/lib/admin-customer-reviews";
-import { getVerifiedBusinessSession } from "@/lib/business-account";
+import { getVerifiedSession } from "@/lib/authenticated-session";
 import { reviewCustomerReview } from "./actions";
 
 export const metadata: Metadata = { title: "Customer review moderation" };
@@ -25,8 +25,8 @@ export default async function CustomerReviewModerationPage({
 }: {
   searchParams: Promise<{ result?: string }>;
 }) {
-  const session = await getVerifiedBusinessSession();
-  if (!session) redirect("/business/sign-in?next=/admin/customer-reviews");
+  const session = await getVerifiedSession();
+  if (!session) redirect("/admin/sign-in?next=/admin/customer-reviews");
   let queue = null;
   let accessDenied = false;
   let loadError = "";
@@ -35,7 +35,7 @@ export default async function CustomerReviewModerationPage({
   } catch (error) {
     if (error instanceof AdminCustomerReviewApiError && error.status === 401) {
       redirect(
-        "/business/sign-in?next=/admin/customer-reviews&error=session_expired",
+        "/admin/sign-in?next=/admin/customer-reviews&error=session_expired",
       );
     } else if (
       error instanceof AdminCustomerReviewApiError &&

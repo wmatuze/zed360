@@ -8,7 +8,15 @@ import type {
   AdminUserList,
   AdminUserListQuery,
 } from '@zed360/contracts';
-import { adminAuditEvents, and, eq, userRoles, users } from '@zed360/database';
+import {
+  adminAuditEvents,
+  and,
+  eq,
+  inArray,
+  sql,
+  userRoles,
+  users,
+} from '@zed360/database';
 import type { AuthenticatedUser } from './authenticated-user.service';
 import { DatabaseService } from './database.service';
 import { PlatformAuthorizationService } from './platform-authorization.service';
@@ -21,6 +29,22 @@ export class AdminUsersService {
     private readonly database: DatabaseService,
     private readonly authorization: PlatformAuthorizationService,
   ) {}
+
+  async getSignInIdentity(username: string) {
+    const [eligibleUser] = await this.database.db
+      .select({ email: users.email })
+      .from(users)
+      .innerJoin(userRoles, eq(userRoles.userId, users.id))
+      .where(
+        and(
+          sql`lower(${users.username}) = ${username.trim().toLowerCase()}`,
+          eq(users.accountStatus, 'active'),
+          inArray(userRoles.role, ['admin', 'reviewer']),
+        ),
+      )
+      .limit(1);
+    return { email: eligibleUser?.email ?? null };
+  }
 
   async list(
     viewer: AuthenticatedUser,

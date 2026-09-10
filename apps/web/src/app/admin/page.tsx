@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminAccessApiError, fetchAdminAccess } from "@/lib/admin-access";
-import { getVerifiedBusinessSession } from "@/lib/business-account";
+import { getVerifiedSession } from "@/lib/authenticated-session";
 
 export const metadata: Metadata = { title: "Administration" };
 export const dynamic = "force-dynamic";
@@ -50,15 +50,15 @@ const planned = [
 ] as const;
 
 export default async function AdminPage() {
-  const session = await getVerifiedBusinessSession();
-  if (!session) redirect("/business/sign-in?next=/admin");
+  const session = await getVerifiedSession();
+  if (!session) redirect("/admin/sign-in?next=/admin");
 
   let access;
   try {
     access = await fetchAdminAccess(session.accessToken);
   } catch (error) {
     if (error instanceof AdminAccessApiError && error.status === 401) {
-      redirect("/business/sign-in?next=/admin&error=session_expired");
+      redirect("/admin/sign-in?next=/admin&error=session_expired");
     }
     const denied = error instanceof AdminAccessApiError && error.status === 403;
     return (

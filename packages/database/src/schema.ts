@@ -165,6 +165,7 @@ export const users = pgTable(
   "users",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+    username: text("username"),
     displayName: text("display_name"),
     email: text("email"),
     phone: text("phone"),
@@ -178,6 +179,7 @@ export const users = pgTable(
     ...timestamps,
   },
   (table) => [
+    uniqueIndex("users_username_unique").on(sql`lower(${table.username})`),
     uniqueIndex("users_email_unique").on(table.email),
     uniqueIndex("users_phone_unique").on(table.phone),
   ],

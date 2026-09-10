@@ -4,7 +4,7 @@ import {
   AdminReviewApiError,
   fetchAdminReviewQueue,
 } from "@/lib/admin-reviews";
-import { getVerifiedBusinessSession } from "@/lib/business-account";
+import { getVerifiedSession } from "@/lib/authenticated-session";
 import { reviewBusiness } from "./actions";
 import { ReviewButtons } from "./review-buttons";
 
@@ -53,8 +53,8 @@ export default async function AdminReviewsPage({
 }: {
   searchParams: Promise<{ result?: string; q?: string; status?: string }>;
 }) {
-  const session = await getVerifiedBusinessSession();
-  if (!session) redirect("/business/sign-in?next=/admin/reviews");
+  const session = await getVerifiedSession();
+  if (!session) redirect("/admin/sign-in?next=/admin/reviews");
 
   let queue = null;
   let accessDenied = false;
@@ -63,7 +63,7 @@ export default async function AdminReviewsPage({
     queue = await fetchAdminReviewQueue(session.accessToken);
   } catch (error) {
     if (error instanceof AdminReviewApiError && error.status === 401) {
-      redirect("/business/sign-in?next=/admin/reviews&error=session_expired");
+      redirect("/admin/sign-in?next=/admin/reviews&error=session_expired");
     } else if (error instanceof AdminReviewApiError && error.status === 403) {
       accessDenied = true;
     } else {

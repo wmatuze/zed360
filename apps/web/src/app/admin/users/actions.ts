@@ -3,7 +3,7 @@
 import { adminUserActionSchema } from "@zed360/contracts";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getVerifiedBusinessSession } from "@/lib/business-account";
+import { getVerifiedSession } from "@/lib/authenticated-session";
 import { AdminUsersApiError, submitAdminUserAction } from "@/lib/admin-users";
 
 export async function manageUser(userId: string, formData: FormData) {
@@ -14,14 +14,14 @@ export async function manageUser(userId: string, formData: FormData) {
   });
   if (!parsed.success) redirect("/admin/users?result=invalid");
 
-  const session = await getVerifiedBusinessSession();
-  if (!session) redirect("/business/sign-in?next=/admin/users");
+  const session = await getVerifiedSession();
+  if (!session) redirect("/admin/sign-in?next=/admin/users");
   try {
     await submitAdminUserAction(session.accessToken, userId, parsed.data);
   } catch (error) {
     if (error instanceof AdminUsersApiError) {
       if (error.status === 401) {
-        redirect("/business/sign-in?next=/admin/users&error=session_expired");
+        redirect("/admin/sign-in?next=/admin/users&error=session_expired");
       }
       if (error.status === 403) redirect("/admin/users?result=forbidden");
       if (error.status === 404) redirect("/admin/users?result=not-found");

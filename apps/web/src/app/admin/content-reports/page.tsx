@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getVerifiedBusinessSession } from "@/lib/business-account";
+import { getVerifiedSession } from "@/lib/authenticated-session";
 import {
   AdminContentReportApiError,
   fetchAdminContentReports,
@@ -24,8 +24,8 @@ export default async function ContentReportsPage({
 }: {
   searchParams: Promise<{ result?: string }>;
 }) {
-  const session = await getVerifiedBusinessSession();
-  if (!session) redirect("/business/sign-in?next=/admin/content-reports");
+  const session = await getVerifiedSession();
+  if (!session) redirect("/admin/sign-in?next=/admin/content-reports");
   let queue = null;
   let accessDenied = false;
   let error = "";
@@ -34,7 +34,7 @@ export default async function ContentReportsPage({
   } catch (caught) {
     if (caught instanceof AdminContentReportApiError && caught.status === 401) {
       redirect(
-        "/business/sign-in?next=/admin/content-reports&error=session_expired",
+        "/admin/sign-in?next=/admin/content-reports&error=session_expired",
       );
     } else if (
       caught instanceof AdminContentReportApiError &&

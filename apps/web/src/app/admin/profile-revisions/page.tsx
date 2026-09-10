@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { fetchProfileRevisions } from "@/lib/admin-profile-revisions";
-import { getVerifiedBusinessSession } from "@/lib/business-account";
+import { getVerifiedSession } from "@/lib/authenticated-session";
 import { decide } from "./actions";
 const labels = {
   description: "Description",
@@ -14,8 +14,8 @@ export default async function ProfileRevisionsPage({
 }: {
   searchParams: Promise<{ result?: string }>;
 }) {
-  const session = await getVerifiedBusinessSession();
-  if (!session) redirect("/business/sign-in?next=/admin/profile-revisions");
+  const session = await getVerifiedSession();
+  if (!session) redirect("/admin/sign-in?next=/admin/profile-revisions");
   const queue = await fetchProfileRevisions(session.accessToken);
   const result = (await searchParams).result;
   return (

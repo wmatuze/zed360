@@ -10,17 +10,40 @@ describe('AdminUsersController', () => {
     emailVerifiedAt: new Date('2026-09-10T08:00:00.000Z'),
   };
   const verify = jest.fn();
+  const getSignInIdentity = jest.fn();
   const list = jest.fn();
   const act = jest.fn();
   const controller = new AdminUsersController(
     { verify } as unknown as AuthenticatedUserService,
-    { list, act } as unknown as AdminUsersService,
+    { getSignInIdentity, list, act } as unknown as AdminUsersService,
   );
+  const originalInternalSecret = process.env.INTERNAL_API_SECRET;
+
+  afterAll(() => {
+    if (originalInternalSecret === undefined) {
+      delete process.env.INTERNAL_API_SECRET;
+    } else {
+      process.env.INTERNAL_API_SECRET = originalInternalSecret;
+    }
+  });
 
   beforeEach(() => {
     verify.mockReset().mockResolvedValue(user);
+    getSignInIdentity.mockReset().mockResolvedValue({
+      email: 'admin@example.com',
+    });
     list.mockReset().mockResolvedValue({ users: [] });
     act.mockReset().mockResolvedValue({ userId: user.id });
+  });
+
+  it('resolves an administrator username only for an internal request', async () => {
+    const secret = 'a'.repeat(32);
+    process.env.INTERNAL_API_SECRET = secret;
+
+    await expect(
+      controller.signInIdentity(secret, { username: 'Platform.Admin' }),
+    ).resolves.toEqual({ email: 'admin@example.com' });
+    expect(getSignInIdentity).toHaveBeenCalledWith('Platform.Admin');
   });
 
   it('loads a validated, paginated user query', async () => {

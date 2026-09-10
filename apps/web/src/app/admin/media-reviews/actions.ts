@@ -3,7 +3,7 @@
 import { submitMediaReviewSchema } from "@zed360/contracts";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getVerifiedBusinessSession } from "@/lib/business-account";
+import { getVerifiedSession } from "@/lib/authenticated-session";
 import {
   AdminMediaReviewApiError,
   submitAdminMediaReview,
@@ -15,15 +15,15 @@ export async function reviewMedia(mediaId: string, formData: FormData) {
     note: formData.get("note"),
   });
   if (!parsed.success) redirect("/admin/media-reviews?result=invalid");
-  const session = await getVerifiedBusinessSession();
-  if (!session) redirect("/business/sign-in?next=/admin/media-reviews");
+  const session = await getVerifiedSession();
+  if (!session) redirect("/admin/sign-in?next=/admin/media-reviews");
   try {
     await submitAdminMediaReview(session.accessToken, mediaId, parsed.data);
   } catch (error) {
     if (error instanceof AdminMediaReviewApiError) {
       if (error.status === 401)
         redirect(
-          "/business/sign-in?next=/admin/media-reviews&error=session_expired",
+          "/admin/sign-in?next=/admin/media-reviews&error=session_expired",
         );
       if (error.status === 403)
         redirect("/admin/media-reviews?result=forbidden");

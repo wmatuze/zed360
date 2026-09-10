@@ -2,7 +2,7 @@
 import { contentReportDecisionSchema } from "@zed360/contracts";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getVerifiedBusinessSession } from "@/lib/business-account";
+import { getVerifiedSession } from "@/lib/authenticated-session";
 import {
   AdminContentReportApiError,
   submitContentReportDecision,
@@ -14,8 +14,8 @@ export async function decideReport(reportId: string, formData: FormData) {
     note: formData.get("note"),
   });
   if (!parsed.success) redirect("/admin/content-reports?result=invalid");
-  const session = await getVerifiedBusinessSession();
-  if (!session) redirect("/business/sign-in?next=/admin/content-reports");
+  const session = await getVerifiedSession();
+  if (!session) redirect("/admin/sign-in?next=/admin/content-reports");
   try {
     await submitContentReportDecision(
       session.accessToken,
@@ -25,7 +25,7 @@ export async function decideReport(reportId: string, formData: FormData) {
   } catch (error) {
     if (error instanceof AdminContentReportApiError && error.status === 401)
       redirect(
-        "/business/sign-in?next=/admin/content-reports&error=session_expired",
+        "/admin/sign-in?next=/admin/content-reports&error=session_expired",
       );
     if (error instanceof AdminContentReportApiError && error.status === 403)
       redirect("/admin/content-reports?result=forbidden");

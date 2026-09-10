@@ -7,7 +7,7 @@ import {
   AdminReviewApiError,
   submitAdminBusinessReview,
 } from "@/lib/admin-reviews";
-import { getVerifiedBusinessSession } from "@/lib/business-account";
+import { getVerifiedSession } from "@/lib/authenticated-session";
 
 export async function reviewBusiness(businessId: string, formData: FormData) {
   const parsed = submitBusinessReviewSchema.safeParse({
@@ -16,8 +16,8 @@ export async function reviewBusiness(businessId: string, formData: FormData) {
   });
   if (!parsed.success) redirect("/admin/reviews?result=invalid");
 
-  const session = await getVerifiedBusinessSession();
-  if (!session) redirect("/business/sign-in?next=/admin/reviews");
+  const session = await getVerifiedSession();
+  if (!session) redirect("/admin/sign-in?next=/admin/reviews");
 
   try {
     await submitAdminBusinessReview(
@@ -28,7 +28,7 @@ export async function reviewBusiness(businessId: string, formData: FormData) {
   } catch (error) {
     if (error instanceof AdminReviewApiError) {
       if (error.status === 401) {
-        redirect("/business/sign-in?next=/admin/reviews&error=session_expired");
+        redirect("/admin/sign-in?next=/admin/reviews&error=session_expired");
       }
       if (error.status === 403) redirect("/admin/reviews?result=forbidden");
       if (error.status === 409) redirect("/admin/reviews?result=not-ready");

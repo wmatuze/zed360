@@ -5,7 +5,7 @@ import {
   AdminMediaReviewApiError,
   fetchAdminMediaReviews,
 } from "@/lib/admin-media-reviews";
-import { getVerifiedBusinessSession } from "@/lib/business-account";
+import { getVerifiedSession } from "@/lib/authenticated-session";
 import { reviewMedia } from "./actions";
 
 export const metadata: Metadata = { title: "Media reviews" };
@@ -26,8 +26,8 @@ export default async function MediaReviewsPage({
 }: {
   searchParams: Promise<{ result?: string }>;
 }) {
-  const session = await getVerifiedBusinessSession();
-  if (!session) redirect("/business/sign-in?next=/admin/media-reviews");
+  const session = await getVerifiedSession();
+  if (!session) redirect("/admin/sign-in?next=/admin/media-reviews");
   let queue = null;
   let accessDenied = false;
   let loadError = "";
@@ -36,7 +36,7 @@ export default async function MediaReviewsPage({
   } catch (error) {
     if (error instanceof AdminMediaReviewApiError && error.status === 401) {
       redirect(
-        "/business/sign-in?next=/admin/media-reviews&error=session_expired",
+        "/admin/sign-in?next=/admin/media-reviews&error=session_expired",
       );
     } else if (
       error instanceof AdminMediaReviewApiError &&
