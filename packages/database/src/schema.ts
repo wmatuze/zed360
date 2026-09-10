@@ -192,6 +192,40 @@ export const userRoles = pgTable(
   ],
 );
 
+export const adminAuditEvents = pgTable(
+  "admin_audit_events",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    actorUserId: uuid("actor_user_id")
+      .notNull()
+      .references(() => users.id),
+    action: text("action").notNull(),
+    subjectType: text("subject_type").notNull(),
+    subjectId: text("subject_id").notNull(),
+    reason: text("reason"),
+    beforeState: jsonb("before_state").$type<Record<string, unknown>>(),
+    afterState: jsonb("after_state").$type<Record<string, unknown>>(),
+    metadata: jsonb("metadata")
+      .$type<Record<string, unknown>>()
+      .default({})
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("admin_audit_events_actor_created_idx").on(
+      table.actorUserId,
+      table.createdAt,
+    ),
+    index("admin_audit_events_subject_created_idx").on(
+      table.subjectType,
+      table.subjectId,
+      table.createdAt,
+    ),
+  ],
+);
+
 export const provinces = pgTable(
   "provinces",
   {
@@ -787,6 +821,29 @@ export const reviews = pgTable(
       table.createdAt,
     ),
     check("reviews_rating_check", sql`${table.rating} between 1 and 5`),
+  ],
+);
+
+export const reviewResponses = pgTable(
+  "review_responses",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    reviewId: uuid("review_id")
+      .notNull()
+      .references(() => reviews.id, { onDelete: "cascade" }),
+    businessId: uuid("business_id")
+      .notNull()
+      .references(() => businesses.id, { onDelete: "cascade" }),
+    respondedByUserId: uuid("responded_by_user_id")
+      .notNull()
+      .references(() => users.id),
+    body: text("body").notNull(),
+    isPublished: boolean("is_published").default(true).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("review_responses_review_unique").on(table.reviewId),
+    index("review_responses_business_idx").on(table.businessId),
   ],
 );
 

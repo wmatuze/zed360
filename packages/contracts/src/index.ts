@@ -999,6 +999,48 @@ export const customerReviewSchema = z.object({
   updatedAt: z.string().datetime(),
 });
 
+export const adminAccessSchema = z.object({
+  role: z.enum(["admin", "reviewer"]),
+});
+
+export type AdminAccess = z.infer<typeof adminAccessSchema>;
+
+export const saveBusinessReviewResponseSchema = z.object({
+  body: z.string().trim().min(2).max(1200),
+});
+
+export type SaveBusinessReviewResponse = z.infer<
+  typeof saveBusinessReviewResponseSchema
+>;
+
+const businessReviewResponseSchema = z.object({
+  id: z.string().uuid(),
+  body: z.string(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+
+export const businessCustomerReviewsSchema = z.object({
+  business: z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+    slug: z.string(),
+  }),
+  reviews: z.array(
+    z.object({
+      id: z.string().uuid(),
+      rating: z.number().int().min(1).max(5),
+      body: z.string().nullable(),
+      createdAt: z.string().datetime(),
+      response: businessReviewResponseSchema.nullable(),
+    }),
+  ),
+});
+
+export type BusinessCustomerReviews = z.infer<
+  typeof businessCustomerReviewsSchema
+>;
+
 export const submitCustomerReviewDecisionSchema = z
   .object({
     decision: z.enum(["approved", "rejected"]),
@@ -1112,6 +1154,7 @@ const publicCustomerReviewSchema = z.object({
   body: z.string().nullable(),
   createdAt: z.string().datetime(),
   verifiedInteraction: z.literal(true),
+  response: businessReviewResponseSchema.nullable(),
 });
 
 export const publicBusinessSummarySchema = z.object({
