@@ -53,6 +53,7 @@ Better future matching and business visibility
 - [Supabase email authentication setup](docs/authentication-setup.md)
 - [Business review administration](docs/admin-review.md)
 - [Administration foundation](docs/admin-foundation.md)
+- [User and role administration](docs/admin-user-management.md)
 - [Git branch and pull-request workflow](docs/git-workflow.md)
 
 ## Local development

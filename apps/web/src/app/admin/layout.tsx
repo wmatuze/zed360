@@ -5,6 +5,7 @@ import { BrandLogo } from "@/components/brand-logo";
 
 const navigation = [
   { href: "/admin", label: "Overview" },
+  { href: "/admin/users", label: "Users" },
   { href: "/admin/reviews", label: "Businesses" },
   { href: "/admin/profile-revisions", label: "Profiles" },
   { href: "/admin/customer-reviews", label: "Reviews" },

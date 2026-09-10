@@ -120,6 +120,13 @@
       "when": 1789045450680,
       "tag": "0016_quick_network",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1789048232358,
+      "tag": "0017_tidy_proudstar",
+      "breakpoints": true
     }
   ]
 }

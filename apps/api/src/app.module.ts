@@ -47,11 +47,14 @@ import { BusinessCustomerReviewsController } from './business-customer-reviews.c
 import { BusinessCustomerReviewsService } from './business-customer-reviews.service';
 import { AdminAccessController } from './admin-access.controller';
 import { AdminAuditService } from './admin-audit.service';
+import { AdminUsersController } from './admin-users.controller';
+import { AdminUsersService } from './admin-users.service';
 
 @Module({
   imports: [],
   controllers: [
     AdminAccessController,
+    AdminUsersController,
     AppController,
     AdminCustomerReviewsController,
     BusinessAccountsController,
@@ -77,6 +80,7 @@ import { AdminAuditService } from './admin-audit.service';
   ],
   providers: [
     AdminAuditService,
+    AdminUsersService,
     AppService,
     AuthenticatedUserService,
     BusinessApplicationsService,

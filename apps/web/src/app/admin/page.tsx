@@ -9,6 +9,11 @@ export const dynamic = "force-dynamic";
 
 const workspaces = [
   {
+    href: "/admin/users",
+    title: "Users and roles",
+    description: "Manage platform roles and suspend or reinstate user access.",
+  },
+  {
     href: "/admin/reviews",
     title: "Business reviews",
     description: "Approve applications and manage business lifecycle actions.",
@@ -36,7 +41,6 @@ const workspaces = [
 ] as const;
 
 const planned = [
-  "Users and roles",
   "Business directory",
   "Verification",
   "Categories",

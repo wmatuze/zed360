@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -13,6 +14,10 @@ describe('AuthenticatedUserService', () => {
   const getClaims = jest.fn();
   const createClientMock = jest.mocked(createClient);
   let service: AuthenticatedUserService;
+  const limit = jest.fn();
+  const where = jest.fn(() => ({ limit }));
+  const from = jest.fn(() => ({ where }));
+  const select = jest.fn(() => ({ from }));
 
   beforeEach(() => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://project.supabase.co';
@@ -21,7 +26,8 @@ describe('AuthenticatedUserService', () => {
     createClientMock.mockReset().mockReturnValue({
       auth: { getClaims },
     } as never);
-    service = new AuthenticatedUserService();
+    limit.mockReset().mockResolvedValue([]);
+    service = new AuthenticatedUserService({ db: { select } } as never);
   });
 
   afterAll(() => {
@@ -83,6 +89,24 @@ describe('AuthenticatedUserService', () => {
     await expect(service.verify('Bearer access-token')).rejects.toBeInstanceOf(
       UnauthorizedException,
     );
+  });
+
+  it('rejects a valid session for a suspended local account', async () => {
+    getClaims.mockResolvedValue({
+      data: {
+        claims: {
+          sub: 'f8d18ef2-7f91-4a63-a40c-2017d7a02f07',
+          email: 'owner@example.com',
+          iat: 1786348800,
+        },
+      },
+      error: null,
+    });
+    limit.mockResolvedValue([{ accountStatus: 'suspended' }]);
+
+    await expect(
+      service.verify('Bearer suspended-token'),
+    ).rejects.toBeInstanceOf(ForbiddenException);
   });
 
   it('returns a temporary error when Supabase cannot be reached', async () => {

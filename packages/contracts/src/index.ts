@@ -1005,6 +1005,60 @@ export const adminAccessSchema = z.object({
 
 export type AdminAccess = z.infer<typeof adminAccessSchema>;
 
+export const adminUserListQuerySchema = z.object({
+  q: z.string().trim().max(120).default(""),
+  page: z.coerce.number().int().positive().default(1),
+  pageSize: z.coerce.number().int().min(10).max(100).default(25),
+});
+
+export type AdminUserListQuery = z.infer<typeof adminUserListQuerySchema>;
+
+export const adminUserActionSchema = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("role_granted"),
+    role: z.enum(["admin", "reviewer"]),
+    reason: z.string().trim().min(10).max(1200),
+  }),
+  z.object({
+    action: z.literal("role_revoked"),
+    role: z.enum(["admin", "reviewer"]),
+    reason: z.string().trim().min(10).max(1200),
+  }),
+  z.object({
+    action: z.literal("suspended"),
+    reason: z.string().trim().min(10).max(1200),
+  }),
+  z.object({
+    action: z.literal("reinstated"),
+    reason: z.string().trim().min(10).max(1200),
+  }),
+]);
+
+export type AdminUserAction = z.infer<typeof adminUserActionSchema>;
+
+export const adminUserSchema = z.object({
+  id: z.string().uuid(),
+  displayName: z.string().nullable(),
+  email: z.string().nullable(),
+  phone: z.string().nullable(),
+  accountStatus: z.enum(["active", "suspended"]),
+  statusReason: z.string().nullable(),
+  roles: z.array(z.enum(["admin", "reviewer"])),
+  businessCount: z.number().int().nonnegative(),
+  createdAt: z.string().datetime(),
+});
+
+export const adminUserListSchema = z.object({
+  viewerRole: z.literal("admin"),
+  users: z.array(adminUserSchema),
+  page: z.number().int().positive(),
+  pageSize: z.number().int().positive(),
+  total: z.number().int().nonnegative(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+export type AdminUserList = z.infer<typeof adminUserListSchema>;
+
 export const saveBusinessReviewResponseSchema = z.object({
   body: z.string().trim().min(2).max(1200),
 });

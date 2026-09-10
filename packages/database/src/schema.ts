@@ -82,6 +82,10 @@ export const verificationStatus = pgEnum("verification_status", [
   "expired",
 ]);
 export const platformRole = pgEnum("platform_role", ["admin", "reviewer"]);
+export const userAccountStatus = pgEnum("user_account_status", [
+  "active",
+  "suspended",
+]);
 export const businessReviewStatus = pgEnum("business_review_status", [
   "pending",
   "approved",
@@ -166,6 +170,11 @@ export const users = pgTable(
     phone: text("phone"),
     emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
     phoneVerifiedAt: timestamp("phone_verified_at", { withTimezone: true }),
+    accountStatus: userAccountStatus("account_status")
+      .default("active")
+      .notNull(),
+    statusReason: text("status_reason"),
+    statusChangedAt: timestamp("status_changed_at", { withTimezone: true }),
     ...timestamps,
   },
   (table) => [

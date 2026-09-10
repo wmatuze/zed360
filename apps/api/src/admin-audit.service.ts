@@ -17,8 +17,11 @@ export type AdminAuditEvent = {
 export class AdminAuditService {
   constructor(private readonly database: DatabaseService) {}
 
-  async record(event: AdminAuditEvent): Promise<string> {
-    const [created] = await this.database.db
+  async record(
+    event: AdminAuditEvent,
+    executor: Pick<DatabaseService['db'], 'insert'> = this.database.db,
+  ): Promise<string> {
+    const [created] = await executor
       .insert(adminAuditEvents)
       .values({
         ...event,
@@ -29,8 +32,9 @@ export class AdminAuditService {
       })
       .returning({ id: adminAuditEvents.id });
 
-    if (!created)
+    if (!created) {
       throw new Error('The administrator audit event was not saved.');
+    }
     return created.id;
   }
 }
