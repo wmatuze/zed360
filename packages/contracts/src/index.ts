@@ -1131,6 +1131,76 @@ export const adminCategoryListSchema = z.object({
 
 export type AdminCategoryList = z.infer<typeof adminCategoryListSchema>;
 
+export const adminLocationListQuerySchema = z.object({
+  q: z.string().trim().max(120).default(""),
+  status: z.enum(["all", "active", "inactive"]).default("all"),
+  provinceId: z.string().uuid().optional(),
+});
+export type AdminLocationListQuery = z.infer<
+  typeof adminLocationListQuerySchema
+>;
+
+const locationNameSchema = z.string().trim().min(2).max(120);
+const locationSlugSchema = z
+  .string()
+  .trim()
+  .min(2)
+  .max(120)
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+
+export const saveAdminProvinceSchema = z.object({
+  name: locationNameSchema,
+  slug: locationSlugSchema,
+});
+export type SaveAdminProvince = z.infer<typeof saveAdminProvinceSchema>;
+
+export const saveAdminDistrictSchema = z.object({
+  provinceId: z.string().uuid(),
+  name: locationNameSchema,
+  slug: locationSlugSchema,
+});
+export type SaveAdminDistrict = z.infer<typeof saveAdminDistrictSchema>;
+
+export const adminLocationStatusActionSchema = z.object({
+  action: z.enum(["activated", "deactivated"]),
+  reason: z.string().trim().min(10).max(1200),
+});
+export type AdminLocationStatusAction = z.infer<
+  typeof adminLocationStatusActionSchema
+>;
+
+export const adminDistrictSchema = z.object({
+  id: z.string().uuid(),
+  provinceId: z.string().uuid(),
+  name: z.string(),
+  slug: z.string(),
+  isActive: z.boolean(),
+  locationCount: z.number().int().nonnegative(),
+  requestCount: z.number().int().nonnegative(),
+  coverageCount: z.number().int().nonnegative(),
+  updatedAt: z.string().datetime(),
+});
+
+export const adminProvinceSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  slug: z.string(),
+  isActive: z.boolean(),
+  districtCount: z.number().int().nonnegative(),
+  activeDistrictCount: z.number().int().nonnegative(),
+  coverageCount: z.number().int().nonnegative(),
+  updatedAt: z.string().datetime(),
+  districts: z.array(adminDistrictSchema),
+});
+
+export const adminLocationListSchema = z.object({
+  viewerRole: z.enum(["admin", "reviewer"]),
+  provinces: z.array(adminProvinceSchema),
+  totalProvinces: z.number().int().nonnegative(),
+  totalDistricts: z.number().int().nonnegative(),
+});
+export type AdminLocationList = z.infer<typeof adminLocationListSchema>;
+
 export const saveBusinessReviewResponseSchema = z.object({
   body: z.string().trim().min(2).max(1200),
 });

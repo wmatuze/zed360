@@ -134,6 +134,13 @@
       "when": 1789050946818,
       "tag": "0018_slippery_squadron_supreme",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1789127286742,
+      "tag": "0019_woozy_jack_power",
+      "breakpoints": true
     }
   ]
 }

@@ -1,5 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { asc, categories, districts, eq, provinces } from '@zed360/database';
+import {
+  and,
+  asc,
+  categories,
+  districts,
+  eq,
+  provinces,
+} from '@zed360/database';
 import { DatabaseService } from './database.service';
 
 function groupBy<T, K>(items: T[], getKey: (item: T) => K) {
@@ -26,6 +33,7 @@ export class ReferenceDataService {
           slug: provinces.slug,
         })
         .from(provinces)
+        .where(eq(provinces.isActive, true))
         .orderBy(asc(provinces.name)),
       this.database.db
         .select({
@@ -35,6 +43,8 @@ export class ReferenceDataService {
           slug: districts.slug,
         })
         .from(districts)
+        .innerJoin(provinces, eq(districts.provinceId, provinces.id))
+        .where(and(eq(districts.isActive, true), eq(provinces.isActive, true)))
         .orderBy(asc(districts.name)),
       this.database.db
         .select({

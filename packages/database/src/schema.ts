@@ -243,6 +243,8 @@ export const provinces = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     name: text("name").notNull(),
     slug: text("slug").notNull(),
+    isActive: boolean("is_active").default(true).notNull(),
+    ...timestamps,
   },
   (table) => [uniqueIndex("provinces_slug_unique").on(table.slug)],
 );
@@ -257,6 +259,8 @@ export const districts = pgTable(
     name: text("name").notNull(),
     slug: text("slug").notNull(),
     centre: geometry("centre", { type: "point", mode: "xy", srid: 4326 }),
+    isActive: boolean("is_active").default(true).notNull(),
+    ...timestamps,
   },
   (table) => [
     uniqueIndex("districts_province_slug_unique").on(

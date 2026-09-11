@@ -10,6 +10,7 @@ import {
   customerRequests,
   districts,
   eq,
+  provinces,
   requestMatches,
 } from '@zed360/database';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
@@ -50,7 +51,14 @@ export class BusinessApplicationsService {
       this.database.db
         .select({ id: districts.id })
         .from(districts)
-        .where(eq(districts.id, application.districtId))
+        .innerJoin(provinces, eq(districts.provinceId, provinces.id))
+        .where(
+          and(
+            eq(districts.id, application.districtId),
+            eq(districts.isActive, true),
+            eq(provinces.isActive, true),
+          ),
+        )
         .limit(1),
     ]);
 

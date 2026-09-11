@@ -23,6 +23,7 @@ import {
   interactions,
   inArray,
   or,
+  provinces,
   requestMatches,
   reviews,
   sql,
@@ -48,7 +49,14 @@ export class RequestsService {
       this.database.db
         .select({ id: districts.id })
         .from(districts)
-        .where(eq(districts.id, request.districtId))
+        .innerJoin(provinces, eq(districts.provinceId, provinces.id))
+        .where(
+          and(
+            eq(districts.id, request.districtId),
+            eq(districts.isActive, true),
+            eq(provinces.isActive, true),
+          ),
+        )
         .limit(1),
     ]);
 

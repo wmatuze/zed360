@@ -207,7 +207,7 @@ export class BusinessLocationsService {
     const [district] = await this.database.db
       .select({ id: districts.id })
       .from(districts)
-      .where(eq(districts.id, districtId))
+      .where(and(eq(districts.id, districtId), eq(districts.isActive, true)))
       .limit(1);
     if (!district)
       throw new NotFoundException('The selected district is unavailable.');
