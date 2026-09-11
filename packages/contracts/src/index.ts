@@ -1059,6 +1059,78 @@ export const adminUserListSchema = z.object({
 
 export type AdminUserList = z.infer<typeof adminUserListSchema>;
 
+export const adminCategoryListQuerySchema = z.object({
+  q: z.string().trim().max(120).default(""),
+  status: z.enum(["all", "active", "inactive"]).default("all"),
+});
+
+export type AdminCategoryListQuery = z.infer<
+  typeof adminCategoryListQuerySchema
+>;
+
+const categoryParentIdSchema = z.preprocess(
+  (value) => (value === "" || value === undefined ? null : value),
+  z.string().uuid().nullable(),
+);
+
+export const saveAdminCategorySchema = z.object({
+  name: z.string().trim().min(2).max(120),
+  slug: z
+    .string()
+    .trim()
+    .min(2)
+    .max(120)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  description: z.string().trim().max(600).optional().or(z.literal("")),
+  parentId: categoryParentIdSchema,
+  sortOrder: z.coerce.number().int().min(0).max(10000),
+});
+
+export type SaveAdminCategory = z.infer<typeof saveAdminCategorySchema>;
+
+export const adminCategoryStatusActionSchema = z.object({
+  action: z.enum(["activated", "deactivated"]),
+  reason: z.string().trim().min(10).max(1200),
+});
+
+export type AdminCategoryStatusAction = z.infer<
+  typeof adminCategoryStatusActionSchema
+>;
+
+export const adminCategorySchema = z.object({
+  id: z.string().uuid(),
+  parentId: z.string().uuid().nullable(),
+  parentName: z.string().nullable(),
+  name: z.string(),
+  slug: z.string(),
+  description: z.string().nullable(),
+  isActive: z.boolean(),
+  sortOrder: z.number().int().nonnegative(),
+  childCount: z.number().int().nonnegative(),
+  activeChildCount: z.number().int().nonnegative(),
+  serviceCount: z.number().int().nonnegative(),
+  requestCount: z.number().int().nonnegative(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+
+export const adminCategoryListSchema = z.object({
+  viewerRole: z.enum(["admin", "reviewer"]),
+  categories: z.array(adminCategorySchema),
+  parents: z.array(
+    z.object({
+      id: z.string().uuid(),
+      name: z.string(),
+      isActive: z.boolean(),
+    }),
+  ),
+  total: z.number().int().nonnegative(),
+  active: z.number().int().nonnegative(),
+  inactive: z.number().int().nonnegative(),
+});
+
+export type AdminCategoryList = z.infer<typeof adminCategoryListSchema>;
+
 export const saveBusinessReviewResponseSchema = z.object({
   body: z.string().trim().min(2).max(1200),
 });

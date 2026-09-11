@@ -49,11 +49,14 @@ import { AdminAccessController } from './admin-access.controller';
 import { AdminAuditService } from './admin-audit.service';
 import { AdminUsersController } from './admin-users.controller';
 import { AdminUsersService } from './admin-users.service';
+import { AdminCategoriesController } from './admin-categories.controller';
+import { AdminCategoriesService } from './admin-categories.service';
 
 @Module({
   imports: [],
   controllers: [
     AdminAccessController,
+    AdminCategoriesController,
     AdminUsersController,
     AppController,
     AdminCustomerReviewsController,
@@ -80,6 +83,7 @@ import { AdminUsersService } from './admin-users.service';
   ],
   providers: [
     AdminAuditService,
+    AdminCategoriesService,
     AdminUsersService,
     AppService,
     AuthenticatedUserService,
