@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { signInAdmin, type AdminSignInState } from "./actions";
 
@@ -61,6 +62,12 @@ export function AdminSignInForm({ nextPath }: { nextPath: string }) {
         This sign-in is restricted to active administrator and reviewer
         accounts.
       </p>
+      <Link
+        className="inline-block text-sm font-medium text-[var(--lime)] hover:underline"
+        href="/admin/forgot-password"
+      >
+        Set or reset your password
+      </Link>
     </form>
   );
 }

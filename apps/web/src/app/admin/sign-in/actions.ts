@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { resolveAdminEmail } from "@/lib/admin-identity";
 import { safeNextPath } from "@/lib/safe-next-path";
 import { createClient } from "@/lib/supabase/server";
 
@@ -25,13 +26,6 @@ export async function signInAdmin(
     return { status: "error", message: invalidCredentialsMessage };
   }
 
-  const internalSecret = process.env.INTERNAL_API_SECRET;
-  if (!internalSecret || internalSecret.length < 32) {
-    return {
-      status: "error",
-      message: "Administrator sign-in is not configured.",
-    };
-  }
   const requestedNext = safeNextPath(
     typeof formData.get("next") === "string"
       ? (formData.get("next") as string)
@@ -44,28 +38,14 @@ export async function signInAdmin(
       : "/admin";
 
   try {
-    const identityResponse = await fetch(
-      `${apiUrl}/admin/users/sign-in-identity`,
-      {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "x-zed360-internal-secret": internalSecret,
-        },
-        body: JSON.stringify({ username: username.data }),
-        cache: "no-store",
-      },
-    );
-    const identity = (await identityResponse.json().catch(() => null)) as {
-      email?: unknown;
-    } | null;
-    if (!identityResponse.ok || typeof identity?.email !== "string") {
+    const email = await resolveAdminEmail(username.data);
+    if (!email) {
       return { status: "error", message: invalidCredentialsMessage };
     }
 
     const supabase = await createClient();
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: identity.email,
+      email,
       password: password.data,
     });
     if (error || !data.session) {

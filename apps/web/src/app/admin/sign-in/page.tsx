@@ -14,7 +14,11 @@ export const dynamic = "force-dynamic";
 export default async function AdminSignInPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string; error?: string }>;
+  searchParams: Promise<{
+    next?: string;
+    error?: string;
+    password?: string;
+  }>;
 }) {
   const parameters = await searchParams;
   const requestedNext = safeNextPath(parameters.next, "/admin");
@@ -52,6 +56,14 @@ export default async function AdminSignInPage({
         </p>
       </div>
       <div>
+        {parameters.password === "updated" ? (
+          <p
+            className="mb-4 rounded-xl border border-[var(--lime)]/20 bg-[var(--lime)]/8 px-4 py-3 text-sm text-white/75"
+            role="status"
+          >
+            Your password is ready. Sign in with your administrator username.
+          </p>
+        ) : null}
         {parameters.error === "session_expired" ||
         parameters.error === "invalid_or_expired" ? (
           <p
