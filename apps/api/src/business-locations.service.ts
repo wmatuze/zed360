@@ -20,6 +20,7 @@ import {
 } from '@zed360/database';
 import type { AuthenticatedUser } from './authenticated-user.service';
 import { DatabaseService } from './database.service';
+import { fromPoint, toPoint } from './location-coordinates';
 import { normaliseOperatingHours } from './operating-hours';
 
 const MAX_ACTIVE_LOCATIONS = 20;
@@ -36,8 +37,9 @@ export class BusinessLocationsService {
     const rows = await this.locationRows(businessId);
     return {
       business: { id: business.id, name: business.name, slug: business.slug },
-      locations: rows.map(({ openingHours, ...location }) => ({
+      locations: rows.map(({ openingHours, coordinates, ...location }) => ({
         ...location,
+        coordinates: fromPoint(coordinates),
         operatingHoursConfigured:
           normaliseOperatingHours(openingHours).configured,
       })),
@@ -62,6 +64,7 @@ export class BusinessLocationsService {
       districtId: input.districtId,
       name: input.name,
       address: input.address || null,
+      coordinates: toPoint(input.coordinates),
       isPrimary: active.length === 0,
     });
     return this.get(user, businessId);
@@ -81,6 +84,9 @@ export class BusinessLocationsService {
         districtId: input.districtId,
         name: input.name,
         address: input.address || null,
+        ...(input.coordinates === undefined
+          ? {}
+          : { coordinates: toPoint(input.coordinates) }),
         updatedAt: new Date(),
       })
       .where(
@@ -180,6 +186,7 @@ export class BusinessLocationsService {
         districtId: businessLocations.districtId,
         districtName: districts.name,
         provinceName: provinces.name,
+        coordinates: businessLocations.coordinates,
         isPrimary: businessLocations.isPrimary,
         isActive: businessLocations.isActive,
         openingHours: businessLocations.openingHours,

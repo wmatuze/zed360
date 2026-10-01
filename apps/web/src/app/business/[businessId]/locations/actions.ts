@@ -23,11 +23,19 @@ async function session() {
   return value;
 }
 
+function coordinates(formData: FormData) {
+  const latitude = String(formData.get("latitude") ?? "").trim();
+  const longitude = String(formData.get("longitude") ?? "").trim();
+  if (!latitude && !longitude) return null;
+  return { latitude: Number(latitude), longitude: Number(longitude) };
+}
+
 const input = (formData: FormData) =>
   saveBusinessLocationSchema.safeParse({
     name: formData.get("name"),
     address: formData.get("address"),
     districtId: formData.get("districtId"),
+    coordinates: coordinates(formData),
   });
 
 function failure(error: unknown): LocationActionState {

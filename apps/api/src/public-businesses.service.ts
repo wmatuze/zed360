@@ -27,6 +27,7 @@ import {
 } from '@zed360/database';
 import type { SQL } from 'drizzle-orm';
 import { DatabaseService } from './database.service';
+import { fromPoint } from './location-coordinates';
 import { publicMediaUrl } from './media-storage';
 import { describeOperatingHours } from './operating-hours';
 
@@ -131,6 +132,7 @@ export class PublicBusinessesService {
               id: primaryLocationRow.id,
               name: primaryLocationRow.name,
               address: primaryLocationRow.address,
+              coordinates: primaryLocationRow.coordinates,
               isPrimary: primaryLocationRow.isPrimary,
               district: primaryLocationRow.district,
               operatingHours: describeOperatingHours(
@@ -244,6 +246,7 @@ export class PublicBusinessesService {
         id: location.id,
         name: location.name,
         address: location.address,
+        coordinates: location.coordinates,
         isPrimary: location.isPrimary,
         district: location.district,
         operatingHours: describeOperatingHours(
@@ -465,6 +468,7 @@ export class PublicBusinessesService {
           businessId: businessLocations.businessId,
           name: businessLocations.name,
           address: businessLocations.address,
+          coordinates: businessLocations.coordinates,
           isPrimary: businessLocations.isPrimary,
           openingHours: businessLocations.openingHours,
           districtName: districts.name,
@@ -627,6 +631,7 @@ export class PublicBusinessesService {
         businessId: location.businessId,
         name: location.name,
         address: location.address,
+        coordinates: fromPoint(location.coordinates),
         isPrimary: location.isPrimary,
         openingHours: location.openingHours,
         district:

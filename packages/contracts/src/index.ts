@@ -418,10 +418,29 @@ export type BusinessOperatingHours = z.infer<
   typeof businessOperatingHoursSchema
 >;
 
+// Zambia's extent with a small margin, so border towns are never rejected.
+export const zambiaBounds = {
+  latitude: { minimum: -18.2, maximum: -8.1 },
+  longitude: { minimum: 21.9, maximum: 33.8 },
+} as const;
+
+export const locationCoordinatesSchema = z.object({
+  latitude: z
+    .number()
+    .min(zambiaBounds.latitude.minimum, "The map pin must be inside Zambia.")
+    .max(zambiaBounds.latitude.maximum, "The map pin must be inside Zambia."),
+  longitude: z
+    .number()
+    .min(zambiaBounds.longitude.minimum, "The map pin must be inside Zambia.")
+    .max(zambiaBounds.longitude.maximum, "The map pin must be inside Zambia."),
+});
+export type LocationCoordinates = z.infer<typeof locationCoordinatesSchema>;
+
 export const saveBusinessLocationSchema = z.object({
   name: z.string().trim().min(2).max(120),
   address: z.string().trim().max(500).optional().or(z.literal("")),
   districtId: z.string().uuid(),
+  coordinates: locationCoordinatesSchema.nullable().optional(),
 });
 export type SaveBusinessLocation = z.infer<typeof saveBusinessLocationSchema>;
 
@@ -443,6 +462,7 @@ export const businessLocationManagementSchema = z.object({
       districtId: z.string().uuid().nullable(),
       districtName: z.string().nullable(),
       provinceName: z.string().nullable(),
+      coordinates: locationCoordinatesSchema.nullable(),
       isPrimary: z.boolean(),
       isActive: z.boolean(),
       operatingHoursConfigured: z.boolean(),
@@ -1001,7 +1021,10 @@ export const submitCustomerReviewSchema = z.object({
   rating: z.coerce.number().int().min(1).max(5),
   body: z.string().trim().max(1200).optional().or(z.literal("")),
   verificationId: z.string().uuid(),
-  code: z.string().trim().regex(/^\d{6}$/),
+  code: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/),
 });
 
 export type SubmitCustomerReview = z.infer<typeof submitCustomerReviewSchema>;
@@ -1305,6 +1328,8 @@ const publicBusinessLocationSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
   address: z.string().nullable(),
+  // Older API responses omit coordinates; treat them as unpinned.
+  coordinates: locationCoordinatesSchema.nullable().default(null),
   isPrimary: z.boolean(),
   district: z
     .object({
