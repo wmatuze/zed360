@@ -13,7 +13,7 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/v1";
 
 const statusLabels = {
   pending: "Awaiting Zed360 review",
-  approved: "Published on the business profile",
+  approved: "Your current review is published",
   rejected: "Changes required",
 } as const;
 
@@ -151,10 +151,9 @@ export function CustomerReviewForm({
         ) : null}
       </div>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-white/48">
-        Your rating is linked to a business you selected through Zed360. A
-        comment is optional. To keep reviews genuine, confirm your WhatsApp
-        number with a one-time code. You do not need an account, and your
-        number is never shown to the business or stored in readable form.
+        Rate the business you chose. To keep reviews genuine, we’ll confirm
+        your WhatsApp number — no account needed, and the business never sees
+        it.
       </p>
 
       {currentReview?.moderationStatus === "rejected" &&
@@ -167,7 +166,7 @@ export function CustomerReviewForm({
       <form className="mt-5" onSubmit={submit}>
         <fieldset>
           <legend className="text-sm font-semibold text-white/75">
-            Rating
+            <span className="text-[var(--lime)]">1</span> · Rate your experience
           </legend>
           <div className="mt-3 flex flex-wrap gap-2">
             {[1, 2, 3, 4, 5].map((value) => (
@@ -195,7 +194,7 @@ export function CustomerReviewForm({
         </label>
         <fieldset className="mt-5 rounded-xl border border-white/10 bg-black/15 p-4">
           <legend className="px-1 text-sm font-semibold text-white/75">
-            Confirm with WhatsApp
+            <span className="text-[var(--lime)]">2</span> · Confirm on WhatsApp
           </legend>
           {verification ? (
             <div>
@@ -249,6 +248,10 @@ export function CustomerReviewForm({
               >
                 {sendingCode ? "Sending…" : "Send code"}
               </button>
+              <p className="basis-full text-xs text-white/60">
+                Enter your number and we’ll send a six-digit code. Your review
+                is submitted once you enter it.
+              </p>
             </div>
           )}
         </fieldset>
