@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import type {
   AdminCustomerReviewQueue,
+  RequestReviewCode,
   SubmitCustomerReview,
   SubmitCustomerReviewDecision,
 } from '@zed360/contracts';
@@ -20,6 +21,7 @@ import {
 import type { AuthenticatedUser } from './authenticated-user.service';
 import { DatabaseService } from './database.service';
 import { PlatformAuthorizationService } from './platform-authorization.service';
+import { ReviewContactVerificationService } from './review-contact-verification.service';
 
 export function reviewModeration(body: string | undefined): {
   status: 'approved' | 'pending';
@@ -45,12 +47,75 @@ export class CustomerReviewsService {
   constructor(
     private readonly database: DatabaseService,
     private readonly authorization: PlatformAuthorizationService,
+    private readonly verification: ReviewContactVerificationService,
   ) {}
 
+  /** Sends a WhatsApp code the reviewer must enter with their review. */
+  async requestCode(shareToken: string, input: RequestReviewCode) {
+    const interaction = await this.eligibleInteraction(shareToken);
+    return this.verification.issue(
+      {
+        requestId: interaction.requestId,
+        businessId: interaction.businessId,
+        interactionId: interaction.id,
+      },
+      input.phone,
+    );
+  }
+
   async submit(shareToken: string, review: SubmitCustomerReview) {
+    const eligibleInteraction = await this.eligibleInteraction(shareToken);
+    const reviewerContactHash = await this.verification.consume(
+      eligibleInteraction.requestId,
+      review.verificationId,
+      review.code,
+    );
+    await this.verification.assertNotRecentlyReviewed(
+      eligibleInteraction.businessId,
+      reviewerContactHash,
+      eligibleInteraction.id,
+    );
+
+    const now = new Date();
+    const moderation = reviewModeration(review.body);
+    const [saved] = await this.database.db
+      .insert(reviews)
+      .values({
+        interactionId: eligibleInteraction.id,
+        businessId: eligibleInteraction.businessId,
+        rating: review.rating,
+        body: review.body || null,
+        moderationStatus: moderation.status,
+        moderationNote: moderation.note,
+        reviewedAt: null,
+        isPublished: moderation.status === 'approved',
+        reviewerContactHash,
+      })
+      .onConflictDoUpdate({
+        target: reviews.interactionId,
+        set: {
+          rating: review.rating,
+          body: review.body || null,
+          moderationStatus: moderation.status,
+          moderationNote: moderation.note,
+          reviewedByUserId: null,
+          reviewedAt: null,
+          isPublished: moderation.status === 'approved',
+          reviewerContactHash,
+          updatedAt: now,
+        },
+      })
+      .returning();
+
+    if (!saved) throw new Error('The review could not be saved.');
+    return this.toCustomerReview(saved);
+  }
+
+  private async eligibleInteraction(shareToken: string) {
     const [eligibleInteraction] = await this.database.db
       .select({
         id: interactions.id,
+        requestId: customerRequests.id,
         businessId: interactions.businessId,
         requestStatus: customerRequests.status,
         outcomeConfirmed: interactions.outcomeConfirmed,
@@ -75,38 +140,7 @@ export class CustomerReviewsService {
         'Complete the request before reviewing the selected business.',
       );
     }
-
-    const now = new Date();
-    const moderation = reviewModeration(review.body);
-    const [saved] = await this.database.db
-      .insert(reviews)
-      .values({
-        interactionId: eligibleInteraction.id,
-        businessId: eligibleInteraction.businessId,
-        rating: review.rating,
-        body: review.body || null,
-        moderationStatus: moderation.status,
-        moderationNote: moderation.note,
-        reviewedAt: null,
-        isPublished: moderation.status === 'approved',
-      })
-      .onConflictDoUpdate({
-        target: reviews.interactionId,
-        set: {
-          rating: review.rating,
-          body: review.body || null,
-          moderationStatus: moderation.status,
-          moderationNote: moderation.note,
-          reviewedByUserId: null,
-          reviewedAt: null,
-          isPublished: moderation.status === 'approved',
-          updatedAt: now,
-        },
-      })
-      .returning();
-
-    if (!saved) throw new Error('The review could not be saved.');
-    return this.toCustomerReview(saved);
+    return eligibleInteraction;
   }
 
   async list(user: AuthenticatedUser): Promise<AdminCustomerReviewQueue> {

@@ -148,6 +148,13 @@
       "when": 1790860838429,
       "tag": "0020_slim_shinobi_shaw",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1790864278264,
+      "tag": "0021_right_gauntlet",
+      "breakpoints": true
     }
   ]
 }

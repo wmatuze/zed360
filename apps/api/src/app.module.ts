@@ -25,6 +25,8 @@ import { PublicBusinessesController } from './public-businesses.controller';
 import { PublicBusinessesService } from './public-businesses.service';
 import { throttlerOptions } from './public-rate-limits';
 import { SignInAttemptLimiter } from './sign-in-attempt-limiter.service';
+import { ReviewContactVerificationService } from './review-contact-verification.service';
+import { WhatsAppCodeSender } from './whatsapp-code-sender.service';
 import { MediaReviewsController } from './media-reviews.controller';
 import { MediaReviewsService } from './media-reviews.service';
 import { AdminCustomerReviewsController } from './admin-customer-reviews.controller';
@@ -117,6 +119,8 @@ import { AdminLocationsService } from './admin-locations.service';
     PlatformAuthorizationService,
     PublicBusinessesService,
     SignInAttemptLimiter,
+    ReviewContactVerificationService,
+    WhatsAppCodeSender,
   ],
 })
 export class AppModule {}

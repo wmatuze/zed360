@@ -17,6 +17,36 @@ customer account is not required.
   Zed360 request. It does not prove payment, delivery, satisfaction, or every
   statement in the review.
 
+## WhatsApp confirmation
+
+A private request link alone can be created by anyone, including a business
+owner reviewing themselves. Every review submission therefore confirms a
+WhatsApp number with a one-time code. This is not an account: there is no
+password, profile, or sign-in, and browsing, requests, and contacting
+businesses are unaffected.
+
+- `POST /v1/requests/shared/:shareToken/review/code` sends a six-digit code
+  using an approved WhatsApp authentication template. The review submission
+  then includes `verificationId` and `code`.
+- Numbers are normalized to E.164 (`0977…`, `977…`, and `+260 977…` are the
+  same number) and stored only as an HMAC keyed by `CONTACT_HASH_SECRET`.
+  Codes are stored only as hashes.
+- Codes expire after 10 minutes, work once, and are invalidated after five
+  checks.
+- A number can review the same business once every 180 days.
+- The business's own phone and WhatsApp numbers, and those of its members,
+  cannot review it.
+- Code sending is limited per IP, per number, and per request because each
+  code is a paid WhatsApp message.
+
+Without WhatsApp credentials outside production, codes are written to the API
+log so the flow can be tested. In production, reviews cannot be submitted
+until `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS_TOKEN`, and
+`WHATSAPP_AUTH_TEMPLATE` are configured. `CONTACT_HASH_SECRET` must never
+change once reviews exist.
+
+Reviews made before this rule have no stored number and remain published.
+
 ## Exception-based moderation
 
 Eligible new and updated reviews publish immediately unless deterministic

@@ -982,9 +982,26 @@ export const reviewModerationStatusSchema = z.enum([
   "rejected",
 ]);
 
+export const requestReviewCodeSchema = z.object({
+  phone: z.string().trim().min(7).max(20),
+});
+
+export type RequestReviewCode = z.infer<typeof requestReviewCodeSchema>;
+
+export const reviewCodeSentSchema = z.object({
+  verificationId: z.string().uuid(),
+  /** The number with all but the last digits hidden, for display. */
+  sentTo: z.string(),
+  expiresAt: z.string().datetime(),
+});
+
+export type ReviewCodeSent = z.infer<typeof reviewCodeSentSchema>;
+
 export const submitCustomerReviewSchema = z.object({
   rating: z.coerce.number().int().min(1).max(5),
   body: z.string().trim().max(1200).optional().or(z.literal("")),
+  verificationId: z.string().uuid(),
+  code: z.string().trim().regex(/^\d{6}$/),
 });
 
 export type SubmitCustomerReview = z.infer<typeof submitCustomerReviewSchema>;

@@ -15,6 +15,7 @@ export const publicRateLimits = {
   businessApplication: { burst: 5, hourly: 10 },
   requestOutcome: { burst: 15, hourly: 60 },
   customerReview: { burst: 5, hourly: 20 },
+  reviewCode: { burst: 3, hourly: 10 },
   contentReport: { burst: 5, hourly: 5 },
 } as const;
 
