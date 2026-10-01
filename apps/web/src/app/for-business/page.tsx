@@ -17,7 +17,7 @@ export default function BusinessApplicationPage() {
           <BrandLogo />
         </Link>
         <Link
-          className="text-xs text-white/45 transition hover:text-white"
+          className="text-xs text-white/50 transition hover:text-white"
           href="/business/sign-in"
         >
           Business sign in
@@ -36,7 +36,7 @@ export default function BusinessApplicationPage() {
             Create a private draft profile with your main service and coverage
             area. Zed360 will review it before anything becomes public.
           </p>
-          <div className="mt-8 space-y-3 text-sm text-white/45">
+          <div className="mt-8 space-y-3 text-sm text-white/50">
             <p>01 — Tell us what your business provides</p>
             <p>02 — Choose where you serve customers</p>
             <p>03 — Confirm ownership before publication</p>

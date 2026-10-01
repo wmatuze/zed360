@@ -25,11 +25,11 @@ export function RecentRequestsPanel() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="text-sm font-semibold">My recent requests</h2>
-          <p className="mt-1 text-xs leading-5 text-white/42">
+          <p className="mt-1 text-xs leading-5 text-white/50">
             Saved only in this browser. Remove them if this is a shared device.
           </p>
         </div>
-        <span className="text-xs text-white/35">{requests.length}/5</span>
+        <span className="text-xs text-white/50">{requests.length}/5</span>
       </div>
       <div className="mt-4 grid gap-2">
         {requests.map((request) => (
@@ -44,12 +44,12 @@ export function RecentRequestsPanel() {
               <span className="block truncate text-sm font-medium text-white/80">
                 {request.summary}
               </span>
-              <span className="mt-1 block text-xs text-white/35">
+              <span className="mt-1 block text-xs text-white/50">
                 Ref {request.id.slice(0, 8).toUpperCase()} · View responses
               </span>
             </Link>
             <button
-              className="rounded-lg px-2 py-1 text-xs text-white/40 hover:bg-white/5 hover:text-white/70"
+              className="rounded-lg px-2 py-1 text-xs text-white/50 hover:bg-white/5 hover:text-white/70"
               onClick={() => forgetRecentRequest(request.shareToken)}
               type="button"
             >

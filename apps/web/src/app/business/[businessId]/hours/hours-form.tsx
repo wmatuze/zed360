@@ -38,7 +38,7 @@ export function HoursForm({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-xl font-semibold">{location.name}</h2>
-          <p className="mt-1 text-sm text-white/42">
+          <p className="mt-1 text-sm text-white/50">
             {[
               location.districtName,
               location.isPrimary ? "Primary location" : null,
@@ -81,7 +81,7 @@ export function HoursForm({
                 <option value="hours">Set hours</option>
                 <option value="open_24_hours">Open 24 hours</option>
               </select>
-              <label className="text-xs text-white/38">
+              <label className="text-xs text-white/50">
                 Opens
                 <input
                   className="mt-1 h-10 w-full rounded-lg border border-white/10 bg-black/20 px-3 text-sm disabled:opacity-30"
@@ -91,7 +91,7 @@ export function HoursForm({
                   type="time"
                 />
               </label>
-              <label className="text-xs text-white/38">
+              <label className="text-xs text-white/50">
                 Closes
                 <input
                   className="mt-1 h-10 w-full rounded-lg border border-white/10 bg-black/20 px-3 text-sm disabled:opacity-30"
@@ -106,7 +106,7 @@ export function HoursForm({
         })}
       </div>
 
-      <p className="mt-4 text-xs leading-5 text-white/38">
+      <p className="mt-4 text-xs leading-5 text-white/50">
         For overnight trading, use a closing time earlier than the opening time,
         for example 18:00 to 02:00.
       </p>

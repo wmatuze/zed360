@@ -62,7 +62,7 @@ export function AdminPasswordUpdateForm() {
       >
         {pending ? "Saving password…" : "Save administrator password"}
       </button>
-      <p className="text-xs leading-5 text-white/30">
+      <p className="text-xs leading-5 text-white/50">
         Use at least eight characters and avoid passwords used on other
         services.
       </p>

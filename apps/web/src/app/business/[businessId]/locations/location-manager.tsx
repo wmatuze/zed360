@@ -135,7 +135,7 @@ function LocationCard({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-xl font-semibold">{location.name}</h2>
-          <p className="mt-1 text-sm text-white/42">
+          <p className="mt-1 text-sm text-white/50">
             {[location.districtName, location.provinceName]
               .filter(Boolean)
               .join(" · ")}
@@ -147,7 +147,7 @@ function LocationCard({
               Primary
             </span>
           ) : null}
-          <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/45">
+          <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/50">
             {location.isActive ? "Active" : "Inactive"}
           </span>
         </div>

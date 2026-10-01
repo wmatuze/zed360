@@ -120,7 +120,7 @@ export default async function AdminPage() {
         <div className="mt-4 flex flex-wrap gap-2">
           {planned.map((item) => (
             <span
-              className="rounded-full border border-white/8 px-3 py-2 text-sm text-white/35"
+              className="rounded-full border border-white/8 px-3 py-2 text-sm text-white/50"
               key={item}
             >
               {item}

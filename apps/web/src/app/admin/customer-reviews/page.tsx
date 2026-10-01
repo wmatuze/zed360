@@ -109,7 +109,7 @@ export default async function CustomerReviewModerationPage({
                     <p className="text-lg font-semibold">
                       {review.business.name}
                     </p>
-                    <p className="mt-1 text-xs text-white/38">
+                    <p className="mt-1 text-xs text-white/50">
                       Verified interaction ·{" "}
                       {new Date(review.createdAt).toLocaleDateString("en-ZM", {
                         dateStyle: "medium",

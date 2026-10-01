@@ -103,11 +103,11 @@ export default async function AdminUsersPage({
                         user.phone ||
                         "Unnamed user"}
                     </p>
-                    <p className="mt-1 truncate text-sm text-white/40">
+                    <p className="mt-1 truncate text-sm text-white/50">
                       {user.email || user.phone || user.id}
                     </p>
                   </div>
-                  <span className="text-sm text-white/45">
+                  <span className="text-sm text-white/50">
                     {user.businessCount} business
                     {user.businessCount === 1 ? "" : "es"}
                   </span>
@@ -133,7 +133,7 @@ export default async function AdminUsersPage({
                         </span>
                       ))
                     ) : (
-                      <span className="text-sm text-white/35">
+                      <span className="text-sm text-white/50">
                         No platform role
                       </span>
                     )}
@@ -205,7 +205,7 @@ export default async function AdminUsersPage({
                     </UserActionButton>
                   </form>
                   {user.statusReason ? (
-                    <p className="mt-3 text-xs text-white/35">
+                    <p className="mt-3 text-xs text-white/50">
                       Current status reason: {user.statusReason}
                     </p>
                   ) : null}
@@ -214,7 +214,7 @@ export default async function AdminUsersPage({
             );
           })
         ) : (
-          <p className="p-6 text-white/45">No users match this search.</p>
+          <p className="p-6 text-white/50">No users match this search.</p>
         )}
       </div>
 
@@ -236,7 +236,7 @@ export default async function AdminUsersPage({
           ) : (
             <span />
           )}
-          <span className="text-sm text-white/40">
+          <span className="text-sm text-white/50">
             Page {result.page} of {result.totalPages}
           </span>
           {result.page < result.totalPages ? (

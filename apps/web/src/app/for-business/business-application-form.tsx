@@ -140,7 +140,7 @@ export function BusinessApplicationForm() {
           Your business profile is saved privately. Verify your email before
           Zed360 reviews it for publication.
         </p>
-        <p className="mt-4 text-sm text-white/42">
+        <p className="mt-4 text-sm text-white/50">
           Application reference: {application.id.slice(0, 8).toUpperCase()}
         </p>
         <ApplicationVerificationStep
@@ -153,7 +153,7 @@ export function BusinessApplicationForm() {
 
   const loading = !referenceData && !referenceError;
   const inputClass =
-    "h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 outline-none transition placeholder:text-white/25 focus:border-[var(--lime)]/55";
+    "h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 outline-none transition placeholder:text-white/50 focus:border-[var(--lime)]/55";
   const selectClass =
     "h-12 w-full rounded-xl border border-white/10 bg-[#11151d] px-4 outline-none transition focus:border-[var(--lime)]/55";
 
@@ -195,7 +195,7 @@ export function BusinessApplicationForm() {
           PACRA registration
         </legend>
         <label className="mt-2 block">
-          <span className="mb-2 block text-xs leading-5 text-white/40">
+          <span className="mb-2 block text-xs leading-5 text-white/50">
             Is this business registered with PACRA? Registration is a separate
             trust signal and is not required to submit an application.
           </span>
@@ -255,7 +255,7 @@ export function BusinessApplicationForm() {
                 <option value="other">Other</option>
               </select>
             </label>
-            <p className="text-xs leading-5 text-white/35 sm:col-span-2">
+            <p className="text-xs leading-5 text-white/50 sm:col-span-2">
               These details enter a pending review. They do not create a PACRA
               verification badge automatically.
             </p>
@@ -268,7 +268,7 @@ export function BusinessApplicationForm() {
           What does the business do?
         </span>
         <textarea
-          className="min-h-24 w-full resize-y rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none transition placeholder:text-white/25 focus:border-[var(--lime)]/55"
+          className="min-h-24 w-full resize-y rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none transition placeholder:text-white/50 focus:border-[var(--lime)]/55"
           maxLength={1200}
           name="description"
           placeholder="A short, factual description of the business"
@@ -368,7 +368,7 @@ export function BusinessApplicationForm() {
       <label className="block">
         <span className="mb-2 block text-sm font-medium text-white/70">
           Address or service-area note{" "}
-          <i className="font-normal text-white/30">optional</i>
+          <i className="font-normal text-white/50">optional</i>
         </span>
         <input
           className={inputClass}
@@ -382,7 +382,7 @@ export function BusinessApplicationForm() {
         <legend className="mb-2 text-sm font-medium text-white/70">
           How should Zed360 contact you?
         </legend>
-        <p className="mb-3 text-xs text-white/35">
+        <p className="mb-3 text-xs text-white/50">
           Your email is required to securely connect this application to your
           account. Contact details are not published before review.
         </p>

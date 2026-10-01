@@ -124,7 +124,7 @@ export default async function MediaReviewsPage({
                     {media.title || media.altText}
                   </p>
                   {media.caption ? (
-                    <p className="mt-2 text-sm leading-6 text-white/42">
+                    <p className="mt-2 text-sm leading-6 text-white/50">
                       {media.caption}
                     </p>
                   ) : null}

@@ -95,7 +95,7 @@ export default async function ContentReportsPage({
                       <h2 className="text-xl font-semibold">
                         {report.targetLabel}
                       </h2>
-                      <p className="mt-1 text-xs text-white/38">
+                      <p className="mt-1 text-xs text-white/50">
                         {report.targetType} · {reasonLabels[report.reason]} ·{" "}
                         {new Date(report.createdAt).toLocaleDateString(
                           "en-ZM",
@@ -121,7 +121,7 @@ export default async function ContentReportsPage({
                       <p className="whitespace-pre-wrap text-sm leading-6 text-white/65">
                         {report.details}
                       </p>
-                      <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-white/40">
+                      <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-white/50">
                         {report.targetSlug ? (
                           <Link
                             className="font-semibold text-[var(--lime)] hover:underline"
@@ -143,7 +143,7 @@ export default async function ContentReportsPage({
                     <form action={action} className="mt-5 grid gap-3">
                       <label className="text-sm text-white/60">
                         Decision reason
-                        <span className="mt-1 block text-xs font-normal leading-5 text-white/35">
+                        <span className="mt-1 block text-xs font-normal leading-5 text-white/50">
                           Required for the audit record. Enter at least 10
                           characters explaining the evidence and decision.
                         </span>
@@ -184,7 +184,7 @@ export default async function ContentReportsPage({
               );
             })
           ) : queue ? (
-            <p className="rounded-2xl border border-white/10 p-6 text-white/45">
+            <p className="rounded-2xl border border-white/10 p-6 text-white/50">
               No open content reports.
             </p>
           ) : null}

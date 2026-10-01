@@ -108,7 +108,7 @@ export default async function BusinessDashboardPage() {
               businesses you manage.
             </p>
           </div>
-          <p className="text-sm text-white/40">Signed in as {session.email}</p>
+          <p className="text-sm text-white/50">Signed in as {session.email}</p>
         </div>
 
         {errorMessage ? (
@@ -132,7 +132,7 @@ export default async function BusinessDashboardPage() {
                 className="rounded-2xl border border-white/10 bg-white/[0.035] p-5"
                 key={label}
               >
-                <dt className="text-xs uppercase tracking-[0.14em] text-white/35">
+                <dt className="text-xs uppercase tracking-[0.14em] text-white/50">
                   {label}
                 </dt>
                 <dd className="mt-2 text-3xl font-semibold tracking-[-0.04em]">
@@ -192,7 +192,7 @@ export default async function BusinessDashboardPage() {
                         <h3 className="text-xl font-semibold">
                           {business.name}
                         </h3>
-                        <p className="mt-1 text-sm text-white/42">
+                        <p className="mt-1 text-sm text-white/50">
                           {reviewLabels[business.reviewStatus]} ·{" "}
                           {business.role}
                         </p>
@@ -212,19 +212,19 @@ export default async function BusinessDashboardPage() {
                     </div>
                     <dl className="mt-5 grid grid-cols-3 gap-3 border-y border-white/8 py-4 text-sm">
                       <div>
-                        <dt className="text-white/35">Matches</dt>
+                        <dt className="text-white/50">Matches</dt>
                         <dd className="mt-1 text-lg font-semibold">
                           {business.metrics.openMatches}
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-white/35">Products</dt>
+                        <dt className="text-white/50">Products</dt>
                         <dd className="mt-1 text-lg font-semibold">
                           {business.metrics.publishedProducts}
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-white/35">Reviews</dt>
+                        <dt className="text-white/50">Reviews</dt>
                         <dd className="mt-1 text-lg font-semibold">
                           {business.metrics.publishedReviews}
                         </dd>
@@ -233,12 +233,12 @@ export default async function BusinessDashboardPage() {
                     <ul className="mt-4 grid gap-2 text-xs sm:grid-cols-2">
                       {setupEntries.map(([key, done]) => (
                         <li
-                          className={done ? "text-white/65" : "text-white/30"}
+                          className={done ? "text-white/65" : "text-white/50"}
                           key={key}
                         >
                           <span
                             className={
-                              done ? "text-[var(--lime)]" : "text-white/25"
+                              done ? "text-[var(--lime)]" : "text-white/50"
                             }
                           >
                             {done ? "●" : "○"}
@@ -353,7 +353,7 @@ export default async function BusinessDashboardPage() {
                     href="/business/requests"
                     key={request.matchId}
                   >
-                    <div className="flex items-center justify-between gap-3 text-xs text-white/35">
+                    <div className="flex items-center justify-between gap-3 text-xs text-white/50">
                       <span>
                         {request.businessName} · {request.categoryName}
                       </span>
@@ -362,13 +362,13 @@ export default async function BusinessDashboardPage() {
                       </span>
                     </div>
                     <p className="mt-2 font-medium">{request.summary}</p>
-                    <p className="mt-1 text-xs text-white/38">
+                    <p className="mt-1 text-xs text-white/50">
                       {request.districtName ?? "Location not specified"}
                     </p>
                   </Link>
                 ))
               ) : (
-                <p className="p-5 text-sm text-white/45">
+                <p className="p-5 text-sm text-white/50">
                   No active matched requests.
                 </p>
               )}
@@ -395,20 +395,20 @@ export default async function BusinessDashboardPage() {
                     href={notification.actionUrl ?? "/business/notifications"}
                     key={notification.id}
                   >
-                    <div className="flex items-center justify-between gap-3 text-xs text-white/35">
+                    <div className="flex items-center justify-between gap-3 text-xs text-white/50">
                       <span>{notification.businessName}</span>
                       {!notification.readAt ? (
                         <span className="text-[var(--lime)]">New</span>
                       ) : null}
                     </div>
                     <p className="mt-2 font-medium">{notification.title}</p>
-                    <p className="mt-1 line-clamp-1 text-sm text-white/45">
+                    <p className="mt-1 line-clamp-1 text-sm text-white/50">
                       {notification.body}
                     </p>
                   </Link>
                 ))
               ) : (
-                <p className="p-5 text-sm text-white/45">
+                <p className="p-5 text-sm text-white/50">
                   No notifications yet.
                 </p>
               )}

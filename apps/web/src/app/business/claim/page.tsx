@@ -128,7 +128,7 @@ function ClaimShell({
         <Link href="/">
           <BrandLogo />
         </Link>
-        <span className="text-xs text-white/35">Business connection</span>
+        <span className="text-xs text-white/50">Business connection</span>
       </header>
       <section className="mx-auto w-full max-w-3xl pb-20 pt-16 lg:pt-24">
         <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-7 sm:p-10">

@@ -105,7 +105,7 @@ export default async function BusinessRequestsPage() {
                   <span className="rounded-full border border-[var(--lime)]/25 bg-[var(--lime)]/8 px-3 py-1 text-[var(--lime)]">
                     {request.categoryName}
                   </span>
-                  <span className="text-white/38">For {business.name}</span>
+                  <span className="text-white/50">For {business.name}</span>
                 </div>
                 <h2 className="mt-4 text-xl font-semibold tracking-[-0.03em] sm:text-2xl">
                   {request.summary}
@@ -117,13 +117,13 @@ export default async function BusinessRequestsPage() {
                 ) : null}
                 <dl className="mt-6 grid gap-4 border-t border-white/8 pt-5 text-sm sm:grid-cols-2 lg:grid-cols-4">
                   <div>
-                    <dt className="text-white/35">Location</dt>
+                    <dt className="text-white/50">Location</dt>
                     <dd className="mt-1 text-white/78">
                       {request.districtName ?? "Not specified"}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-white/35">When needed</dt>
+                    <dt className="text-white/50">When needed</dt>
                     <dd className="mt-1 text-white/78">
                       {request.timing
                         ? timingLabels[request.timing]
@@ -131,13 +131,13 @@ export default async function BusinessRequestsPage() {
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-white/35">Budget</dt>
+                    <dt className="text-white/50">Budget</dt>
                     <dd className="mt-1 text-white/78">
                       {moneyRange(request.budgetMinimum, request.budgetMaximum)}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-white/35">Posted</dt>
+                    <dt className="text-white/50">Posted</dt>
                     <dd className="mt-1 text-white/78">
                       {new Date(request.createdAt).toLocaleDateString("en-ZM", {
                         dateStyle: "medium",
@@ -154,7 +154,7 @@ export default async function BusinessRequestsPage() {
                 {business.role === "owner" || business.role === "manager" ? (
                   <ResponseForm matchId={matchId} response={response} />
                 ) : (
-                  <p className="mt-5 text-sm text-white/45">
+                  <p className="mt-5 text-sm text-white/50">
                     An owner or manager can respond to this request.
                   </p>
                 )}

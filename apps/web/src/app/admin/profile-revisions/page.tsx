@@ -51,10 +51,10 @@ export default async function ProfileRevisionsPage({
                           className="grid gap-2 border-t border-white/8 pt-3 sm:grid-cols-[10rem_1fr_1fr]"
                           key={field}
                         >
-                          <span className="text-sm text-white/40">
+                          <span className="text-sm text-white/50">
                             {labels[field]}
                           </span>
-                          <span className="text-sm text-white/45">
+                          <span className="text-sm text-white/50">
                             {revision.current[field] || "—"}
                           </span>
                           <span className="text-sm text-white/85">
@@ -84,7 +84,7 @@ export default async function ProfileRevisionsPage({
               );
             })
           ) : (
-            <p className="rounded-2xl border border-white/10 p-6 text-white/45">
+            <p className="rounded-2xl border border-white/10 p-6 text-white/50">
               No profile exceptions awaiting review. Routine profile changes
               publish immediately with audit history.
             </p>

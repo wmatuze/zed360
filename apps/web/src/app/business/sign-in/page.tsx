@@ -33,7 +33,7 @@ export default async function BusinessSignInPage({
         <Link className="flex items-center gap-3" href="/">
           <BrandLogo />
         </Link>
-        <span className="text-xs text-white/35">Business access</span>
+        <span className="text-xs text-white/50">Business access</span>
       </header>
 
       <section className="mx-auto grid w-full max-w-5xl gap-10 pb-20 pt-14 lg:grid-cols-[.72fr_1.28fr] lg:pt-24">

@@ -21,7 +21,7 @@ export function AdminSignInForm({ nextPath }: { nextPath: string }) {
         <input
           autoComplete="username"
           autoFocus
-          className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 outline-none transition placeholder:text-white/25 focus:border-[var(--lime)]/55"
+          className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 outline-none transition placeholder:text-white/50 focus:border-[var(--lime)]/55"
           maxLength={50}
           minLength={3}
           name="username"
@@ -35,7 +35,7 @@ export function AdminSignInForm({ nextPath }: { nextPath: string }) {
         </span>
         <input
           autoComplete="current-password"
-          className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 outline-none transition placeholder:text-white/25 focus:border-[var(--lime)]/55"
+          className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 outline-none transition placeholder:text-white/50 focus:border-[var(--lime)]/55"
           maxLength={128}
           minLength={8}
           name="password"
@@ -58,7 +58,7 @@ export function AdminSignInForm({ nextPath }: { nextPath: string }) {
       >
         {pending ? "Signing in…" : "Sign in to administration"}
       </button>
-      <p className="text-xs leading-5 text-white/30">
+      <p className="text-xs leading-5 text-white/50">
         This sign-in is restricted to active administrator and reviewer
         accounts.
       </p>

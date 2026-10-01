@@ -89,7 +89,7 @@ export default async function Home() {
             <button className="button button-primary home-search-button" type="submit">Search businesses <span aria-hidden="true">→</span></button>
           </form>
 
-          <div className="mt-6 flex flex-col items-center justify-center gap-3 text-sm text-white/45 sm:flex-row">
+          <div className="mt-6 flex flex-col items-center justify-center gap-3 text-sm text-white/50 sm:flex-row">
             <span>Not sure who to search for?</span>
             <Link className="font-semibold text-[var(--lime)] hover:underline" href="/request">Tell us what you need instead →</Link>
           </div>
@@ -130,7 +130,7 @@ export default async function Home() {
             <div>
               <p className="eyebrow"><span /> Fresh and trusted</p>
               <h2 className="mt-5 max-w-2xl text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">Businesses worth discovering.</h2>
-              <p className="mt-4 max-w-2xl leading-7 text-white/45">Approved profiles with recently confirmed information appear first, so you can start with businesses keeping their details current.</p>
+              <p className="mt-4 max-w-2xl leading-7 text-white/50">Approved profiles with recently confirmed information appear first, so you can start with businesses keeping their details current.</p>
             </div>
             <Link className="text-sm font-semibold text-[var(--lime)] hover:underline" href="/businesses">View all businesses →</Link>
           </div>
@@ -155,13 +155,13 @@ export default async function Home() {
                         <h3 className="text-xl font-semibold tracking-[-0.03em] group-hover:text-[var(--lime)]">{business.name}</h3>
                         {verified ? <span className="verified-pill">Verified</span> : null}
                       </div>
-                      <p className="mt-2 text-sm text-white/42">{location ? `${location.name}, ${location.provinceName}` : "Serving customers in Zambia"}</p>
+                      <p className="mt-2 text-sm text-white/50">{location ? `${location.name}, ${location.provinceName}` : "Serving customers in Zambia"}</p>
                       <p className="mt-4 line-clamp-2 text-sm leading-6 text-white/55">{business.description || business.serviceNames.slice(0, 3).join(" · ") || "View this business profile and its available services."}</p>
                       <div className="mt-auto flex items-center justify-between gap-3 pt-5 text-xs">
-                        <span className={business.availabilityFreshness === "current" && business.availability === "available" ? "text-[var(--lime)]" : "text-white/35"}>
+                        <span className={business.availabilityFreshness === "current" && business.availability === "available" ? "text-[var(--lime)]" : "text-white/50"}>
                           {business.availabilityFreshness === "current" ? availabilityLabels[business.availability] : "View current details"}
                         </span>
-                        <b className="text-white/40 group-hover:text-[var(--lime)]">View profile →</b>
+                        <b className="text-white/50 group-hover:text-[var(--lime)]">View profile →</b>
                       </div>
                     </div>
                   </Link>
@@ -193,14 +193,14 @@ export default async function Home() {
 
       <footer className="border-t border-white/8 px-5 py-12 text-sm sm:px-8 lg:px-10">
         <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
-          <div><BrandLogo /><p className="mt-5 max-w-sm leading-6 text-white/40">Helping people across Zambia discover, compare, and connect with businesses they can trust.</p></div>
+          <div><BrandLogo /><p className="mt-5 max-w-sm leading-6 text-white/50">Helping people across Zambia discover, compare, and connect with businesses they can trust.</p></div>
           {footerColumns.map((column) => (
-            <div key={column.title}><h2 className="font-semibold text-white/80">{column.title}</h2><ul className="mt-4 space-y-3 text-white/40">
+            <div key={column.title}><h2 className="font-semibold text-white/80">{column.title}</h2><ul className="mt-4 space-y-3 text-white/50">
               {column.links.map(([label, href]) => <li key={label}><Link className="transition hover:text-white" href={href}>{label}</Link></li>)}
             </ul></div>
           ))}
         </div>
-        <div className="mx-auto mt-12 flex max-w-7xl flex-col justify-between gap-3 border-t border-white/8 pt-6 text-xs text-white/40 sm:flex-row">
+        <div className="mx-auto mt-12 flex max-w-7xl flex-col justify-between gap-3 border-t border-white/8 pt-6 text-xs text-white/50 sm:flex-row">
           <span>© 2026 Zed360. Built for Zambia.</span><span>Discovery · Connection · Trust</span>
         </div>
       </footer>

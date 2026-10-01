@@ -160,9 +160,9 @@ export default async function AdminLocationsPage({
             <summary className="grid cursor-pointer list-none gap-2 px-5 py-4 hover:bg-white/[0.035] sm:grid-cols-[1fr_auto_auto]">
               <div>
                 <p className="font-semibold">{province.name}</p>
-                <p className="text-sm text-white/40">/{province.slug}</p>
+                <p className="text-sm text-white/50">/{province.slug}</p>
               </div>
-              <span className="text-sm text-white/45">
+              <span className="text-sm text-white/50">
                 {province.districtCount} districts · {province.coverageCount}{" "}
                 coverage areas
               </span>
@@ -204,11 +204,11 @@ export default async function AdminLocationsPage({
                       <summary className="grid cursor-pointer list-none gap-2 px-4 py-3 sm:grid-cols-[1fr_auto_auto]">
                         <div>
                           <p className="font-medium">{district.name}</p>
-                          <p className="text-xs text-white/35">
+                          <p className="text-xs text-white/50">
                             /{district.slug}
                           </p>
                         </div>
-                        <span className="text-sm text-white/40">
+                        <span className="text-sm text-white/50">
                           {district.locationCount} locations ·{" "}
                           {district.requestCount} requests ·{" "}
                           {district.coverageCount} coverage
@@ -252,7 +252,7 @@ export default async function AdminLocationsPage({
                     </details>
                   ))
                 ) : (
-                  <p className="p-4 text-sm text-white/40">
+                  <p className="p-4 text-sm text-white/50">
                     No districts match these filters.
                   </p>
                 )}
@@ -261,7 +261,7 @@ export default async function AdminLocationsPage({
           </details>
         ))}
         {!result.provinces.length ? (
-          <p className="rounded-xl border border-white/10 p-5 text-white/45">
+          <p className="rounded-xl border border-white/10 p-5 text-white/50">
             No locations match these filters.
           </p>
         ) : null}
