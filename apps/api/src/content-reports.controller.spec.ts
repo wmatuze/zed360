@@ -1,5 +1,4 @@
 import { BadRequestException } from '@nestjs/common';
-import type { Request } from 'express';
 import { AuthenticatedUserService } from './authenticated-user.service';
 import { ContentReportsController } from './content-reports.controller';
 import { ContentReportsService } from './content-reports.service';
@@ -13,10 +12,6 @@ describe('ContentReportsController', () => {
     { verify } as unknown as AuthenticatedUserService,
     { submit, list, decide } as unknown as ContentReportsService,
   );
-  const request = {
-    ip: '127.0.0.1',
-    socket: { remoteAddress: '127.0.0.1' },
-  } as unknown as Request;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -32,13 +27,13 @@ describe('ContentReportsController', () => {
       reporterEmail: '',
       website: '' as const,
     };
-    await controller.submit(request, report);
-    expect(submit).toHaveBeenCalledWith(report, '127.0.0.1');
+    await controller.submit(report);
+    expect(submit).toHaveBeenCalledWith(report);
   });
 
   it('rejects a report without enough detail', () => {
     expect(() =>
-      controller.submit(request, {
+      controller.submit({
         targetType: 'business',
         targetId: 'ef7e5e78-5c1d-49b8-87aa-296145c2fc05',
         reason: 'other',

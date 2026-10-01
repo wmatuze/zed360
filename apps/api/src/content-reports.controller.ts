@@ -6,15 +6,14 @@ import {
   Headers,
   Param,
   Post,
-  Req,
 } from '@nestjs/common';
 import {
   contentReportDecisionSchema,
   submitContentReportSchema,
 } from '@zed360/contracts';
-import type { Request } from 'express';
 import { AuthenticatedUserService } from './authenticated-user.service';
 import { ContentReportsService } from './content-reports.service';
+import { PublicRateLimit } from './public-rate-limits';
 
 const uuid =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -27,15 +26,13 @@ export class ContentReportsController {
   ) {}
 
   @Post()
-  submit(@Req() request: Request, @Body() body: unknown) {
+  @PublicRateLimit('contentReport')
+  submit(@Body() body: unknown) {
     const parsed = submitContentReportSchema.safeParse(body);
     if (!parsed.success) {
       throw new BadRequestException('Check the report information.');
     }
-    return this.reports.submit(
-      parsed.data,
-      request.ip || request.socket.remoteAddress || 'unknown',
-    );
+    return this.reports.submit(parsed.data);
   }
 
   @Get('admin')
