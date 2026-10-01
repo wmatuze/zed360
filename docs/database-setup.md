@@ -85,6 +85,27 @@ pnpm.cmd db:migrate
 
 Then verify in the Supabase table editor that the initial Zed360 tables exist. Never run a migration against a production project unless the target connection has been confirmed first.
 
+## 6. Keep tables private to the API
+
+Zed360 reads and writes data only through its API, which connects as the
+table owner. The Supabase Data API must not expose application tables, because
+the publishable key is shipped to every browser.
+
+1. In **Integrations → Data API → Settings**, remove `public` from
+   **Exposed schemas** and turn off **Automatically expose new tables**.
+2. Every table enables row-level security in `packages/database/src/schema.ts`
+   (`.enableRLS()`), so tables stay closed even if `public` is exposed again.
+   Add `.enableRLS()` to any new table.
+3. The only policy lets a signed-in user read their own `business_members`
+   rows, which the business-media storage policies require.
+
+To confirm, this request must fail with `PGRST106` or `PGRST205` rather than
+return rows:
+
+```powershell
+curl.exe "https://YOUR-PROJECT-REF.supabase.co/rest/v1/users?select=*" -H "apikey: YOUR_PUBLISHABLE_KEY" -H "Accept-Profile: public"
+```
+
 ## Optional Docker setup
 
 The repository includes `compose.yaml` for developers who prefer a local PostGIS and Redis environment. It is optional and is not part of the normal setup for a resource-constrained computer.

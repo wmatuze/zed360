@@ -1,0 +1,27 @@
+ALTER TABLE "admin_audit_events" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "business_locations" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "business_media_assets" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "business_members" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "business_notification_events" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "business_notifications" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "business_products" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "business_profile_revisions" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "business_responses" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "business_reviews" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "business_service_coverage_areas" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "business_service_fulfillment_options" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "business_services" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "business_verifications" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "businesses" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "categories" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "content_reports" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "customer_requests" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "districts" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "interactions" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "provinces" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "request_matches" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "review_responses" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "reviews" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "user_roles" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "users" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+CREATE POLICY "business_members_select_own" ON "business_members" AS PERMISSIVE FOR SELECT TO "authenticated" USING ("business_members"."user_id" = (select auth.uid()));

@@ -141,6 +141,13 @@
       "when": 1789127286742,
       "tag": "0019_woozy_jack_power",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1790860838429,
+      "tag": "0020_slim_shinobi_shaw",
+      "breakpoints": true
     }
   ]
 }
