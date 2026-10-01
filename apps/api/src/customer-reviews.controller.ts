@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { submitCustomerReviewSchema } from '@zed360/contracts';
 import { CustomerReviewsService } from './customer-reviews.service';
+import { PublicRateLimit } from './public-rate-limits';
 
 const uuidPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -17,6 +18,7 @@ export class CustomerReviewsController {
   constructor(private readonly reviews: CustomerReviewsService) {}
 
   @Post(':shareToken/review')
+  @PublicRateLimit('customerReview')
   submit(@Param('shareToken') shareToken: string, @Body() body: unknown) {
     const parsed = submitCustomerReviewSchema.safeParse(body);
     if (!uuidPattern.test(shareToken) || !parsed.success) {

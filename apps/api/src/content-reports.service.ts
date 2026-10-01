@@ -1,8 +1,6 @@
 import {
   ConflictException,
   ForbiddenException,
-  HttpException,
-  HttpStatus,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -23,22 +21,14 @@ import type { AuthenticatedUser } from './authenticated-user.service';
 import { DatabaseService } from './database.service';
 import { PlatformAuthorizationService } from './platform-authorization.service';
 
-const HOUR = 60 * 60 * 1000;
-
 @Injectable()
 export class ContentReportsService {
-  private readonly rateLimits = new Map<
-    string,
-    { count: number; resetsAt: number }
-  >();
-
   constructor(
     private readonly database: DatabaseService,
     private readonly authorization: PlatformAuthorizationService,
   ) {}
 
-  async submit(report: SubmitContentReport, requesterKey: string) {
-    this.checkRateLimit(requesterKey);
+  async submit(report: SubmitContentReport) {
     await this.requirePublicTarget(report.targetType, report.targetId);
     const [created] = await this.database.db
       .insert(contentReports)
@@ -227,26 +217,5 @@ export class ContentReportsService {
     if (!rows.length) {
       throw new NotFoundException('This report target is unavailable.');
     }
-  }
-
-  private checkRateLimit(key: string) {
-    const now = Date.now();
-    if (this.rateLimits.size > 1000) {
-      for (const [entryKey, value] of this.rateLimits) {
-        if (value.resetsAt <= now) this.rateLimits.delete(entryKey);
-      }
-    }
-    const current = this.rateLimits.get(key);
-    if (!current || current.resetsAt <= now) {
-      this.rateLimits.set(key, { count: 1, resetsAt: now + HOUR });
-      return;
-    }
-    if (current.count >= 5) {
-      throw new HttpException(
-        'Too many reports were submitted. Please try again later.',
-        HttpStatus.TOO_MANY_REQUESTS,
-      );
-    }
-    current.count += 1;
   }
 }

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthenticatedUserService } from './authenticated-user.service';
@@ -22,6 +23,7 @@ import { RequestsService } from './requests.service';
 import { PlatformAuthorizationService } from './platform-authorization.service';
 import { PublicBusinessesController } from './public-businesses.controller';
 import { PublicBusinessesService } from './public-businesses.service';
+import { throttlerOptions } from './public-rate-limits';
 import { MediaReviewsController } from './media-reviews.controller';
 import { MediaReviewsService } from './media-reviews.service';
 import { AdminCustomerReviewsController } from './admin-customer-reviews.controller';
@@ -55,7 +57,7 @@ import { AdminLocationsController } from './admin-locations.controller';
 import { AdminLocationsService } from './admin-locations.service';
 
 @Module({
-  imports: [],
+  imports: [ThrottlerModule.forRoot(throttlerOptions)],
   controllers: [
     AdminAccessController,
     AdminCategoriesController,

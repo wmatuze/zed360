@@ -1,12 +1,14 @@
 import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
 import { createBusinessApplicationSchema } from '@zed360/contracts';
 import { BusinessApplicationsService } from './business-applications.service';
+import { PublicRateLimit } from './public-rate-limits';
 
 @Controller('business-applications')
 export class BusinessApplicationsController {
   constructor(private readonly applications: BusinessApplicationsService) {}
 
   @Post()
+  @PublicRateLimit('businessApplication')
   create(@Body() body: unknown) {
     const parsed = createBusinessApplicationSchema.safeParse(body);
     if (!parsed.success) {

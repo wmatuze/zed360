@@ -25,6 +25,7 @@
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/throttler": "^6.7.1",
     "@supabase/supabase-js": "2.112.2",
     "@zed360/contracts": "workspace:*",
     "@zed360/database": "workspace:*",

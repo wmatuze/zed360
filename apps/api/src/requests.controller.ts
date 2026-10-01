@@ -10,6 +10,7 @@ import {
   createCustomerRequestSchema,
   customerRequestOutcomeActionSchema,
 } from '@zed360/contracts';
+import { PublicRateLimit } from './public-rate-limits';
 import { RequestsService } from './requests.service';
 
 function validateShareToken(shareToken: string) {
@@ -33,6 +34,7 @@ export class RequestsController {
   }
 
   @Post('shared/:shareToken/outcome')
+  @PublicRateLimit('requestOutcome')
   recordOutcome(
     @Param('shareToken') shareToken: string,
     @Body() body: unknown,
@@ -48,6 +50,7 @@ export class RequestsController {
   }
 
   @Post()
+  @PublicRateLimit('customerRequest')
   create(@Body() body: unknown) {
     const parsed = createCustomerRequestSchema.safeParse(body);
     if (!parsed.success) {
