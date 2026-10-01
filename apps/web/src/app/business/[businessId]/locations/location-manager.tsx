@@ -12,6 +12,7 @@ import {
   updateLocation,
   type LocationActionState,
 } from "./actions";
+import { PinField } from "./pin-field";
 
 const initial: LocationActionState = { status: "idle", message: "" };
 type Location = BusinessLocationManagement["locations"][number];
@@ -93,6 +94,7 @@ function Fields({
           </select>
         </label>
       </div>
+      <PinField initial={location?.coordinates ?? null} />
     </>
   );
 }
@@ -199,9 +201,20 @@ export function LocationManager({
   locations: Location[];
   referenceData: ReferenceData;
 }) {
+  // Counting successful additions remounts the fields, so a new branch never
+  // inherits the previous branch's map pin or district.
   const [state, action, pending] = useActionState(
-    createLocation.bind(null, businessId),
-    initial,
+    async (
+      previous: LocationActionState & { added: number },
+      formData: FormData,
+    ) => {
+      const result = await createLocation(businessId, previous, formData);
+      return {
+        ...result,
+        added: previous.added + (result.status === "success" ? 1 : 0),
+      };
+    },
+    { ...initial, added: 0 },
   );
   return (
     <div className="mt-8 grid gap-6 lg:grid-cols-[.85fr_1.15fr] lg:items-start">
@@ -215,7 +228,7 @@ export function LocationManager({
           </p>
           <h2 className="mt-2 text-2xl font-semibold">Add a location</h2>
         </div>
-        <Fields referenceData={referenceData} />
+        <Fields key={state.added} referenceData={referenceData} />
         <Message state={state} />
         <button className="button button-primary w-fit" disabled={pending}>
           {pending ? "Adding…" : "Add location"}

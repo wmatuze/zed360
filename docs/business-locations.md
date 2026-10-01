@@ -16,6 +16,24 @@ immediately; it does not imply that Zed360 independently verified the address.
 - Operating hours remain attached to their individual location.
 - Owners and managers can change locations; staff accounts cannot.
 
-Districts must come from Zed360's verified Zambia reference data. Coordinates,
-map pins, directions, and proximity search can be added later without replacing
-the location records introduced here.
+Districts must come from Zed360's verified Zambia reference data.
+
+## Map pins
+
+Owners and managers can add an optional map pin to each location, either from
+the device's current position or by pasting coordinates or a full Google Maps
+link. Short `maps.app.goo.gl` links cannot be read without contacting Google,
+so owners are asked to paste the coordinates instead.
+
+- Pins must fall inside Zambia's bounding box. The check is a sanity check,
+  not proof that the pin matches the selected district.
+- Coordinates are stored as a PostGIS point and published with the location.
+  Like the address, a pin is owner-provided and is not verified by Zed360.
+- The form tells owners to pin only places customers should visit. A business
+  that travels to customers from home should leave the pin empty, because a
+  published pin would reveal a private address.
+- A pin can be removed; the location then falls back to a text search for
+  directions.
+
+Pinned locations make proximity search ("businesses near you") possible later
+without changing the location records.

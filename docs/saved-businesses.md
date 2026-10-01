@@ -27,8 +27,7 @@ address.
 
 ## Directions
 
-Each public location with an address or district offers a "Get directions"
-link that opens a Google Maps search for the business name, address, district,
-and province. Owners cannot yet place an exact map pin, so locations without an
-address or district show no directions link rather than a guess. When owners can
-set coordinates, directions should use them instead of a text search.
+When the owner has set a map pin, "Get directions" opens Google Maps directions
+to that exact point. Otherwise, locations with an address or district open a
+Google Maps search for the business name, address, district, and province.
+Locations with neither show no directions link rather than a guess.
