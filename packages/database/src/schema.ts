@@ -8,12 +8,14 @@ import {
   jsonb,
   numeric,
   pgEnum,
+  pgPolicy,
   pgTable,
   text,
   timestamp,
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { authenticatedRole, authUid } from "drizzle-orm/supabase";
 
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -183,7 +185,7 @@ export const users = pgTable(
     uniqueIndex("users_email_unique").on(table.email),
     uniqueIndex("users_phone_unique").on(table.phone),
   ],
-);
+).enableRLS();
 
 export const userRoles = pgTable(
   "user_roles",
@@ -201,7 +203,7 @@ export const userRoles = pgTable(
     uniqueIndex("user_roles_unique").on(table.userId, table.role),
     index("user_roles_role_idx").on(table.role),
   ],
-);
+).enableRLS();
 
 export const adminAuditEvents = pgTable(
   "admin_audit_events",
@@ -235,7 +237,7 @@ export const adminAuditEvents = pgTable(
       table.createdAt,
     ),
   ],
-);
+).enableRLS();
 
 export const provinces = pgTable(
   "provinces",
@@ -247,7 +249,7 @@ export const provinces = pgTable(
     ...timestamps,
   },
   (table) => [uniqueIndex("provinces_slug_unique").on(table.slug)],
-);
+).enableRLS();
 
 export const districts = pgTable(
   "districts",
@@ -269,7 +271,7 @@ export const districts = pgTable(
     ),
     index("districts_province_idx").on(table.provinceId),
   ],
-);
+).enableRLS();
 
 export const categories = pgTable(
   "categories",
@@ -291,7 +293,7 @@ export const categories = pgTable(
     uniqueIndex("categories_slug_unique").on(table.slug),
     index("categories_parent_idx").on(table.parentId),
   ],
-);
+).enableRLS();
 
 export const businesses = pgTable(
   "businesses",
@@ -324,7 +326,7 @@ export const businesses = pgTable(
     uniqueIndex("businesses_slug_unique").on(table.slug),
     index("businesses_status_idx").on(table.status),
   ],
-);
+).enableRLS();
 
 export const businessMembers = pgTable(
   "business_members",
@@ -345,8 +347,16 @@ export const businessMembers = pgTable(
     uniqueIndex("business_members_one_owner_unique")
       .on(table.businessId)
       .where(sql`${table.role} = 'owner'`),
+    // The business-media storage policies run as the signed-in user and look
+    // up their own memberships here. All other access goes through the API,
+    // which connects as the table owner and is not subject to RLS.
+    pgPolicy("business_members_select_own", {
+      for: "select",
+      to: authenticatedRole,
+      using: sql`${table.userId} = ${authUid}`,
+    }),
   ],
-);
+).enableRLS();
 
 export const businessProfileRevisions = pgTable(
   "business_profile_revisions",
@@ -391,7 +401,7 @@ export const businessProfileRevisions = pgTable(
       table.createdAt,
     ),
   ],
-);
+).enableRLS();
 
 export const businessNotificationEvents = pgTable(
   "business_notification_events",
@@ -417,7 +427,7 @@ export const businessNotificationEvents = pgTable(
       table.createdAt,
     ),
   ],
-);
+).enableRLS();
 
 export const businessNotifications = pgTable(
   "business_notifications",
@@ -453,7 +463,7 @@ export const businessNotifications = pgTable(
       table.createdAt,
     ),
   ],
-);
+).enableRLS();
 
 export const contentReports = pgTable(
   "content_reports",
@@ -477,7 +487,7 @@ export const contentReports = pgTable(
     ),
     index("content_reports_target_idx").on(table.targetType, table.targetId),
   ],
-);
+).enableRLS();
 
 export const businessLocations = pgTable(
   "business_locations",
@@ -507,7 +517,7 @@ export const businessLocations = pgTable(
     index("business_locations_business_idx").on(table.businessId),
     index("business_locations_district_idx").on(table.districtId),
   ],
-);
+).enableRLS();
 
 export const businessServices = pgTable(
   "business_services",
@@ -536,7 +546,7 @@ export const businessServices = pgTable(
     index("business_services_business_idx").on(table.businessId),
     index("business_services_category_idx").on(table.categoryId),
   ],
-);
+).enableRLS();
 
 export const businessServiceFulfillmentOptions = pgTable(
   "business_service_fulfillment_options",
@@ -573,7 +583,7 @@ export const businessServiceFulfillmentOptions = pgTable(
       sql`${table.leadTimeMinimumDays} is null or ${table.leadTimeMaximumDays} is null or ${table.leadTimeMinimumDays} <= ${table.leadTimeMaximumDays}`,
     ),
   ],
-);
+).enableRLS();
 
 export const businessServiceCoverageAreas = pgTable(
   "business_service_coverage_areas",
@@ -605,7 +615,7 @@ export const businessServiceCoverageAreas = pgTable(
       sql`num_nonnulls(${table.provinceId}, ${table.districtId}) = 1`,
     ),
   ],
-);
+).enableRLS();
 
 export const businessProducts = pgTable(
   "business_products",
@@ -637,7 +647,7 @@ export const businessProducts = pgTable(
       sql`${table.priceFrom} is null or ${table.priceTo} is null or ${table.priceFrom} <= ${table.priceTo}`,
     ),
   ],
-);
+).enableRLS();
 
 export const businessMediaAssets = pgTable(
   "business_media_assets",
@@ -691,7 +701,7 @@ export const businessMediaAssets = pgTable(
       sql`(${table.width} is null or ${table.width} > 0) and (${table.height} is null or ${table.height} > 0)`,
     ),
   ],
-);
+).enableRLS();
 
 export const customerRequests = pgTable(
   "customer_requests",
@@ -727,7 +737,7 @@ export const customerRequests = pgTable(
     index("customer_requests_category_idx").on(table.categoryId),
     index("customer_requests_district_idx").on(table.districtId),
   ],
-);
+).enableRLS();
 
 export const requestMatches = pgTable(
   "request_matches",
@@ -753,7 +763,7 @@ export const requestMatches = pgTable(
       table.status,
     ),
   ],
-);
+).enableRLS();
 
 export const businessResponses = pgTable(
   "business_responses",
@@ -772,7 +782,7 @@ export const businessResponses = pgTable(
     ...timestamps,
   },
   (table) => [uniqueIndex("business_responses_match_unique").on(table.matchId)],
-);
+).enableRLS();
 
 export const interactions = pgTable(
   "interactions",
@@ -801,7 +811,7 @@ export const interactions = pgTable(
       .on(table.requestId)
       .where(sql`${table.outcomeConfirmed} = true`),
   ],
-);
+).enableRLS();
 
 export const reviews = pgTable(
   "reviews",
@@ -837,7 +847,7 @@ export const reviews = pgTable(
     ),
     check("reviews_rating_check", sql`${table.rating} between 1 and 5`),
   ],
-);
+).enableRLS();
 
 export const reviewResponses = pgTable(
   "review_responses",
@@ -860,7 +870,7 @@ export const reviewResponses = pgTable(
     uniqueIndex("review_responses_review_unique").on(table.reviewId),
     index("review_responses_business_idx").on(table.businessId),
   ],
-);
+).enableRLS();
 
 export const businessVerifications = pgTable(
   "business_verifications",
@@ -883,7 +893,7 @@ export const businessVerifications = pgTable(
   (table) => [
     index("business_verifications_business_idx").on(table.businessId),
   ],
-);
+).enableRLS();
 
 export const businessReviews = pgTable(
   "business_reviews",
@@ -908,7 +918,7 @@ export const businessReviews = pgTable(
     ),
     index("business_reviews_reviewer_idx").on(table.reviewedByUserId),
   ],
-);
+).enableRLS();
 
 export const businessesRelations = relations(businesses, ({ many }) => ({
   locations: many(businessLocations),
