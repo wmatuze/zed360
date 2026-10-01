@@ -7,6 +7,10 @@ import {
   ComparisonTray,
 } from "@/components/business-comparison-controls";
 import {
+  SaveBusinessButton,
+  SavedBusinessesLink,
+} from "@/components/saved-businesses";
+import {
   fetchPublicBusinessDirectory,
   fetchPublicReferenceData,
   PublicBusinessApiError,
@@ -94,6 +98,7 @@ export default async function BusinessesPage({
           <BrandLogo />
         </Link>
         <div className="flex items-center gap-3">
+          <SavedBusinessesLink />
           <Link
             className="hidden text-sm text-white/55 transition hover:text-white sm:block"
             href="/for-business"
@@ -314,6 +319,16 @@ export default async function BusinessesPage({
                   </div>
                 </Link>
                 <CompareButton name={business.name} slug={business.slug} />
+                <SaveBusinessButton
+                  name={business.name}
+                  place={
+                    business.primaryLocation?.district
+                      ? `${business.primaryLocation.district.name}, ${business.primaryLocation.district.provinceName}`
+                      : null
+                  }
+                  slug={business.slug}
+                  variant="card"
+                />
               </div>
             ))}
           </div>
