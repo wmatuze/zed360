@@ -35,9 +35,7 @@ export function CustomerReviewForm({
   const [error, setError] = useState("");
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
-  const [verification, setVerification] = useState<ReviewCodeSent | null>(
-    null,
-  );
+  const [verification, setVerification] = useState<ReviewCodeSent | null>(null);
   const [sendingCode, setSendingCode] = useState(false);
 
   async function sendCode() {
@@ -64,7 +62,8 @@ export function CustomerReviewForm({
         );
       }
       const sent = reviewCodeSentSchema.safeParse(result);
-      if (!sent.success) throw new Error("The WhatsApp code could not be sent.");
+      if (!sent.success)
+        throw new Error("The WhatsApp code could not be sent.");
       setVerification(sent.data);
       setCode("");
     } catch (sendError) {
@@ -151,9 +150,8 @@ export function CustomerReviewForm({
         ) : null}
       </div>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-white/48">
-        Rate the business you chose. To keep reviews genuine, we’ll confirm
-        your WhatsApp number — no account needed, and the business never sees
-        it.
+        Rate the business you chose. To keep reviews genuine, we’ll confirm your
+        WhatsApp number — no account needed, and the business never sees it.
       </p>
 
       {currentReview?.moderationStatus === "rejected" &&
@@ -192,69 +190,72 @@ export function CustomerReviewForm({
             value={body}
           />
         </label>
-        <fieldset className="mt-6 border-t border-white/10 pt-5">
-          <legend className="float-left mb-3 w-full text-sm font-semibold text-white/75">
-            <span className="text-[var(--lime)]">2</span> · Confirm on WhatsApp
-          </legend>
-          {verification ? (
-            <div>
-              <p className="text-sm text-white/60">
-                We sent a code to {verification.sentTo} on WhatsApp. It expires
-                in 10 minutes.
-              </p>
-              <label className="mt-3 block text-sm font-semibold text-white/75">
-                Six-digit code
-                <input
-                  autoComplete="one-time-code"
-                  className="mt-2 block h-11 w-full max-w-48 rounded-xl border border-white/10 bg-black/20 px-4 font-normal tracking-[0.3em] outline-none focus:border-[var(--lime)]/55"
-                  inputMode="numeric"
-                  maxLength={6}
-                  onChange={(event) =>
-                    setCode(event.target.value.replace(/\D/g, ""))
-                  }
-                  pattern="[0-9]{6}"
-                  required
-                  value={code}
-                />
-              </label>
-              <button
-                className="mt-2 text-xs font-medium text-white/50 hover:text-white"
-                onClick={() => setVerification(null)}
-                type="button"
-              >
-                Use a different number or resend
-              </button>
-            </div>
-          ) : (
-            <div className="flex flex-wrap items-end gap-3">
-              <label className="block text-sm font-semibold text-white/75">
-                WhatsApp number
-                <input
-                  autoComplete="tel"
-                  className="mt-2 block h-11 w-full min-w-0 max-w-64 rounded-xl border border-white/10 bg-black/20 px-4 font-normal outline-none focus:border-[var(--lime)]/55"
-                  inputMode="tel"
-                  maxLength={20}
-                  onChange={(event) => setPhone(event.target.value)}
-                  placeholder="0977 123 456"
-                  type="tel"
-                  value={phone}
-                />
-              </label>
-              <button
-                className="button button-secondary"
-                disabled={sendingCode || phone.trim().length < 7}
-                onClick={sendCode}
-                type="button"
-              >
-                {sendingCode ? "Sending…" : "Send code"}
-              </button>
-              <p className="basis-full text-xs text-white/60">
-                Enter your number and we’ll send a six-digit code. Your review
-                is submitted once you enter it.
-              </p>
-            </div>
-          )}
-        </fieldset>
+        <div className="mt-6 border-t border-white/10 pt-5">
+          <fieldset>
+            <legend className="mb-3 text-sm font-semibold text-white/75">
+              <span className="text-[var(--lime)]">2</span> · Confirm on
+              WhatsApp
+            </legend>
+            {verification ? (
+              <div>
+                <p className="text-sm text-white/60">
+                  We sent a code to {verification.sentTo} on WhatsApp. It
+                  expires in 10 minutes.
+                </p>
+                <label className="mt-3 block text-sm font-semibold text-white/75">
+                  Six-digit code
+                  <input
+                    autoComplete="one-time-code"
+                    className="mt-2 block h-11 w-full max-w-48 rounded-xl border border-white/10 bg-black/20 px-4 font-normal tracking-[0.3em] outline-none focus:border-[var(--lime)]/55"
+                    inputMode="numeric"
+                    maxLength={6}
+                    onChange={(event) =>
+                      setCode(event.target.value.replace(/\D/g, ""))
+                    }
+                    pattern="[0-9]{6}"
+                    required
+                    value={code}
+                  />
+                </label>
+                <button
+                  className="mt-2 text-xs font-medium text-white/50 hover:text-white"
+                  onClick={() => setVerification(null)}
+                  type="button"
+                >
+                  Use a different number or resend
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-end gap-3">
+                <label className="block text-sm font-semibold text-white/75">
+                  WhatsApp number
+                  <input
+                    autoComplete="tel"
+                    className="mt-2 block h-11 w-full min-w-0 max-w-64 rounded-xl border border-white/10 bg-black/20 px-4 font-normal outline-none focus:border-[var(--lime)]/55"
+                    inputMode="tel"
+                    maxLength={20}
+                    onChange={(event) => setPhone(event.target.value)}
+                    placeholder="0977 123 456"
+                    type="tel"
+                    value={phone}
+                  />
+                </label>
+                <button
+                  className="button button-secondary"
+                  disabled={sendingCode || phone.trim().length < 7}
+                  onClick={sendCode}
+                  type="button"
+                >
+                  {sendingCode ? "Sending…" : "Send code"}
+                </button>
+                <p className="basis-full text-xs text-white/60">
+                  Enter your number and we’ll send a six-digit code. Your review
+                  is submitted once you enter it.
+                </p>
+              </div>
+            )}
+          </fieldset>
+        </div>
         <button
           className="button button-primary mt-4"
           disabled={pending || !verification || code.length !== 6}
