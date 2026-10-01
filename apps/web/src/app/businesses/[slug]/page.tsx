@@ -3,6 +3,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
 import { ReportContent } from "@/components/report-content";
+import {
+  SaveBusinessButton,
+  SavedBusinessesLink,
+  ShareBusinessButtons,
+} from "@/components/saved-businesses";
+import { directionsHref } from "@/lib/directions";
 import { notFound } from "next/navigation";
 import {
   fetchPublicBusinessProfile,
@@ -118,6 +124,9 @@ export default async function BusinessProfilePage({
     business.locations[0];
   const whatsapp = business.whatsapp ? whatsappHref(business.whatsapp) : null;
   const website = business.website ? websiteHref(business.website) : null;
+  const place = primaryLocation?.district
+    ? `${primaryLocation.district.name}, ${primaryLocation.district.provinceName}`
+    : null;
 
   return (
     <main className="min-h-screen bg-[var(--ink)] text-white">
@@ -125,12 +134,15 @@ export default async function BusinessProfilePage({
         <Link className="flex items-center gap-3" href="/">
           <BrandLogo />
         </Link>
-        <Link
-          className="text-sm text-white/55 transition hover:text-white"
-          href="/businesses"
-        >
-          ← Browse businesses
-        </Link>
+        <div className="flex items-center gap-5">
+          <SavedBusinessesLink />
+          <Link
+            className="text-sm text-white/55 transition hover:text-white"
+            href="/businesses"
+          >
+            ← Browse businesses
+          </Link>
+        </div>
       </header>
 
       <section className="mx-auto w-full max-w-6xl px-5 pb-20 pt-10 sm:px-8 lg:px-10 lg:pt-16">
@@ -219,12 +231,17 @@ export default async function BusinessProfilePage({
                   }).format(new Date(business.lastConfirmedAt))}
                 </p>
               ) : null}
-              {primaryLocation?.district ? (
-                <p className="mt-4 text-sm text-white/50">
-                  Based in {primaryLocation.district.name},{" "}
-                  {primaryLocation.district.provinceName}
-                </p>
+              {place ? (
+                <p className="mt-4 text-sm text-white/50">Based in {place}</p>
               ) : null}
+              <div className="mt-6 flex flex-wrap gap-3">
+                <SaveBusinessButton
+                  name={business.name}
+                  place={place}
+                  slug={business.slug}
+                />
+                <ShareBusinessButtons name={business.name} />
+              </div>
             </div>
           </div>
         </div>
@@ -569,53 +586,66 @@ export default async function BusinessProfilePage({
               <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-6">
                 <h2 className="text-lg font-semibold">Locations</h2>
                 <div className="mt-4 space-y-4">
-                  {business.locations.map((location) => (
-                    <div key={location.id}>
-                      <div className="flex items-start justify-between gap-3">
-                        <p className="text-sm font-semibold text-white/78">
-                          {location.name}
+                  {business.locations.map((location) => {
+                    const directions = directionsHref(business.name, location);
+                    return (
+                      <div key={location.id}>
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="text-sm font-semibold text-white/78">
+                            {location.name}
+                          </p>
+                          <span
+                            className={`shrink-0 rounded-full border px-2.5 py-1 text-[.68rem] ${location.operatingHours.currentStatus === "open" ? "border-[var(--lime)]/25 bg-[var(--lime)]/8 text-[var(--lime)]" : "border-white/10 bg-white/5 text-white/50"}`}
+                          >
+                            {location.operatingHours.currentLabel}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs leading-5 text-white/50">
+                          {[
+                            location.district?.name,
+                            location.district?.provinceName,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
                         </p>
-                        <span
-                          className={`shrink-0 rounded-full border px-2.5 py-1 text-[.68rem] ${location.operatingHours.currentStatus === "open" ? "border-[var(--lime)]/25 bg-[var(--lime)]/8 text-[var(--lime)]" : "border-white/10 bg-white/5 text-white/50"}`}
-                        >
-                          {location.operatingHours.currentLabel}
-                        </span>
+                        {location.address ? (
+                          <p className="mt-1 text-xs leading-5 text-white/48">
+                            {location.address}
+                          </p>
+                        ) : null}
+                        <p className="mt-2 text-xs text-white/55">
+                          Today: {location.operatingHours.todayLabel}
+                        </p>
+                        {location.operatingHours.configured ? (
+                          <details className="mt-2 text-xs text-white/50">
+                            <summary className="cursor-pointer text-[var(--lime)]/75">
+                              View weekly hours
+                            </summary>
+                            <dl className="mt-3 grid grid-cols-[2.5rem_1fr] gap-x-3 gap-y-2">
+                              {location.operatingHours.days.map((day) => (
+                                <div className="contents" key={day.dayOfWeek}>
+                                  <dt>{dayNames[day.dayOfWeek]}</dt>
+                                  <dd className="text-white/60">
+                                    {hoursLabel(day)}
+                                  </dd>
+                                </div>
+                              ))}
+                            </dl>
+                          </details>
+                        ) : null}
+                        {directions ? (
+                          <a
+                            className="mt-3 inline-block text-xs font-semibold text-[var(--lime)] hover:underline"
+                            href={directions}
+                            rel="noreferrer"
+                            target="_blank"
+                          >
+                            Get directions ↗
+                          </a>
+                        ) : null}
                       </div>
-                      <p className="mt-1 text-xs leading-5 text-white/50">
-                        {[
-                          location.district?.name,
-                          location.district?.provinceName,
-                        ]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </p>
-                      {location.address ? (
-                        <p className="mt-1 text-xs leading-5 text-white/48">
-                          {location.address}
-                        </p>
-                      ) : null}
-                      <p className="mt-2 text-xs text-white/55">
-                        Today: {location.operatingHours.todayLabel}
-                      </p>
-                      {location.operatingHours.configured ? (
-                        <details className="mt-2 text-xs text-white/50">
-                          <summary className="cursor-pointer text-[var(--lime)]/75">
-                            View weekly hours
-                          </summary>
-                          <dl className="mt-3 grid grid-cols-[2.5rem_1fr] gap-x-3 gap-y-2">
-                            {location.operatingHours.days.map((day) => (
-                              <div className="contents" key={day.dayOfWeek}>
-                                <dt>{dayNames[day.dayOfWeek]}</dt>
-                                <dd className="text-white/60">
-                                  {hoursLabel(day)}
-                                </dd>
-                              </div>
-                            ))}
-                          </dl>
-                        </details>
-                      ) : null}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ) : null}
