@@ -7,7 +7,7 @@ import {
   AdminCustomerReviewApiError,
   submitAdminCustomerReview,
 } from "@/lib/admin-customer-reviews";
-import { getVerifiedBusinessSession } from "@/lib/business-account";
+import { getVerifiedSession } from "@/lib/authenticated-session";
 
 export async function reviewCustomerReview(
   reviewId: string,
@@ -18,19 +18,15 @@ export async function reviewCustomerReview(
     note: formData.get("note"),
   });
   if (!parsed.success) redirect("/admin/customer-reviews?result=invalid");
-  const session = await getVerifiedBusinessSession();
-  if (!session) redirect("/business/sign-in?next=/admin/customer-reviews");
+  const session = await getVerifiedSession();
+  if (!session) redirect("/admin/sign-in?next=/admin/customer-reviews");
   try {
-    await submitAdminCustomerReview(
-      session.accessToken,
-      reviewId,
-      parsed.data,
-    );
+    await submitAdminCustomerReview(session.accessToken, reviewId, parsed.data);
   } catch (error) {
     if (error instanceof AdminCustomerReviewApiError) {
       if (error.status === 401)
         redirect(
-          "/business/sign-in?next=/admin/customer-reviews&error=session_expired",
+          "/admin/sign-in?next=/admin/customer-reviews&error=session_expired",
         );
       if (error.status === 403)
         redirect("/admin/customer-reviews?result=forbidden");

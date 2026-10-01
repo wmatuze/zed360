@@ -30,7 +30,12 @@ export async function GET(request: NextRequest) {
 }
 
 function redirectToSignInError(request: NextRequest, next: string) {
-  const signInUrl = new URL("/business/sign-in", request.url);
+  const signInUrl = new URL(
+    next === "/admin" || next.startsWith("/admin/")
+      ? "/admin/sign-in"
+      : "/business/sign-in",
+    request.url,
+  );
   signInUrl.searchParams.set("error", "invalid_or_expired");
   signInUrl.searchParams.set("next", next);
   return NextResponse.redirect(signInUrl);

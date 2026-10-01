@@ -4,7 +4,7 @@ import {
   type BusinessAccount,
   type BusinessApplicationClaimPreview,
 } from "@zed360/contracts";
-import { createClient } from "@/lib/supabase/server";
+export { getVerifiedSession as getVerifiedBusinessSession } from "@/lib/authenticated-session";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/v1";
 
@@ -15,24 +15,6 @@ export class BusinessAccountApiError extends Error {
   ) {
     super(message);
   }
-}
-
-export async function getVerifiedBusinessSession() {
-  const supabase = await createClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  const user = session?.user;
-
-  if (!user?.id || !user.email || !user.email_confirmed_at) {
-    return null;
-  }
-  if (!session?.access_token) return null;
-
-  return {
-    accessToken: session.access_token,
-    email: user.email,
-  };
 }
 
 export async function fetchBusinessAccount(

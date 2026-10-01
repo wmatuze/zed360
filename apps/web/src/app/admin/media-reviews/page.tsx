@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
-import { BrandLogo } from "@/components/brand-logo";
 import { redirect } from "next/navigation";
-import { signOut } from "@/app/business/account/actions";
 import {
   AdminMediaReviewApiError,
   fetchAdminMediaReviews,
 } from "@/lib/admin-media-reviews";
-import { getVerifiedBusinessSession } from "@/lib/business-account";
+import { getVerifiedSession } from "@/lib/authenticated-session";
 import { reviewMedia } from "./actions";
 
 export const metadata: Metadata = { title: "Media reviews" };
@@ -29,8 +26,8 @@ export default async function MediaReviewsPage({
 }: {
   searchParams: Promise<{ result?: string }>;
 }) {
-  const session = await getVerifiedBusinessSession();
-  if (!session) redirect("/business/sign-in?next=/admin/media-reviews");
+  const session = await getVerifiedSession();
+  if (!session) redirect("/admin/sign-in?next=/admin/media-reviews");
   let queue = null;
   let accessDenied = false;
   let loadError = "";
@@ -39,7 +36,7 @@ export default async function MediaReviewsPage({
   } catch (error) {
     if (error instanceof AdminMediaReviewApiError && error.status === 401) {
       redirect(
-        "/business/sign-in?next=/admin/media-reviews&error=session_expired",
+        "/admin/sign-in?next=/admin/media-reviews&error=session_expired",
       );
     } else if (
       error instanceof AdminMediaReviewApiError &&
@@ -56,24 +53,7 @@ export default async function MediaReviewsPage({
   const { result } = await searchParams;
 
   return (
-    <main className="min-h-screen bg-[var(--ink)] px-5 py-6 text-white sm:px-8 lg:px-10">
-      <header className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4">
-        <Link className="flex items-center gap-3" href="/">
-          <BrandLogo />
-        </Link>
-        <div className="flex items-center gap-3">
-          <Link className="button button-quiet" href="/admin/customer-reviews">
-            Customer reviews
-          </Link>
-          <Link className="button button-quiet" href="/admin/reviews">
-            Business reviews
-          </Link>
-          <form action={signOut}>
-            <button className="button button-quiet">Sign out</button>
-          </form>
-        </div>
-      </header>
-
+    <main className="px-5 text-white sm:px-8 lg:px-10">
       <section className="mx-auto w-full max-w-6xl pb-20 pt-14 lg:pt-20">
         <p className="eyebrow">
           <span /> Trust operations

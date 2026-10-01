@@ -1,9 +1,12 @@
 import {
+  ForbiddenException,
   Injectable,
   ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { createClient } from '@supabase/supabase-js';
+import { eq, users } from '@zed360/database';
+import { DatabaseService } from './database.service';
 import { loadApiEnvironment } from './environment';
 
 export type AuthenticatedUser = {
@@ -19,6 +22,8 @@ export class AuthenticatedUserService {
     { expiresAt: number; result: Promise<AuthenticatedUser> }
   >();
 
+  constructor(private readonly database: DatabaseService) {}
+
   async verify(authorization?: string): Promise<AuthenticatedUser> {
     const token = this.bearerToken(authorization);
     if (this.verificationCache.size >= 500) {
@@ -33,7 +38,9 @@ export class AuthenticatedUserService {
       }
     }
     const cached = this.verificationCache.get(token);
-    if (cached && cached.expiresAt > Date.now()) return cached.result;
+    if (cached && cached.expiresAt > Date.now()) {
+      return this.requireActiveAccount(await cached.result);
+    }
 
     const result = this.verifyWithSupabase(token);
     this.verificationCache.set(token, {
@@ -41,7 +48,7 @@ export class AuthenticatedUserService {
       result,
     });
     try {
-      return await result;
+      return await this.requireActiveAccount(await result);
     } catch (error) {
       if (this.verificationCache.get(token)?.result === result) {
         this.verificationCache.delete(token);
@@ -92,11 +99,24 @@ export class AuthenticatedUserService {
       throw new UnauthorizedException('A verified email address is required.');
     }
 
-    return {
+    const authenticatedUser = {
       id: claims.sub,
       email: claims.email.trim().toLowerCase(),
       emailVerifiedAt: new Date(claims.iat * 1000),
     };
+    return authenticatedUser;
+  }
+
+  private async requireActiveAccount(user: AuthenticatedUser) {
+    const [localUser] = await this.database.db
+      .select({ accountStatus: users.accountStatus })
+      .from(users)
+      .where(eq(users.id, user.id))
+      .limit(1);
+    if (localUser?.accountStatus === 'suspended') {
+      throw new ForbiddenException('This Zed360 account is suspended.');
+    }
+    return user;
   }
 
   private bearerToken(authorization?: string) {

@@ -321,6 +321,7 @@ export class PublicBusinessesService {
           body: review.body,
           createdAt: review.createdAt.toISOString(),
           verifiedInteraction: true as const,
+          response: null,
         })),
     };
   }

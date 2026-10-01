@@ -43,10 +43,24 @@ import { BusinessLocationsController } from './business-locations.controller';
 import { BusinessLocationsService } from './business-locations.service';
 import { BusinessServicesController } from './business-services.controller';
 import { BusinessServicesService } from './business-services.service';
+import { BusinessCustomerReviewsController } from './business-customer-reviews.controller';
+import { BusinessCustomerReviewsService } from './business-customer-reviews.service';
+import { AdminAccessController } from './admin-access.controller';
+import { AdminAuditService } from './admin-audit.service';
+import { AdminUsersController } from './admin-users.controller';
+import { AdminUsersService } from './admin-users.service';
+import { AdminCategoriesController } from './admin-categories.controller';
+import { AdminCategoriesService } from './admin-categories.service';
+import { AdminLocationsController } from './admin-locations.controller';
+import { AdminLocationsService } from './admin-locations.service';
 
 @Module({
   imports: [],
   controllers: [
+    AdminAccessController,
+    AdminCategoriesController,
+    AdminLocationsController,
+    AdminUsersController,
     AppController,
     AdminCustomerReviewsController,
     BusinessAccountsController,
@@ -56,6 +70,7 @@ import { BusinessServicesService } from './business-services.service';
     BusinessOperatingHoursController,
     BusinessLocationsController,
     BusinessServicesController,
+    BusinessCustomerReviewsController,
     BusinessNotificationsController,
     BusinessReviewsController,
     BusinessRequestsController,
@@ -70,6 +85,10 @@ import { BusinessServicesService } from './business-services.service';
     RequestsController,
   ],
   providers: [
+    AdminAuditService,
+    AdminCategoriesService,
+    AdminLocationsService,
+    AdminUsersService,
     AppService,
     AuthenticatedUserService,
     BusinessApplicationsService,
@@ -79,6 +98,7 @@ import { BusinessServicesService } from './business-services.service';
     BusinessOperatingHoursService,
     BusinessLocationsService,
     BusinessServicesService,
+    BusinessCustomerReviewsService,
     BusinessNotificationsService,
     BusinessCatalogService,
     MediaReviewsService,

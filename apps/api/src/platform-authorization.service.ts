@@ -10,14 +10,26 @@ export class PlatformAuthorizationService {
   constructor(private readonly database: DatabaseService) {}
 
   async requireReviewer(user: AuthenticatedUser): Promise<ReviewerRole> {
-    const roles = await this.database.db
+    const roles = await this.rolesFor(user);
+
+    if (roles.includes('admin')) return 'admin';
+    if (roles.includes('reviewer')) return 'reviewer';
+
+    throw new ForbiddenException('Reviewer access is required.');
+  }
+
+  async requireAdmin(user: AuthenticatedUser): Promise<'admin'> {
+    const roles = await this.rolesFor(user);
+    if (roles.includes('admin')) return 'admin';
+
+    throw new ForbiddenException('Administrator access is required.');
+  }
+
+  private async rolesFor(user: AuthenticatedUser): Promise<ReviewerRole[]> {
+    const rows = await this.database.db
       .select({ role: userRoles.role })
       .from(userRoles)
       .where(eq(userRoles.userId, user.id));
-
-    if (roles.some(({ role }) => role === 'admin')) return 'admin';
-    if (roles.some(({ role }) => role === 'reviewer')) return 'reviewer';
-
-    throw new ForbiddenException('Reviewer access is required.');
+    return rows.map(({ role }) => role);
   }
 }

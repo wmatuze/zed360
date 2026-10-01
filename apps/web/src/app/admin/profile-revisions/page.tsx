@@ -1,8 +1,6 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { BrandLogo } from "@/components/brand-logo";
 import { fetchProfileRevisions } from "@/lib/admin-profile-revisions";
-import { getVerifiedBusinessSession } from "@/lib/business-account";
+import { getVerifiedSession } from "@/lib/authenticated-session";
 import { decide } from "./actions";
 const labels = {
   description: "Description",
@@ -16,18 +14,12 @@ export default async function ProfileRevisionsPage({
 }: {
   searchParams: Promise<{ result?: string }>;
 }) {
-  const session = await getVerifiedBusinessSession();
-  if (!session) redirect("/business/sign-in?next=/admin/profile-revisions");
+  const session = await getVerifiedSession();
+  if (!session) redirect("/admin/sign-in?next=/admin/profile-revisions");
   const queue = await fetchProfileRevisions(session.accessToken);
   const result = (await searchParams).result;
   return (
-    <main className="min-h-screen bg-[var(--ink)] px-5 py-6 text-white">
-      <header className="mx-auto flex max-w-6xl justify-between">
-        <Link href="/">
-          <BrandLogo />
-        </Link>
-        <span className="text-sm text-white/40">{queue.viewerRole}</span>
-      </header>
+    <main className="px-5 text-white sm:px-8 lg:px-10">
       <section className="mx-auto max-w-6xl pb-20 pt-14">
         <p className="eyebrow">
           <span /> Moderation

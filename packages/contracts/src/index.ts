@@ -999,6 +999,244 @@ export const customerReviewSchema = z.object({
   updatedAt: z.string().datetime(),
 });
 
+export const adminAccessSchema = z.object({
+  role: z.enum(["admin", "reviewer"]),
+});
+
+export type AdminAccess = z.infer<typeof adminAccessSchema>;
+
+export const adminUserListQuerySchema = z.object({
+  q: z.string().trim().max(120).default(""),
+  page: z.coerce.number().int().positive().default(1),
+  pageSize: z.coerce.number().int().min(10).max(100).default(25),
+});
+
+export type AdminUserListQuery = z.infer<typeof adminUserListQuerySchema>;
+
+export const adminUserActionSchema = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("role_granted"),
+    role: z.enum(["admin", "reviewer"]),
+    reason: z.string().trim().min(10).max(1200),
+  }),
+  z.object({
+    action: z.literal("role_revoked"),
+    role: z.enum(["admin", "reviewer"]),
+    reason: z.string().trim().min(10).max(1200),
+  }),
+  z.object({
+    action: z.literal("suspended"),
+    reason: z.string().trim().min(10).max(1200),
+  }),
+  z.object({
+    action: z.literal("reinstated"),
+    reason: z.string().trim().min(10).max(1200),
+  }),
+]);
+
+export type AdminUserAction = z.infer<typeof adminUserActionSchema>;
+
+export const adminUserSchema = z.object({
+  id: z.string().uuid(),
+  displayName: z.string().nullable(),
+  email: z.string().nullable(),
+  phone: z.string().nullable(),
+  accountStatus: z.enum(["active", "suspended"]),
+  statusReason: z.string().nullable(),
+  roles: z.array(z.enum(["admin", "reviewer"])),
+  businessCount: z.number().int().nonnegative(),
+  createdAt: z.string().datetime(),
+});
+
+export const adminUserListSchema = z.object({
+  viewerRole: z.literal("admin"),
+  users: z.array(adminUserSchema),
+  page: z.number().int().positive(),
+  pageSize: z.number().int().positive(),
+  total: z.number().int().nonnegative(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+export type AdminUserList = z.infer<typeof adminUserListSchema>;
+
+export const adminCategoryListQuerySchema = z.object({
+  q: z.string().trim().max(120).default(""),
+  status: z.enum(["all", "active", "inactive"]).default("all"),
+});
+
+export type AdminCategoryListQuery = z.infer<
+  typeof adminCategoryListQuerySchema
+>;
+
+const categoryParentIdSchema = z.preprocess(
+  (value) => (value === "" || value === undefined ? null : value),
+  z.string().uuid().nullable(),
+);
+
+export const saveAdminCategorySchema = z.object({
+  name: z.string().trim().min(2).max(120),
+  slug: z
+    .string()
+    .trim()
+    .min(2)
+    .max(120)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  description: z.string().trim().max(600).optional().or(z.literal("")),
+  parentId: categoryParentIdSchema,
+  sortOrder: z.coerce.number().int().min(0).max(10000),
+});
+
+export type SaveAdminCategory = z.infer<typeof saveAdminCategorySchema>;
+
+export const adminCategoryStatusActionSchema = z.object({
+  action: z.enum(["activated", "deactivated"]),
+  reason: z.string().trim().min(10).max(1200),
+});
+
+export type AdminCategoryStatusAction = z.infer<
+  typeof adminCategoryStatusActionSchema
+>;
+
+export const adminCategorySchema = z.object({
+  id: z.string().uuid(),
+  parentId: z.string().uuid().nullable(),
+  parentName: z.string().nullable(),
+  name: z.string(),
+  slug: z.string(),
+  description: z.string().nullable(),
+  isActive: z.boolean(),
+  sortOrder: z.number().int().nonnegative(),
+  childCount: z.number().int().nonnegative(),
+  activeChildCount: z.number().int().nonnegative(),
+  serviceCount: z.number().int().nonnegative(),
+  requestCount: z.number().int().nonnegative(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+
+export const adminCategoryListSchema = z.object({
+  viewerRole: z.enum(["admin", "reviewer"]),
+  categories: z.array(adminCategorySchema),
+  parents: z.array(
+    z.object({
+      id: z.string().uuid(),
+      name: z.string(),
+      isActive: z.boolean(),
+    }),
+  ),
+  total: z.number().int().nonnegative(),
+  active: z.number().int().nonnegative(),
+  inactive: z.number().int().nonnegative(),
+});
+
+export type AdminCategoryList = z.infer<typeof adminCategoryListSchema>;
+
+export const adminLocationListQuerySchema = z.object({
+  q: z.string().trim().max(120).default(""),
+  status: z.enum(["all", "active", "inactive"]).default("all"),
+  provinceId: z.string().uuid().optional(),
+});
+export type AdminLocationListQuery = z.infer<
+  typeof adminLocationListQuerySchema
+>;
+
+const locationNameSchema = z.string().trim().min(2).max(120);
+const locationSlugSchema = z
+  .string()
+  .trim()
+  .min(2)
+  .max(120)
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+
+export const saveAdminProvinceSchema = z.object({
+  name: locationNameSchema,
+  slug: locationSlugSchema,
+});
+export type SaveAdminProvince = z.infer<typeof saveAdminProvinceSchema>;
+
+export const saveAdminDistrictSchema = z.object({
+  provinceId: z.string().uuid(),
+  name: locationNameSchema,
+  slug: locationSlugSchema,
+});
+export type SaveAdminDistrict = z.infer<typeof saveAdminDistrictSchema>;
+
+export const adminLocationStatusActionSchema = z.object({
+  action: z.enum(["activated", "deactivated"]),
+  reason: z.string().trim().min(10).max(1200),
+});
+export type AdminLocationStatusAction = z.infer<
+  typeof adminLocationStatusActionSchema
+>;
+
+export const adminDistrictSchema = z.object({
+  id: z.string().uuid(),
+  provinceId: z.string().uuid(),
+  name: z.string(),
+  slug: z.string(),
+  isActive: z.boolean(),
+  locationCount: z.number().int().nonnegative(),
+  requestCount: z.number().int().nonnegative(),
+  coverageCount: z.number().int().nonnegative(),
+  updatedAt: z.string().datetime(),
+});
+
+export const adminProvinceSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  slug: z.string(),
+  isActive: z.boolean(),
+  districtCount: z.number().int().nonnegative(),
+  activeDistrictCount: z.number().int().nonnegative(),
+  coverageCount: z.number().int().nonnegative(),
+  updatedAt: z.string().datetime(),
+  districts: z.array(adminDistrictSchema),
+});
+
+export const adminLocationListSchema = z.object({
+  viewerRole: z.enum(["admin", "reviewer"]),
+  provinces: z.array(adminProvinceSchema),
+  totalProvinces: z.number().int().nonnegative(),
+  totalDistricts: z.number().int().nonnegative(),
+});
+export type AdminLocationList = z.infer<typeof adminLocationListSchema>;
+
+export const saveBusinessReviewResponseSchema = z.object({
+  body: z.string().trim().min(2).max(1200),
+});
+
+export type SaveBusinessReviewResponse = z.infer<
+  typeof saveBusinessReviewResponseSchema
+>;
+
+const businessReviewResponseSchema = z.object({
+  id: z.string().uuid(),
+  body: z.string(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+
+export const businessCustomerReviewsSchema = z.object({
+  business: z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+    slug: z.string(),
+  }),
+  reviews: z.array(
+    z.object({
+      id: z.string().uuid(),
+      rating: z.number().int().min(1).max(5),
+      body: z.string().nullable(),
+      createdAt: z.string().datetime(),
+      response: businessReviewResponseSchema.nullable(),
+    }),
+  ),
+});
+
+export type BusinessCustomerReviews = z.infer<
+  typeof businessCustomerReviewsSchema
+>;
+
 export const submitCustomerReviewDecisionSchema = z
   .object({
     decision: z.enum(["approved", "rejected"]),
@@ -1112,6 +1350,7 @@ const publicCustomerReviewSchema = z.object({
   body: z.string().nullable(),
   createdAt: z.string().datetime(),
   verifiedInteraction: z.literal(true),
+  response: businessReviewResponseSchema.nullable(),
 });
 
 export const publicBusinessSummarySchema = z.object({

@@ -163,13 +163,23 @@ export class BusinessServiceCoverageService {
         ? this.database.db
             .select({ id: districts.id })
             .from(districts)
-            .where(inArray(districts.id, districtIds))
+            .where(
+              and(
+                inArray(districts.id, districtIds),
+                eq(districts.isActive, true),
+              ),
+            )
         : [],
       provinceIds.length
         ? this.database.db
             .select({ id: provinces.id })
             .from(provinces)
-            .where(inArray(provinces.id, provinceIds))
+            .where(
+              and(
+                inArray(provinces.id, provinceIds),
+                eq(provinces.isActive, true),
+              ),
+            )
         : [],
     ]);
     if (

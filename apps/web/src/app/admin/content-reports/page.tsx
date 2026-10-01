@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { signOut } from "@/app/business/account/actions";
-import { BrandLogo } from "@/components/brand-logo";
-import { getVerifiedBusinessSession } from "@/lib/business-account";
+import { getVerifiedSession } from "@/lib/authenticated-session";
 import {
   AdminContentReportApiError,
   fetchAdminContentReports,
@@ -26,8 +24,8 @@ export default async function ContentReportsPage({
 }: {
   searchParams: Promise<{ result?: string }>;
 }) {
-  const session = await getVerifiedBusinessSession();
-  if (!session) redirect("/business/sign-in?next=/admin/content-reports");
+  const session = await getVerifiedSession();
+  if (!session) redirect("/admin/sign-in?next=/admin/content-reports");
   let queue = null;
   let accessDenied = false;
   let error = "";
@@ -36,7 +34,7 @@ export default async function ContentReportsPage({
   } catch (caught) {
     if (caught instanceof AdminContentReportApiError && caught.status === 401) {
       redirect(
-        "/business/sign-in?next=/admin/content-reports&error=session_expired",
+        "/admin/sign-in?next=/admin/content-reports&error=session_expired",
       );
     } else if (
       caught instanceof AdminContentReportApiError &&
@@ -52,22 +50,7 @@ export default async function ContentReportsPage({
   }
   const result = (await searchParams).result;
   return (
-    <main className="min-h-screen bg-[var(--ink)] px-5 py-6 text-white sm:px-8 lg:px-10">
-      <header className="mx-auto flex max-w-6xl items-center justify-between gap-4">
-        <Link href="/">
-          <BrandLogo />
-        </Link>
-        <div className="flex flex-wrap items-center justify-end gap-3">
-          <Link className="button button-quiet" href="/admin/reviews">
-            Business reviews
-          </Link>
-          <form action={signOut}>
-            <button className="button button-quiet" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+    <main className="px-5 text-white sm:px-8 lg:px-10">
       <section className="mx-auto max-w-6xl pb-20 pt-14">
         <p className="eyebrow">
           <span /> Trust operations
@@ -93,8 +76,8 @@ export default async function ContentReportsPage({
           <div className="mt-8 rounded-2xl border border-amber-200/20 bg-amber-200/8 p-6">
             <h2 className="text-lg font-semibold">Reviewer access required</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-white/55">
-              Your email is signed in, but this account has not been assigned
-              an administrator or reviewer role.
+              Your email is signed in, but this account has not been assigned an
+              administrator or reviewer role.
             </p>
           </div>
         ) : null}
@@ -148,7 +131,9 @@ export default async function ContentReportsPage({
                             View reported public profile ↗
                           </Link>
                         ) : (
-                          <span>The reported public profile is unavailable.</span>
+                          <span>
+                            The reported public profile is unavailable.
+                          </span>
                         )}
                         {report.reporterEmail ? (
                           <span>Reporter contact: {report.reporterEmail}</span>

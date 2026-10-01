@@ -82,6 +82,10 @@ export const verificationStatus = pgEnum("verification_status", [
   "expired",
 ]);
 export const platformRole = pgEnum("platform_role", ["admin", "reviewer"]);
+export const userAccountStatus = pgEnum("user_account_status", [
+  "active",
+  "suspended",
+]);
 export const businessReviewStatus = pgEnum("business_review_status", [
   "pending",
   "approved",
@@ -161,14 +165,21 @@ export const users = pgTable(
   "users",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+    username: text("username"),
     displayName: text("display_name"),
     email: text("email"),
     phone: text("phone"),
     emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
     phoneVerifiedAt: timestamp("phone_verified_at", { withTimezone: true }),
+    accountStatus: userAccountStatus("account_status")
+      .default("active")
+      .notNull(),
+    statusReason: text("status_reason"),
+    statusChangedAt: timestamp("status_changed_at", { withTimezone: true }),
     ...timestamps,
   },
   (table) => [
+    uniqueIndex("users_username_unique").on(sql`lower(${table.username})`),
     uniqueIndex("users_email_unique").on(table.email),
     uniqueIndex("users_phone_unique").on(table.phone),
   ],
@@ -192,12 +203,48 @@ export const userRoles = pgTable(
   ],
 );
 
+export const adminAuditEvents = pgTable(
+  "admin_audit_events",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    actorUserId: uuid("actor_user_id")
+      .notNull()
+      .references(() => users.id),
+    action: text("action").notNull(),
+    subjectType: text("subject_type").notNull(),
+    subjectId: text("subject_id").notNull(),
+    reason: text("reason"),
+    beforeState: jsonb("before_state").$type<Record<string, unknown>>(),
+    afterState: jsonb("after_state").$type<Record<string, unknown>>(),
+    metadata: jsonb("metadata")
+      .$type<Record<string, unknown>>()
+      .default({})
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("admin_audit_events_actor_created_idx").on(
+      table.actorUserId,
+      table.createdAt,
+    ),
+    index("admin_audit_events_subject_created_idx").on(
+      table.subjectType,
+      table.subjectId,
+      table.createdAt,
+    ),
+  ],
+);
+
 export const provinces = pgTable(
   "provinces",
   {
     id: uuid("id").defaultRandom().primaryKey(),
     name: text("name").notNull(),
     slug: text("slug").notNull(),
+    isActive: boolean("is_active").default(true).notNull(),
+    ...timestamps,
   },
   (table) => [uniqueIndex("provinces_slug_unique").on(table.slug)],
 );
@@ -212,6 +259,8 @@ export const districts = pgTable(
     name: text("name").notNull(),
     slug: text("slug").notNull(),
     centre: geometry("centre", { type: "point", mode: "xy", srid: 4326 }),
+    isActive: boolean("is_active").default(true).notNull(),
+    ...timestamps,
   },
   (table) => [
     uniqueIndex("districts_province_slug_unique").on(
@@ -787,6 +836,29 @@ export const reviews = pgTable(
       table.createdAt,
     ),
     check("reviews_rating_check", sql`${table.rating} between 1 and 5`),
+  ],
+);
+
+export const reviewResponses = pgTable(
+  "review_responses",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    reviewId: uuid("review_id")
+      .notNull()
+      .references(() => reviews.id, { onDelete: "cascade" }),
+    businessId: uuid("business_id")
+      .notNull()
+      .references(() => businesses.id, { onDelete: "cascade" }),
+    respondedByUserId: uuid("responded_by_user_id")
+      .notNull()
+      .references(() => users.id),
+    body: text("body").notNull(),
+    isPublished: boolean("is_published").default(true).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("review_responses_review_unique").on(table.reviewId),
+    index("review_responses_business_idx").on(table.businessId),
   ],
 );
 

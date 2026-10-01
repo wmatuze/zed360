@@ -40,4 +40,18 @@ describe('PlatformAuthorizationService', () => {
       ForbiddenException,
     );
   });
+
+  it('accepts an administrator for administrator-only operations', async () => {
+    where.mockResolvedValue([{ role: 'admin' }]);
+
+    await expect(service.requireAdmin(user)).resolves.toBe('admin');
+  });
+
+  it('does not grant administrator access to a reviewer', async () => {
+    where.mockResolvedValue([{ role: 'reviewer' }]);
+
+    await expect(service.requireAdmin(user)).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
+  });
 });
