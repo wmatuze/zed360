@@ -1,3 +1,5 @@
+import { clientIpAddress, TooManySignInAttemptsError } from "./client-ip";
+
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/v1";
 
 export async function resolveAdminEmail(username: string) {
@@ -12,9 +14,10 @@ export async function resolveAdminEmail(username: string) {
       "content-type": "application/json",
       "x-zed360-internal-secret": internalSecret,
     },
-    body: JSON.stringify({ username }),
+    body: JSON.stringify({ username, clientIp: await clientIpAddress() }),
     cache: "no-store",
   });
+  if (response.status === 429) throw new TooManySignInAttemptsError();
   if (!response.ok) {
     throw new Error("Administrator identity could not be checked.");
   }

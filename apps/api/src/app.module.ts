@@ -24,6 +24,7 @@ import { PlatformAuthorizationService } from './platform-authorization.service';
 import { PublicBusinessesController } from './public-businesses.controller';
 import { PublicBusinessesService } from './public-businesses.service';
 import { throttlerOptions } from './public-rate-limits';
+import { SignInAttemptLimiter } from './sign-in-attempt-limiter.service';
 import { MediaReviewsController } from './media-reviews.controller';
 import { MediaReviewsService } from './media-reviews.service';
 import { AdminCustomerReviewsController } from './admin-customer-reviews.controller';
@@ -115,6 +116,7 @@ import { AdminLocationsService } from './admin-locations.service';
     RequestsService,
     PlatformAuthorizationService,
     PublicBusinessesService,
+    SignInAttemptLimiter,
   ],
 })
 export class AppModule {}

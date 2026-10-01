@@ -2,6 +2,8 @@ import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { AuthenticatedUserService } from './authenticated-user.service';
 import { BusinessAccountsController } from './business-accounts.controller';
 import { BusinessAccountsService } from './business-accounts.service';
+import { ThrottlerStorageService } from '@nestjs/throttler';
+import { SignInAttemptLimiter } from './sign-in-attempt-limiter.service';
 
 describe('BusinessAccountsController', () => {
   const user = {
@@ -24,6 +26,7 @@ describe('BusinessAccountsController', () => {
       previewApplicationClaim,
       confirmApplicationClaim,
     } as unknown as BusinessAccountsService,
+    new SignInAttemptLimiter(new ThrottlerStorageService()),
   );
 
   beforeEach(() => {
@@ -65,10 +68,10 @@ describe('BusinessAccountsController', () => {
     expect(getSignInEligibility).toHaveBeenCalledWith('Owner@Example.com');
   });
 
-  it('rejects public sign-in eligibility probes', () => {
-    expect(() =>
+  it('rejects public sign-in eligibility probes', async () => {
+    await expect(
       controller.signInEligibility(undefined, { email: user.email }),
-    ).toThrow(UnauthorizedException);
+    ).rejects.toThrow(UnauthorizedException);
     expect(getSignInEligibility).not.toHaveBeenCalled();
   });
 
