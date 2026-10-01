@@ -68,8 +68,11 @@ export class AuthenticatedUserService {
       );
     }
 
-    let claimsResult: Awaited<
-      ReturnType<ReturnType<typeof createClient>['auth']['getClaims']>
+    // getUser asks Supabase Auth for the account record rather than trusting
+    // token claims, so unconfirmed emails and deleted users are rejected even
+    // if the project allows sign-in before email confirmation.
+    let userResult: Awaited<
+      ReturnType<ReturnType<typeof createClient>['auth']['getUser']>
     >;
     try {
       const supabase = createClient(url, publishableKey, {
@@ -79,32 +82,41 @@ export class AuthenticatedUserService {
           persistSession: false,
         },
       });
-      claimsResult = await supabase.auth.getClaims(token);
+      userResult = await supabase.auth.getUser(token);
     } catch {
       throw new ServiceUnavailableException(
         'Business authentication could not be verified right now.',
       );
     }
 
-    if (claimsResult.error) {
+    if (userResult.error) {
+      const status = userResult.error.status;
+      if (!status || status >= 500) {
+        throw new ServiceUnavailableException(
+          'Business authentication could not be verified right now.',
+        );
+      }
       throw new UnauthorizedException('Your sign-in session is invalid.');
     }
 
-    const claims = claimsResult.data?.claims;
+    const user = userResult.data?.user;
+    const confirmedAt = user?.email_confirmed_at
+      ? new Date(user.email_confirmed_at)
+      : null;
     if (
-      typeof claims?.sub !== 'string' ||
-      typeof claims.email !== 'string' ||
-      typeof claims.iat !== 'number'
+      typeof user?.id !== 'string' ||
+      typeof user.email !== 'string' ||
+      !confirmedAt ||
+      Number.isNaN(confirmedAt.getTime())
     ) {
       throw new UnauthorizedException('A verified email address is required.');
     }
 
-    const authenticatedUser = {
-      id: claims.sub,
-      email: claims.email.trim().toLowerCase(),
-      emailVerifiedAt: new Date(claims.iat * 1000),
+    return {
+      id: user.id,
+      email: user.email.trim().toLowerCase(),
+      emailVerifiedAt: confirmedAt,
     };
-    return authenticatedUser;
   }
 
   private async requireActiveAccount(user: AuthenticatedUser) {
