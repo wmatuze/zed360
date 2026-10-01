@@ -152,7 +152,7 @@ function ServiceCard({
           </p>
           <h2 className="mt-1 text-xl font-semibold">{service.name}</h2>
         </div>
-        <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/45">
+        <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/50">
           {service.status === "archived"
             ? "Archived"
             : service.isAvailable

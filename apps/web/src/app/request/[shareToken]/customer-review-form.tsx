@@ -183,7 +183,7 @@ export function CustomerReviewForm({
           </div>
         </fieldset>
         <label className="mt-5 block text-sm font-semibold text-white/75">
-          Comment <span className="font-normal text-white/35">(optional)</span>
+          Comment <span className="font-normal text-white/50">(optional)</span>
           <textarea
             className="mt-2 min-h-28 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 font-normal outline-none focus:border-[var(--lime)]/55"
             maxLength={1200}
@@ -192,8 +192,8 @@ export function CustomerReviewForm({
             value={body}
           />
         </label>
-        <fieldset className="mt-5 rounded-xl border border-white/10 bg-black/15 p-4">
-          <legend className="px-1 text-sm font-semibold text-white/75">
+        <fieldset className="mt-6 border-t border-white/10 pt-5">
+          <legend className="float-left mb-3 w-full text-sm font-semibold text-white/75">
             <span className="text-[var(--lime)]">2</span> · Confirm on WhatsApp
           </legend>
           {verification ? (
@@ -266,7 +266,7 @@ export function CustomerReviewForm({
               : "Submit review"}
         </button>
         {currentReview?.moderationStatus === "approved" ? (
-          <p className="mt-3 text-xs leading-5 text-white/38">
+          <p className="mt-3 text-xs leading-5 text-white/50">
             Updates normally publish immediately. Content containing contact
             details, external links, or spam patterns may need a safety check.
           </p>

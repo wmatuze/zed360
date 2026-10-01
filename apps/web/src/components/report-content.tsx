@@ -65,11 +65,11 @@ export function ReportContent({
     setOpen(false);
   }
 
-  if (message) return <p className="text-xs text-white/40">{message}</p>;
+  if (message) return <p className="text-xs text-white/50">{message}</p>;
   return (
     <div className={compact ? "mt-4" : ""}>
       <button
-        className="text-xs text-white/35 underline-offset-4 hover:text-white/65 hover:underline"
+        className="text-xs text-white/50 underline-offset-4 hover:text-white/65 hover:underline"
         onClick={() => setOpen((value) => !value)}
         type="button"
       >
@@ -117,7 +117,7 @@ export function ReportContent({
             />
           </label>
           <input className="hidden" name="website" tabIndex={-1} type="text" />
-          <p className="text-[0.68rem] leading-5 text-white/30">
+          <p className="text-[0.68rem] leading-5 text-white/50">
             A report starts a review. It does not automatically remove content
             or suspend a business.
           </p>

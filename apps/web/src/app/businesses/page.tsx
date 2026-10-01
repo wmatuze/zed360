@@ -121,7 +121,7 @@ export default async function BusinessesPage({
             </p>
           </div>
           {directory ? (
-            <p className="text-sm text-white/40">
+            <p className="text-sm text-white/50">
               {directory.total} approved{" "}
               {directory.total === 1 ? "business" : "businesses"}
             </p>
@@ -137,7 +137,7 @@ export default async function BusinessesPage({
             <label className="text-sm text-white/65">
               What are you looking for?
               <input
-                className="mt-2 w-full rounded-xl border border-white/10 bg-[#10141c] px-4 py-3 text-white outline-none transition placeholder:text-white/25 focus:border-[var(--lime)]/55"
+                className="mt-2 w-full rounded-xl border border-white/10 bg-[#10141c] px-4 py-3 text-white outline-none transition placeholder:text-white/50 focus:border-[var(--lime)]/55"
                 defaultValue={filters.q}
                 maxLength={100}
                 name="q"
@@ -284,7 +284,7 @@ export default async function BusinessesPage({
                     {business.name}
                   </h2>
                   <p
-                    className={`mt-2 text-xs ${business.availabilityFreshness === "current" && business.availability === "available" ? "text-[var(--lime)]" : "text-white/38"}`}
+                    className={`mt-2 text-xs ${business.availabilityFreshness === "current" && business.availability === "available" ? "text-[var(--lime)]" : "text-white/50"}`}
                   >
                     {business.availabilityFreshness === "current"
                       ? availabilityLabels[business.availability]
@@ -304,7 +304,7 @@ export default async function BusinessesPage({
                     ))}
                   </div>
                   <div className="mt-auto flex items-end justify-between gap-4 pb-12 pt-6 text-sm">
-                    <span className="text-white/42">
+                    <span className="text-white/50">
                       {business.primaryLocation?.district?.name ??
                         "Service location available"}
                     </span>
@@ -347,7 +347,7 @@ export default async function BusinessesPage({
                 ← Previous
               </Link>
             ) : null}
-            <span className="text-sm text-white/42">
+            <span className="text-sm text-white/50">
               Page {directory.page} of {directory.totalPages}
             </span>
             {directory.page < directory.totalPages ? (

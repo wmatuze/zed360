@@ -129,7 +129,26 @@ export default async function SharedRequestPage({
           </span>
         </div>
 
-        <div className="mt-8 rounded-2xl border border-[var(--lime)]/20 bg-[var(--lime)]/8 p-5 text-sm leading-6 text-white/65">
+        {requestClosed ? (
+          <p className="mt-4 flex items-center gap-2 text-sm text-white/70">
+            <span
+              aria-hidden="true"
+              className={`h-2 w-2 rounded-full ${data.request.status === "resolved" ? "bg-[var(--lime)]" : "bg-white/50"}`}
+            />
+            <strong className="font-semibold text-white">
+              {data.request.status === "resolved"
+                ? "Completed"
+                : data.request.status === "cancelled"
+                  ? "Closed"
+                  : "Expired"}
+            </strong>
+            {selectedBusiness
+              ? `· You selected ${selectedBusiness.business.name}`
+              : null}
+          </p>
+        ) : null}
+
+        <div className="mt-8 rounded-2xl border border-white/10 p-5 text-sm leading-6 text-white/60">
           Keep this page private. Anyone with its link can view your request,
           compare responses, and record your decision.
           <PrivateRequestActions
@@ -137,21 +156,6 @@ export default async function SharedRequestPage({
             summary={data.request.summary}
           />
         </div>
-
-        {requestClosed ? (
-          <div className="mt-5 rounded-2xl border border-white/12 bg-white/[0.045] p-5 text-sm leading-6 text-white/65">
-            <strong className="block text-white">
-              {data.request.status === "resolved"
-                ? "Request completed"
-                : data.request.status === "cancelled"
-                  ? "Request closed"
-                  : "Request expired"}
-            </strong>
-            {selectedBusiness
-              ? `You selected ${selectedBusiness.business.name}. Your responses remain available on this private page.`
-              : "Your responses remain available on this private page."}
-          </div>
-        ) : null}
 
         {data.request.status === "resolved" && selectedBusiness ? (
           <CustomerReviewForm
@@ -166,18 +170,20 @@ export default async function SharedRequestPage({
             <h2 className="text-2xl font-semibold tracking-[-0.035em]">
               Business responses
             </h2>
-            <p className="mt-2 text-sm text-white/45">
+            <p className="mt-2 text-sm text-white/50">
               Compare the offer, message, and contact options. Zed360 does not
               choose for you.
             </p>
           </div>
-          <span className="text-sm text-white/38">
+          <span className="text-sm text-white/50">
             {data.responses.length} received
           </span>
         </div>
 
         {data.responses.length ? (
-          <div className="mt-6 grid gap-5 lg:grid-cols-2">
+          <div
+            className={`mt-6 grid gap-5 ${data.responses.length > 1 ? "lg:grid-cols-2" : ""}`}
+          >
             {data.responses.map((response) => {
               const whatsapp = whatsappHref(response.business.whatsapp);
               const website = websiteHref(response.business.website);
@@ -192,7 +198,7 @@ export default async function SharedRequestPage({
                         {response.business.name}
                       </h3>
                       {response.business.description ? (
-                        <p className="mt-2 line-clamp-3 text-sm leading-6 text-white/45">
+                        <p className="mt-2 line-clamp-3 text-sm leading-6 text-white/50">
                           {response.business.description}
                         </p>
                       ) : null}

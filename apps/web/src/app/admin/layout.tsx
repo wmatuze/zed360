@@ -35,7 +35,7 @@ export default async function AdminLayout({
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4">
           <Link className="flex items-center gap-3" href="/">
             <BrandLogo />
-            <span className="hidden border-l border-white/12 pl-3 text-xs font-semibold uppercase tracking-[0.16em] text-white/38 sm:inline">
+            <span className="hidden border-l border-white/12 pl-3 text-xs font-semibold uppercase tracking-[0.16em] text-white/50 sm:inline">
               Administration
             </span>
           </Link>
@@ -46,7 +46,7 @@ export default async function AdminLayout({
               </button>
             </form>
           ) : (
-            <span className="text-xs text-white/35">Restricted access</span>
+            <span className="text-xs text-white/50">Restricted access</span>
           )}
         </div>
         {hasAdminAccess ? (

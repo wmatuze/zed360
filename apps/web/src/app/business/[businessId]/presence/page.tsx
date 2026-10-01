@@ -82,7 +82,7 @@ export default async function BusinessPresencePage({
             className="rounded-2xl border border-white/10 bg-white/[.035] p-6"
           >
             <h2 className="text-xl font-semibold">Current availability</h2>
-            <p className="mt-2 text-sm leading-6 text-white/45">
+            <p className="mt-2 text-sm leading-6 text-white/50">
               Last updated: {date(presence.availability.updatedAt)}. This signal
               is treated as current for 7 days.
             </p>
@@ -117,7 +117,7 @@ export default async function BusinessPresencePage({
 
           <div className="rounded-2xl border border-white/10 bg-white/[.035] p-6">
             <h2 className="text-xl font-semibold">Profile freshness</h2>
-            <p className="mt-2 text-sm leading-6 text-white/45">
+            <p className="mt-2 text-sm leading-6 text-white/50">
               Last confirmed: {date(presence.profile.lastConfirmedAt)}. Zed360
               considers a profile current for 90 days.
             </p>

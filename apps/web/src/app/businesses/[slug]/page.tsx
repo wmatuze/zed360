@@ -206,13 +206,13 @@ export default async function BusinessProfilePage({
               </p>
               {business.availabilityFreshness === "current" &&
               business.availabilityNote ? (
-                <p className="mt-3 text-sm text-white/45">
+                <p className="mt-3 text-sm text-white/50">
                   {business.availabilityNote}
                 </p>
               ) : null}
               {business.profileFreshness === "current" &&
               business.lastConfirmedAt ? (
-                <p className="mt-3 text-xs text-white/30">
+                <p className="mt-3 text-xs text-white/50">
                   Profile confirmed{" "}
                   {new Intl.DateTimeFormat("en-ZM", {
                     dateStyle: "medium",
@@ -220,7 +220,7 @@ export default async function BusinessProfilePage({
                 </p>
               ) : null}
               {primaryLocation?.district ? (
-                <p className="mt-4 text-sm text-white/38">
+                <p className="mt-4 text-sm text-white/50">
                   Based in {primaryLocation.district.name},{" "}
                   {primaryLocation.district.provinceName}
                 </p>
@@ -240,7 +240,7 @@ export default async function BusinessProfilePage({
                   Services and coverage
                 </h2>
               </div>
-              <span className="text-sm text-white/35">
+              <span className="text-sm text-white/50">
                 {business.services.length}{" "}
                 {business.services.length === 1 ? "service" : "services"}
               </span>
@@ -300,7 +300,7 @@ export default async function BusinessProfilePage({
                                 <p className="text-sm font-semibold text-white/82">
                                   {fulfillmentLabels[option.mode]}
                                 </p>
-                                <p className="mt-1 text-xs leading-5 text-white/42">
+                                <p className="mt-1 text-xs leading-5 text-white/50">
                                   {scopeLabels[option.coverageScope]}
                                   {areaNames.length
                                     ? `: ${areaNames.join(", ")}`
@@ -314,7 +314,7 @@ export default async function BusinessProfilePage({
                                   </p>
                                 ) : null}
                                 {option.notes ? (
-                                  <p className="mt-2 text-xs leading-5 text-white/42">
+                                  <p className="mt-2 text-xs leading-5 text-white/50">
                                     {option.notes}
                                   </p>
                                 ) : null}
@@ -323,7 +323,7 @@ export default async function BusinessProfilePage({
                           })}
                         </div>
                       ) : (
-                        <p className="mt-4 text-xs text-white/35">
+                        <p className="mt-4 text-xs text-white/50">
                           Service method has not been confirmed yet.
                         </p>
                       )}
@@ -342,7 +342,7 @@ export default async function BusinessProfilePage({
                 <h2 className="text-3xl font-semibold tracking-[-0.04em]">
                   Products
                 </h2>
-                <p className="mt-2 text-sm text-white/42">
+                <p className="mt-2 text-sm text-white/50">
                   Display only—contact the business directly to buy or order.
                 </p>
                 <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -380,11 +380,11 @@ export default async function BusinessProfilePage({
                             ) : null}
                           </div>
                           {product.description ? (
-                            <p className="mt-2 text-sm leading-6 text-white/45">
+                            <p className="mt-2 text-sm leading-6 text-white/50">
                               {product.description}
                             </p>
                           ) : null}
-                          <p className="mt-4 text-xs capitalize text-white/35">
+                          <p className="mt-4 text-xs capitalize text-white/50">
                             {product.availability.replaceAll("_", " ")}
                           </p>
                         </div>
@@ -427,7 +427,7 @@ export default async function BusinessProfilePage({
                             </p>
                           ) : null}
                           {media.caption ? (
-                            <p className="mt-1 text-xs leading-5 text-white/42">
+                            <p className="mt-1 text-xs leading-5 text-white/50">
                               {media.caption}
                             </p>
                           ) : null}
@@ -449,7 +449,7 @@ export default async function BusinessProfilePage({
                     <h2 className="text-3xl font-semibold tracking-[-0.04em]">
                       Verified reviews
                     </h2>
-                    <p className="mt-2 text-sm text-white/42">
+                    <p className="mt-2 text-sm text-white/50">
                       From customers who selected this business through a Zed360
                       request.
                     </p>
@@ -468,7 +468,7 @@ export default async function BusinessProfilePage({
                       <div className="flex items-start justify-between gap-4">
                         <div>
                           <p className="font-semibold">Verified customer</p>
-                          <p className="mt-1 text-xs text-white/35">
+                          <p className="mt-1 text-xs text-white/50">
                             {new Date(review.createdAt).toLocaleDateString(
                               "en-ZM",
                               { dateStyle: "medium" },
@@ -490,7 +490,7 @@ export default async function BusinessProfilePage({
                           {review.body}
                         </p>
                       ) : (
-                        <p className="mt-4 text-sm text-white/35">
+                        <p className="mt-4 text-sm text-white/50">
                           Rating only
                         </p>
                       )}
@@ -502,7 +502,7 @@ export default async function BusinessProfilePage({
                     </article>
                   ))}
                 </div>
-                <p className="mt-4 text-xs leading-5 text-white/32">
+                <p className="mt-4 text-xs leading-5 text-white/50">
                   “Verified” means the reviewer selected this business through
                   Zed360. It does not verify payment, delivery, or every claim
                   in the review.
@@ -514,7 +514,7 @@ export default async function BusinessProfilePage({
           <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
             <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-6">
               <h2 className="text-lg font-semibold">Contact this business</h2>
-              <p className="mt-2 text-sm leading-6 text-white/42">
+              <p className="mt-2 text-sm leading-6 text-white/50">
                 Contact the business directly. Zed360 does not handle payment.
               </p>
               <div className="mt-5 flex flex-col gap-3">
@@ -556,7 +556,7 @@ export default async function BusinessProfilePage({
                 ) : null}
               </div>
               {!business.phone && !business.email && !whatsapp && !website ? (
-                <p className="mt-5 text-sm text-white/42">
+                <p className="mt-5 text-sm text-white/50">
                   Public contact details have not been added yet.
                 </p>
               ) : null}
@@ -576,12 +576,12 @@ export default async function BusinessProfilePage({
                           {location.name}
                         </p>
                         <span
-                          className={`shrink-0 rounded-full border px-2.5 py-1 text-[.68rem] ${location.operatingHours.currentStatus === "open" ? "border-[var(--lime)]/25 bg-[var(--lime)]/8 text-[var(--lime)]" : "border-white/10 bg-white/5 text-white/45"}`}
+                          className={`shrink-0 rounded-full border px-2.5 py-1 text-[.68rem] ${location.operatingHours.currentStatus === "open" ? "border-[var(--lime)]/25 bg-[var(--lime)]/8 text-[var(--lime)]" : "border-white/10 bg-white/5 text-white/50"}`}
                         >
                           {location.operatingHours.currentLabel}
                         </span>
                       </div>
-                      <p className="mt-1 text-xs leading-5 text-white/42">
+                      <p className="mt-1 text-xs leading-5 text-white/50">
                         {[
                           location.district?.name,
                           location.district?.provinceName,
@@ -598,7 +598,7 @@ export default async function BusinessProfilePage({
                         Today: {location.operatingHours.todayLabel}
                       </p>
                       {location.operatingHours.configured ? (
-                        <details className="mt-2 text-xs text-white/42">
+                        <details className="mt-2 text-xs text-white/50">
                           <summary className="cursor-pointer text-[var(--lime)]/75">
                             View weekly hours
                           </summary>

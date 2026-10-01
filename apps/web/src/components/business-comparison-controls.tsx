@@ -86,7 +86,7 @@ export function ComparisonTray() {
     <div className="sticky bottom-4 z-30 mx-auto mt-8 flex max-w-xl flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--lime)]/25 bg-[#11170f]/95 p-4 shadow-2xl backdrop-blur">
       <div>
         <p className="text-sm font-semibold">{slugs.length} of 3 selected</p>
-        <p className="text-xs text-white/42">Choose at least two businesses.</p>
+        <p className="text-xs text-white/50">Choose at least two businesses.</p>
       </div>
       <div className="flex gap-2">
         <button

@@ -231,7 +231,7 @@ export default async function CompareBusinessesPage({
                       <span key={service.id}>
                         <strong>{service.name}</strong>
                         <br />
-                        <small className="text-white/38">
+                        <small className="text-white/50">
                           {service.category.name} ·{" "}
                           {servicePrice(service.priceFrom, service.priceTo)}
                         </small>

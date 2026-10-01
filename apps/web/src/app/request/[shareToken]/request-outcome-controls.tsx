@@ -81,7 +81,7 @@ export function ResponseOutcomeControls({
 
   if (requestClosed) {
     return contacted ? (
-      <p className="mt-5 text-xs font-semibold text-white/42">
+      <p className="mt-5 text-xs font-semibold text-white/50">
         You marked this business as contacted.
       </p>
     ) : null;
@@ -89,7 +89,7 @@ export function ResponseOutcomeControls({
 
   return (
     <div className="mt-5 border-t border-white/8 pt-5">
-      <p className="text-xs leading-5 text-white/42">
+      <p className="text-xs leading-5 text-white/50">
         Use these controls only after you contact or choose this business.
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
@@ -165,7 +165,7 @@ export function RequestClosureControls({
       <p className="font-semibold">
         {closed ? "Need more responses?" : "Finished with this request?"}
       </p>
-      <p className="mt-2 text-sm leading-6 text-white/45">
+      <p className="mt-2 text-sm leading-6 text-white/50">
         {closed
           ? "Reopening makes the request available to matched businesses again."
           : "Close it if you no longer need the service and did not choose one of these businesses."}

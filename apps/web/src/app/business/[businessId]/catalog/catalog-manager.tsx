@@ -162,7 +162,7 @@ function ProductForm({
         </div>
       ) : null}
       {pricingType === "contact" ? (
-        <p className="rounded-xl border border-white/8 bg-black/15 p-4 text-sm leading-6 text-white/45">
+        <p className="rounded-xl border border-white/8 bg-black/15 p-4 text-sm leading-6 text-white/50">
           No amount will be displayed. Customers will be invited to contact the
           business for the current price.
         </p>
@@ -367,12 +367,12 @@ function MediaUploadForm({
           name="caption"
         />
       </label>
-      <p className="text-xs leading-5 text-white/35">
+      <p className="text-xs leading-5 text-white/50">
         JPG, PNG, or WebP only; maximum 5 MB. Gallery, work-sample, and product
         images publish after validation. Logos and covers require Zed360 review.
       </p>
       {purpose === "logo" ? (
-        <p className="text-xs leading-5 text-white/45">
+        <p className="text-xs leading-5 text-white/50">
           Use an official symbol, wordmark, or business-name mark you are
           authorized to use. A square image is preferred. Product photos,
           portraits, advertisements, and imitation verification badges are not
@@ -380,7 +380,7 @@ function MediaUploadForm({
         </p>
       ) : null}
       {purpose === "cover" ? (
-        <p className="text-xs leading-5 text-white/45">
+        <p className="text-xs leading-5 text-white/50">
           Use a wide image that genuinely represents the business, its premises,
           work, or products. Avoid contact-number posters and misleading badges.
         </p>
@@ -460,7 +460,7 @@ function MediaCard({
           </span>
         </div>
         {media.moderationNote ? (
-          <p className="mt-2 text-xs leading-5 text-white/42">
+          <p className="mt-2 text-xs leading-5 text-white/50">
             Status note: {media.moderationNote}
           </p>
         ) : null}
@@ -495,7 +495,7 @@ export function CatalogManager({ catalog }: { catalog: BusinessCatalog }) {
             Display-only products
           </p>
           <h2 className="mt-2 text-2xl font-semibold">Add a product</h2>
-          <p className="mt-2 text-sm leading-6 text-white/45">
+          <p className="mt-2 text-sm leading-6 text-white/50">
             Products help customers discover what you sell. Payments and orders
             stay directly between you and the customer.
           </p>
@@ -509,7 +509,7 @@ export function CatalogManager({ catalog }: { catalog: BusinessCatalog }) {
             Visual storefront
           </p>
           <h2 className="mt-2 text-2xl font-semibold">Upload an image</h2>
-          <p className="mt-2 text-sm leading-6 text-white/45">
+          <p className="mt-2 text-sm leading-6 text-white/50">
             Add product photos, work samples, and profile images customers can
             trust.
           </p>
@@ -526,7 +526,7 @@ export function CatalogManager({ catalog }: { catalog: BusinessCatalog }) {
         <section>
           <div className="flex items-end justify-between gap-4">
             <h2 className="text-2xl font-semibold">Your products</h2>
-            <span className="text-sm text-white/38">
+            <span className="text-sm text-white/50">
               {catalog.products.length} total
             </span>
           </div>
@@ -538,7 +538,7 @@ export function CatalogManager({ catalog }: { catalog: BusinessCatalog }) {
               >
                 <summary className="cursor-pointer list-none text-lg font-semibold">
                   {product.name}
-                  <span className="ml-3 text-xs font-normal text-white/38">
+                  <span className="ml-3 text-xs font-normal text-white/50">
                     {product.isPublished ? "Published" : "Private draft"} ·{" "}
                     {availabilityLabels[product.availability]}
                   </span>

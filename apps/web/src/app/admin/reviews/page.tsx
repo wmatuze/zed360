@@ -200,11 +200,11 @@ export default async function AdminReviewsPage({
                 <summary className="grid cursor-pointer list-none gap-3 px-5 py-4 transition hover:bg-white/[0.04] sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center">
                   <div className="min-w-0">
                     <p className="truncate font-semibold">{business.name}</p>
-                    <p className="mt-1 truncate text-sm text-white/40">
+                    <p className="mt-1 truncate text-sm text-white/50">
                       {display(business.ownerEmail || business.contact.email)}
                     </p>
                   </div>
-                  <span className="text-sm text-white/45">
+                  <span className="text-sm text-white/50">
                     {business.status === "suspended"
                       ? "Suspended"
                       : reviewLabels[business.reviewStatus]}{" "}
@@ -224,7 +224,7 @@ export default async function AdminReviewsPage({
                       <p className="text-2xl font-semibold tracking-[-0.035em]">
                         {business.name}
                       </p>
-                      <p className="mt-2 text-sm text-white/45">
+                      <p className="mt-2 text-sm text-white/50">
                         {business.status === "suspended"
                           ? "Suspended"
                           : reviewLabels[business.reviewStatus]}{" "}
@@ -320,7 +320,7 @@ export default async function AdminReviewsPage({
                           ? `${business.registration.status.replaceAll("_", " ")} · ${display(business.registration.registeredLegalName)} · ${display(business.registration.registrationNumber)}`
                           : "No declaration found"}
                       </p>
-                      <p className="mt-2 text-xs leading-5 text-white/32">
+                      <p className="mt-2 text-xs leading-5 text-white/50">
                         This is owner-provided information, not a PACRA
                         verification result.
                       </p>
@@ -346,7 +346,7 @@ export default async function AdminReviewsPage({
                         Review reason or audit note
                       </span>
                       <textarea
-                        className="min-h-24 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm outline-none transition placeholder:text-white/25 focus:border-[var(--lime)]/55"
+                        className="min-h-24 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm outline-none transition placeholder:text-white/50 focus:border-[var(--lime)]/55"
                         maxLength={1200}
                         name="reason"
                         placeholder="Required for rejection, correction, suspension, or revocation; optional for approval, reopening, or reinstatement."

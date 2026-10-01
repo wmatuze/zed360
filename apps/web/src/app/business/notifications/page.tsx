@@ -132,7 +132,7 @@ export default async function BusinessNotificationsPage({
               >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <p className="text-xs text-white/38">
+                    <p className="text-xs text-white/50">
                       {notification.business.name} ·{" "}
                       {new Date(notification.createdAt).toLocaleString("en-ZM", {
                         dateStyle: "medium",
@@ -201,7 +201,7 @@ export default async function BusinessNotificationsPage({
             ) : (
               <span />
             )}
-            <span className="text-white/45">
+            <span className="text-white/50">
               Page {data.page} of {data.totalPages}
             </span>
             {data.page < data.totalPages ? (

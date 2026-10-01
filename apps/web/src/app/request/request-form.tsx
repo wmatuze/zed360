@@ -162,7 +162,7 @@ export function RequestForm() {
           Zed360 received your request successfully. Use your private page to
           check and compare responses from approved businesses.
         </p>
-        <p className="mt-4 text-sm text-white/42">
+        <p className="mt-4 text-sm text-white/50">
           Request reference: {createdRequest.id.slice(0, 8).toUpperCase()}
         </p>
         <div className="mt-6 rounded-2xl border border-white/10 bg-black/15 p-4 text-sm leading-6 text-white/55">
@@ -218,7 +218,7 @@ export function RequestForm() {
           What do you need?
         </span>
         <textarea
-          className="min-h-28 w-full resize-y rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none transition placeholder:text-white/25 focus:border-[var(--lime)]/55"
+          className="min-h-28 w-full resize-y rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none transition placeholder:text-white/50 focus:border-[var(--lime)]/55"
           maxLength={240}
           minLength={10}
           name="summary"
@@ -336,13 +336,13 @@ export function RequestForm() {
       </div>
       <fieldset>
         <legend className="mb-2 text-sm font-medium text-white/70">
-          Budget range <i className="font-normal text-white/30">optional</i>
+          Budget range <i className="font-normal text-white/50">optional</i>
         </legend>
         <div className="grid gap-5 sm:grid-cols-2">
           <label>
             <span className="sr-only">Minimum budget</span>
             <input
-              className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 outline-none transition placeholder:text-white/25 focus:border-[var(--lime)]/55"
+              className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 outline-none transition placeholder:text-white/50 focus:border-[var(--lime)]/55"
               min="0"
               name="budgetMinimum"
               placeholder="Minimum, e.g. K1,000"
@@ -353,7 +353,7 @@ export function RequestForm() {
           <label>
             <span className="sr-only">Maximum budget</span>
             <input
-              className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 outline-none transition placeholder:text-white/25 focus:border-[var(--lime)]/55"
+              className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 outline-none transition placeholder:text-white/50 focus:border-[var(--lime)]/55"
               min="0"
               name="budgetMaximum"
               placeholder="Maximum, e.g. K3,000"
@@ -366,10 +366,10 @@ export function RequestForm() {
       <label className="block">
         <span className="mb-2 block text-sm font-medium text-white/70">
           Anything else businesses should know?{" "}
-          <i className="font-normal text-white/30">optional</i>
+          <i className="font-normal text-white/50">optional</i>
         </span>
         <textarea
-          className="min-h-20 w-full resize-y rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none transition placeholder:text-white/25 focus:border-[var(--lime)]/55"
+          className="min-h-20 w-full resize-y rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none transition placeholder:text-white/50 focus:border-[var(--lime)]/55"
           maxLength={2000}
           name="details"
           placeholder="Measurements, preferred brands, delivery requirements, or other useful details"
@@ -391,7 +391,7 @@ export function RequestForm() {
         {submitting ? "Submitting request…" : "Post this request"}{" "}
         {!submitting ? <span aria-hidden="true">→</span> : null}
       </button>
-      <p className="text-xs leading-5 text-white/28">
+      <p className="text-xs leading-5 text-white/50">
         Submitting a request will not create a purchase or payment obligation.
       </p>
     </form>

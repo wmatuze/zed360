@@ -29,7 +29,7 @@ export function AdminPasswordRequestForm() {
         <input
           autoComplete="username"
           autoFocus
-          className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 outline-none transition placeholder:text-white/25 focus:border-[var(--lime)]/55"
+          className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 outline-none transition placeholder:text-white/50 focus:border-[var(--lime)]/55"
           maxLength={50}
           minLength={3}
           name="username"

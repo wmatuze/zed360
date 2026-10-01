@@ -24,7 +24,7 @@ export function SignInForm({ nextPath }: { nextPath: string }) {
         <input
           autoComplete="email"
           autoFocus
-          className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 outline-none transition placeholder:text-white/25 focus:border-[var(--lime)]/55"
+          className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 outline-none transition placeholder:text-white/50 focus:border-[var(--lime)]/55"
           maxLength={254}
           name="email"
           placeholder="you@business.co.zm"
@@ -55,7 +55,7 @@ export function SignInForm({ nextPath }: { nextPath: string }) {
         {!pending ? <span aria-hidden="true">→</span> : null}
       </button>
 
-      <p className="text-xs leading-5 text-white/30">
+      <p className="text-xs leading-5 text-white/50">
         No password is required. Receiving the email verifies control of this
         address; it does not verify a business or grant access to customer
         requests.

@@ -144,12 +144,12 @@ export default async function AdminCategoriesPage({
                     {category.parentId ? "↳ " : ""}
                     {category.name}
                   </p>
-                  <p className="mt-1 truncate text-sm text-white/40">
+                  <p className="mt-1 truncate text-sm text-white/50">
                     /{category.slug}
                     {category.parentName ? ` · ${category.parentName}` : ""}
                   </p>
                 </div>
-                <span className="text-sm text-white/45">
+                <span className="text-sm text-white/50">
                   {category.serviceCount} services · {category.requestCount}{" "}
                   requests
                 </span>
@@ -188,7 +188,7 @@ export default async function AdminCategoriesPage({
             </details>
           ))
         ) : (
-          <p className="p-6 text-white/45">
+          <p className="p-6 text-white/50">
             No categories match these filters.
           </p>
         )}
@@ -219,7 +219,7 @@ function Stat({
 }) {
   return (
     <span
-      className={`rounded-full border px-4 py-2 ${active ? "border-[var(--lime)]/20 text-[var(--lime)]" : "border-white/10 text-white/45"}`}
+      className={`rounded-full border px-4 py-2 ${active ? "border-[var(--lime)]/20 text-[var(--lime)]" : "border-white/10 text-white/50"}`}
     >
       {value} {label}
     </span>

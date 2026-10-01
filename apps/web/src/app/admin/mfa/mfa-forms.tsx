@@ -39,7 +39,7 @@ function CodeForm({
         <input
           autoComplete="one-time-code"
           autoFocus
-          className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 text-lg tracking-[0.4em] outline-none transition placeholder:tracking-normal placeholder:text-white/25 focus:border-[var(--lime)]/55"
+          className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 text-lg tracking-[0.4em] outline-none transition placeholder:tracking-normal placeholder:text-white/50 focus:border-[var(--lime)]/55"
           inputMode="numeric"
           maxLength={6}
           minLength={6}

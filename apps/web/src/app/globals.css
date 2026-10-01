@@ -135,9 +135,9 @@ select {
   backdrop-filter: blur(18px);
 }
 .home-search-field { display: flex; min-width: 0; flex-direction: column; justify-content: center; gap: 0.3rem; padding: 0.55rem 0.8rem; text-align: left; }
-.home-search-field > span { color: rgba(255, 255, 255, 0.36); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.home-search-field > span { color: rgba(255, 255, 255, 0.5); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
 .home-search-field input, .home-search-field select { width: 100%; border: 0; outline: 0; background: transparent; color: white; font: inherit; }
-.home-search-field input::placeholder { color: rgba(255, 255, 255, 0.27); }
+.home-search-field input::placeholder { color: rgba(255, 255, 255, 0.5); }
 .home-search-field select { color-scheme: dark; cursor: pointer; }
 .home-search-button { width: 100%; border: 0; cursor: pointer; }
 .home-trust-point { display: flex; align-items: center; justify-content: center; gap: 0.55rem; border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 999px; background: rgba(255, 255, 255, 0.025); padding: 0.7rem 1rem; }
@@ -147,7 +147,7 @@ select {
 .home-card-pattern { width: 100%; height: 100%; background: radial-gradient(circle at 75% 35%, rgba(119, 216, 255, 0.14), transparent 42%), linear-gradient(135deg, rgba(184, 242, 56, 0.09), transparent 55%), linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px); background-size: auto, auto, 28px 28px, 28px 28px; }
 .home-business-logo { position: absolute; bottom: 0.75rem; left: 1.25rem; display: grid; width: 3.25rem; height: 3.25rem; overflow: hidden; place-items: center; border: 3px solid #11151d; border-radius: 1rem; background: var(--lime); color: var(--ink); font-size: 0.74rem; font-weight: 800; }
 .verified-pill { flex: none; border: 1px solid rgba(184, 242, 56, 0.2); border-radius: 999px; background: rgba(184, 242, 56, 0.08); padding: 0.28rem 0.55rem; color: var(--lime); font-size: 0.64rem; font-weight: 700; }
-.home-empty-state { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 1.25rem; background: rgba(255, 255, 255, 0.025); padding: 1.25rem; color: rgba(255, 255, 255, 0.42); font-size: 0.88rem; }
+.home-empty-state { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 1.25rem; background: rgba(255, 255, 255, 0.025); padding: 1.25rem; color: rgba(255, 255, 255, 0.5); font-size: 0.88rem; }
 .home-empty-state a { color: var(--lime); font-weight: 650; }
 
 @media (max-width: 639px) {
@@ -201,7 +201,7 @@ select {
   font-size: 0.9rem;
 }
 .preview-label {
-  color: rgba(255, 255, 255, 0.34);
+  color: rgba(255, 255, 255, 0.5);
   font-size: 0.68rem;
   font-weight: 650;
   letter-spacing: 0.06em;
@@ -240,7 +240,7 @@ select {
 }
 .response-card small {
   margin-top: 0.2rem;
-  color: rgba(255, 255, 255, 0.38);
+  color: rgba(255, 255, 255, 0.5);
 }
 .response-card b {
   color: var(--lime);
@@ -280,7 +280,7 @@ select {
 .step-card p {
   margin-top: 0.55rem;
   max-width: 19rem;
-  color: rgba(255, 255, 255, 0.42);
+  color: rgba(255, 255, 255, 0.5);
   font-size: 0.88rem;
   line-height: 1.5rem;
 }
@@ -324,7 +324,7 @@ select {
 }
 .category-card p {
   margin-top: 0.3rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.5);
   font-size: 0.8rem;
 }
 .category-card b {
