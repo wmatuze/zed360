@@ -15,6 +15,10 @@ import {
 } from '@zed360/contracts';
 import { AuthenticatedUserService } from './authenticated-user.service';
 import { AdminUsersService } from './admin-users.service';
+import {
+  parseClientIp,
+  SignInAttemptLimiter,
+} from './sign-in-attempt-limiter.service';
 import { loadApiEnvironment } from './environment';
 import { timingSafeEqual } from 'node:crypto';
 
@@ -52,10 +56,11 @@ export class AdminUsersController {
   constructor(
     private readonly authentication: AuthenticatedUserService,
     private readonly users: AdminUsersService,
+    private readonly attempts: SignInAttemptLimiter,
   ) {}
 
   @Post('sign-in-identity')
-  signInIdentity(
+  async signInIdentity(
     @Headers('x-zed360-internal-secret') internalSecret: string | undefined,
     @Body() body: unknown,
   ) {
@@ -63,6 +68,7 @@ export class AdminUsersController {
     const username = parseUsername(body);
     if (!username)
       throw new BadRequestException('A valid username is required.');
+    await this.attempts.consume('admin', username, parseClientIp(body));
     return this.users.getSignInIdentity(username);
   }
 

@@ -1,6 +1,11 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import {
+  clientIpAddress,
+  TooManySignInAttemptsError,
+  tooManyAttemptsMessage,
+} from "@/lib/client-ip";
 import { safeNextPath } from "@/lib/safe-next-path";
 import { z } from "zod";
 
@@ -86,6 +91,9 @@ export async function requestSignInLink(
       message: neutralSuccessMessage,
     };
   } catch (error) {
+    if (error instanceof TooManySignInAttemptsError) {
+      return { status: "error", message: tooManyAttemptsMessage };
+    }
     if (
       error instanceof Error &&
       error.message.startsWith("Supabase Auth is not configured")
@@ -135,10 +143,11 @@ async function getSignInEligibility(email: string) {
         "content-type": "application/json",
         "x-zed360-internal-secret": internalSecret,
       },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, clientIp: await clientIpAddress() }),
       cache: "no-store",
     },
   );
+  if (response.status === 429) throw new TooManySignInAttemptsError();
   if (!response.ok) {
     throw new Error("Business sign-in eligibility could not be checked.");
   }

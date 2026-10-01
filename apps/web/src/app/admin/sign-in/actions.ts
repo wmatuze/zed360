@@ -3,6 +3,10 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { resolveAdminEmail } from "@/lib/admin-identity";
+import {
+  TooManySignInAttemptsError,
+  tooManyAttemptsMessage,
+} from "@/lib/client-ip";
 import { safeNextPath } from "@/lib/safe-next-path";
 import { createClient } from "@/lib/supabase/server";
 
@@ -60,10 +64,13 @@ export async function signInAdmin(
       await supabase.auth.signOut();
       return { status: "error", message: invalidCredentialsMessage };
     }
-  } catch {
+  } catch (error) {
     return {
       status: "error",
-      message: "Administrator sign-in is temporarily unavailable.",
+      message:
+        error instanceof TooManySignInAttemptsError
+          ? tooManyAttemptsMessage
+          : "Administrator sign-in is temporarily unavailable.",
     };
   }
 

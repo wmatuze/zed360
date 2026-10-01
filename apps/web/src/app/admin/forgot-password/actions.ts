@@ -2,6 +2,10 @@
 
 import { z } from "zod";
 import { resolveAdminEmail } from "@/lib/admin-identity";
+import {
+  TooManySignInAttemptsError,
+  tooManyAttemptsMessage,
+} from "@/lib/client-ip";
 import { createClient } from "@/lib/supabase/server";
 
 const usernameSchema = z.string().trim().min(3).max(50);
@@ -52,10 +56,13 @@ export async function requestAdminPasswordReset(
         : { status: "success", message: neutralMessage };
     }
     return { status: "success", message: neutralMessage };
-  } catch {
+  } catch (error) {
     return {
       status: "error",
-      message: "Password setup is temporarily unavailable.",
+      message:
+        error instanceof TooManySignInAttemptsError
+          ? tooManyAttemptsMessage
+          : "Password setup is temporarily unavailable.",
     };
   }
 }

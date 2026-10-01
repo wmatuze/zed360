@@ -14,6 +14,10 @@ import {
 } from '@zed360/contracts';
 import { AuthenticatedUserService } from './authenticated-user.service';
 import { BusinessAccountsService } from './business-accounts.service';
+import {
+  parseClientIp,
+  SignInAttemptLimiter,
+} from './sign-in-attempt-limiter.service';
 import { loadApiEnvironment } from './environment';
 import { timingSafeEqual } from 'node:crypto';
 
@@ -56,10 +60,11 @@ export class BusinessAccountsController {
   constructor(
     private readonly authentication: AuthenticatedUserService,
     private readonly accounts: BusinessAccountsService,
+    private readonly attempts: SignInAttemptLimiter,
   ) {}
 
   @Post('sign-in-eligibility')
-  signInEligibility(
+  async signInEligibility(
     @Headers('x-zed360-internal-secret') internalSecret: string | undefined,
     @Body() body: unknown,
   ) {
@@ -68,6 +73,7 @@ export class BusinessAccountsController {
     if (!email) {
       throw new BadRequestException('A valid email address is required.');
     }
+    await this.attempts.consume('business', email, parseClientIp(body));
     return this.accounts.getSignInEligibility(email);
   }
 
