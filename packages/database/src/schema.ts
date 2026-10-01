@@ -833,10 +833,17 @@ export const reviews = pgTable(
     reviewedByUserId: uuid("reviewed_by_user_id").references(() => users.id),
     reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
     isPublished: boolean("is_published").default(false).notNull(),
+    // Keyed hash of the reviewer's confirmed WhatsApp number. The number
+    // itself is never stored. Null for reviews made before verification.
+    reviewerContactHash: text("reviewer_contact_hash"),
     ...timestamps,
   },
   (table) => [
     uniqueIndex("reviews_interaction_unique").on(table.interactionId),
+    index("reviews_business_contact_idx").on(
+      table.businessId,
+      table.reviewerContactHash,
+    ),
     index("reviews_business_published_idx").on(
       table.businessId,
       table.isPublished,
@@ -846,6 +853,32 @@ export const reviews = pgTable(
       table.createdAt,
     ),
     check("reviews_rating_check", sql`${table.rating} between 1 and 5`),
+  ],
+).enableRLS();
+
+// One-time WhatsApp codes that confirm a reviewer's number. Only hashes are
+// stored: a keyed hash of the number and a hash of the code.
+export const reviewContactVerifications = pgTable(
+  "review_contact_verifications",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    requestId: uuid("request_id")
+      .notNull()
+      .references(() => customerRequests.id, { onDelete: "cascade" }),
+    contactHash: text("contact_hash").notNull(),
+    codeHash: text("code_hash").notNull(),
+    attempts: integer("attempts").default(0).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    consumedAt: timestamp("consumed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("review_contact_verifications_request_idx").on(
+      table.requestId,
+      table.createdAt,
+    ),
   ],
 ).enableRLS();
 

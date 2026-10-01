@@ -7,7 +7,8 @@ import {
 } from '@nestjs/throttler';
 import { isIP } from 'node:net';
 
-type SignInScope = 'admin' | 'business' | 'mfa';
+type SignInScope =
+  'admin' | 'business' | 'mfa' | 'reviewCodePhone' | 'reviewCodeRequest';
 
 // Sign-in runs inside Next.js server actions, so Supabase sees every attempt
 // from the web server's address and its own per-IP limits never apply to an
@@ -27,6 +28,16 @@ export const signInAttemptLimits = {
   mfa: {
     identifier: { limit: 5, window: minutes(15) },
     clientIp: { limit: 20, window: minutes(15) },
+  },
+  // Each review code is a paid WhatsApp message, so sends are capped per
+  // number and per request on top of the per-IP route limit.
+  reviewCodePhone: {
+    identifier: { limit: 3, window: hours(1) },
+    clientIp: { limit: 10, window: hours(1) },
+  },
+  reviewCodeRequest: {
+    identifier: { limit: 5, window: hours(1) },
+    clientIp: { limit: 10, window: hours(1) },
   },
 } as const;
 

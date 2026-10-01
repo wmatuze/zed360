@@ -6,7 +6,10 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
-import { submitCustomerReviewSchema } from '@zed360/contracts';
+import {
+  requestReviewCodeSchema,
+  submitCustomerReviewSchema,
+} from '@zed360/contracts';
 import { CustomerReviewsService } from './customer-reviews.service';
 import { PublicRateLimit } from './public-rate-limits';
 
@@ -17,13 +20,23 @@ const uuidPattern =
 export class CustomerReviewsController {
   constructor(private readonly reviews: CustomerReviewsService) {}
 
+  @Post(':shareToken/review/code')
+  @PublicRateLimit('reviewCode')
+  requestCode(@Param('shareToken') shareToken: string, @Body() body: unknown) {
+    const parsed = requestReviewCodeSchema.safeParse(body);
+    if (!uuidPattern.test(shareToken) || !parsed.success) {
+      throw new BadRequestException('Enter the WhatsApp number to confirm.');
+    }
+    return this.reviews.requestCode(shareToken, parsed.data);
+  }
+
   @Post(':shareToken/review')
   @PublicRateLimit('customerReview')
   submit(@Param('shareToken') shareToken: string, @Body() body: unknown) {
     const parsed = submitCustomerReviewSchema.safeParse(body);
     if (!uuidPattern.test(shareToken) || !parsed.success) {
       throw new BadRequestException(
-        'Provide a rating from one to five and an optional review comment.',
+        'Provide a rating, an optional comment, and the WhatsApp code.',
       );
     }
     return this.reviews.submit(shareToken, parsed.data);
