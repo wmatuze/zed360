@@ -207,13 +207,13 @@ export function CustomerReviewForm({
                 Six-digit code
                 <input
                   autoComplete="one-time-code"
-                  className="mt-2 h-11 w-full max-w-48 rounded-xl border border-white/10 bg-black/20 px-4 font-normal tracking-[0.3em] outline-none focus:border-[var(--lime)]/55"
+                  className="mt-2 block h-11 w-full max-w-48 rounded-xl border border-white/10 bg-black/20 px-4 font-normal tracking-[0.3em] outline-none focus:border-[var(--lime)]/55"
                   inputMode="numeric"
                   maxLength={6}
                   onChange={(event) =>
-                    setCode(event.target.value.replace(/D/g, ""))
+                    setCode(event.target.value.replace(/\D/g, ""))
                   }
-                  pattern="d{6}"
+                  pattern="[0-9]{6}"
                   required
                   value={code}
                 />
@@ -232,7 +232,7 @@ export function CustomerReviewForm({
                 WhatsApp number
                 <input
                   autoComplete="tel"
-                  className="mt-2 h-11 w-full min-w-0 max-w-64 rounded-xl border border-white/10 bg-black/20 px-4 font-normal outline-none focus:border-[var(--lime)]/55"
+                  className="mt-2 block h-11 w-full min-w-0 max-w-64 rounded-xl border border-white/10 bg-black/20 px-4 font-normal outline-none focus:border-[var(--lime)]/55"
                   inputMode="tel"
                   maxLength={20}
                   onChange={(event) => setPhone(event.target.value)}
