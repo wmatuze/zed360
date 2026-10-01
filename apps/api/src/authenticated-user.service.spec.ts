@@ -11,7 +11,7 @@ jest.mock('@supabase/supabase-js', () => ({ createClient: jest.fn() }));
 describe('AuthenticatedUserService', () => {
   const originalUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const originalKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  const getClaims = jest.fn();
+  const getUser = jest.fn();
   const createClientMock = jest.mocked(createClient);
   let service: AuthenticatedUserService;
   const limit = jest.fn();
@@ -19,12 +19,23 @@ describe('AuthenticatedUserService', () => {
   const from = jest.fn(() => ({ where }));
   const select = jest.fn(() => ({ from }));
 
+  const confirmedUser = (email = 'owner@example.com') => ({
+    data: {
+      user: {
+        id: 'f8d18ef2-7f91-4a63-a40c-2017d7a02f07',
+        email,
+        email_confirmed_at: '2026-08-10T09:00:00.000Z',
+      },
+    },
+    error: null,
+  });
+
   beforeEach(() => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://project.supabase.co';
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'publishable-key';
-    getClaims.mockReset();
+    getUser.mockReset();
     createClientMock.mockReset().mockReturnValue({
-      auth: { getClaims },
+      auth: { getUser },
     } as never);
     limit.mockReset().mockResolvedValue([]);
     service = new AuthenticatedUserService({ db: { select } } as never);
@@ -36,54 +47,36 @@ describe('AuthenticatedUserService', () => {
   });
 
   it('verifies the access token with Supabase and normalizes the email', async () => {
-    getClaims.mockResolvedValue({
-      data: {
-        claims: {
-          sub: 'f8d18ef2-7f91-4a63-a40c-2017d7a02f07',
-          email: 'Owner@Example.com',
-          iat: 1786348800,
-        },
-      },
-      error: null,
-    });
+    getUser.mockResolvedValue(confirmedUser('Owner@Example.com'));
 
     await expect(service.verify('Bearer access-token')).resolves.toEqual({
       id: 'f8d18ef2-7f91-4a63-a40c-2017d7a02f07',
       email: 'owner@example.com',
-      emailVerifiedAt: new Date(1786348800 * 1000),
+      emailVerifiedAt: new Date('2026-08-10T09:00:00.000Z'),
     });
-    expect(getClaims).toHaveBeenCalledWith('access-token');
+    expect(getUser).toHaveBeenCalledWith('access-token');
   });
 
   it('rejects requests without a bearer token', async () => {
     await expect(service.verify()).rejects.toBeInstanceOf(
       UnauthorizedException,
     );
-    expect(getClaims).not.toHaveBeenCalled();
+    expect(getUser).not.toHaveBeenCalled();
   });
 
   it('reuses a recent successful verification', async () => {
-    getClaims.mockResolvedValue({
-      data: {
-        claims: {
-          sub: 'f8d18ef2-7f91-4a63-a40c-2017d7a02f07',
-          email: 'owner@example.com',
-          iat: 1786348800,
-        },
-      },
-      error: null,
-    });
+    getUser.mockResolvedValue(confirmedUser());
 
     await service.verify('Bearer access-token');
     await service.verify('Bearer access-token');
 
-    expect(getClaims).toHaveBeenCalledTimes(1);
+    expect(getUser).toHaveBeenCalledTimes(1);
   });
 
   it('rejects an invalid Supabase token', async () => {
-    getClaims.mockResolvedValue({
-      data: null,
-      error: new Error('invalid token'),
+    getUser.mockResolvedValue({
+      data: { user: null },
+      error: Object.assign(new Error('invalid token'), { status: 403 }),
     });
 
     await expect(service.verify('Bearer access-token')).rejects.toBeInstanceOf(
@@ -91,17 +84,18 @@ describe('AuthenticatedUserService', () => {
     );
   });
 
+  it('rejects an account whose email has not been confirmed', async () => {
+    const unconfirmed = confirmedUser();
+    unconfirmed.data.user.email_confirmed_at = undefined as never;
+    getUser.mockResolvedValue(unconfirmed);
+
+    await expect(
+      service.verify('Bearer unconfirmed-token'),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
+  });
+
   it('rejects a valid session for a suspended local account', async () => {
-    getClaims.mockResolvedValue({
-      data: {
-        claims: {
-          sub: 'f8d18ef2-7f91-4a63-a40c-2017d7a02f07',
-          email: 'owner@example.com',
-          iat: 1786348800,
-        },
-      },
-      error: null,
-    });
+    getUser.mockResolvedValue(confirmedUser());
     limit.mockResolvedValue([{ accountStatus: 'suspended' }]);
 
     await expect(
@@ -110,7 +104,18 @@ describe('AuthenticatedUserService', () => {
   });
 
   it('returns a temporary error when Supabase cannot be reached', async () => {
-    getClaims.mockRejectedValue(new Error('network unavailable'));
+    getUser.mockRejectedValue(new Error('network unavailable'));
+
+    await expect(service.verify('Bearer access-token')).rejects.toBeInstanceOf(
+      ServiceUnavailableException,
+    );
+  });
+
+  it('returns a temporary error when Supabase reports a retryable failure', async () => {
+    getUser.mockResolvedValue({
+      data: { user: null },
+      error: Object.assign(new Error('fetch failed'), { status: 0 }),
+    });
 
     await expect(service.verify('Bearer access-token')).rejects.toBeInstanceOf(
       ServiceUnavailableException,
