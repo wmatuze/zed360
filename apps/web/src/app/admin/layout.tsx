@@ -23,9 +23,10 @@ export default async function AdminLayout({
   children: ReactNode;
 }) {
   const session = await getVerifiedSession();
+  // Navigation appears only once the authenticator step is complete.
   const hasAdminAccess = session
     ? await fetchAdminAccess(session.accessToken)
-        .then(() => true)
+        .then((access) => access.mfaVerified)
         .catch(() => false)
     : false;
   return (

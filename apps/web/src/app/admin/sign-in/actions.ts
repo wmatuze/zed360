@@ -7,7 +7,7 @@ import {
   TooManySignInAttemptsError,
   tooManyAttemptsMessage,
 } from "@/lib/client-ip";
-import { safeNextPath } from "@/lib/safe-next-path";
+import { adminNextPath } from "@/lib/safe-next-path";
 import { createClient } from "@/lib/supabase/server";
 
 const usernameSchema = z.string().trim().min(3).max(50);
@@ -30,16 +30,11 @@ export async function signInAdmin(
     return { status: "error", message: invalidCredentialsMessage };
   }
 
-  const requestedNext = safeNextPath(
+  const next = adminNextPath(
     typeof formData.get("next") === "string"
       ? (formData.get("next") as string)
       : null,
-    "/admin",
   );
-  const next =
-    requestedNext === "/admin" || requestedNext.startsWith("/admin/")
-      ? requestedNext
-      : "/admin";
 
   try {
     const email = await resolveAdminEmail(username.data);
@@ -74,5 +69,6 @@ export async function signInAdmin(
     };
   }
 
-  redirect(next);
+  // A password session is single-factor; the authenticator step follows.
+  redirect(`/admin/mfa?next=${encodeURIComponent(next)}`);
 }

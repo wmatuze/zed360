@@ -12,7 +12,10 @@ export class AdminAccessController {
   @Get()
   async getAccess(@Headers('authorization') authorization?: string) {
     const user = await this.authentication.verify(authorization);
-    const role = await this.authorization.requireReviewer(user);
-    return { role };
+    const role = await this.authorization.reviewerRole(user);
+    return {
+      role,
+      mfaVerified: user.assuranceLevel === 'aal2',
+    };
   }
 }

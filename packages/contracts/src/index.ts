@@ -1001,6 +1001,8 @@ export const customerReviewSchema = z.object({
 
 export const adminAccessSchema = z.object({
   role: z.enum(["admin", "reviewer"]),
+  /** True once the session has been confirmed with an authenticator code. */
+  mfaVerified: z.boolean(),
 });
 
 export type AdminAccess = z.infer<typeof adminAccessSchema>;

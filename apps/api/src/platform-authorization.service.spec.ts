@@ -13,12 +13,26 @@ describe('PlatformAuthorizationService', () => {
     id: 'f8d18ef2-7f91-4a63-a40c-2017d7a02f07',
     email: 'reviewer@example.com',
     emailVerifiedAt: new Date('2026-08-10T08:00:00.000Z'),
+    assuranceLevel: 'aal2' as const,
   };
 
   beforeEach(() => {
     select.mockClear();
     from.mockClear();
     where.mockReset();
+  });
+
+  it('requires a second factor for reviewer and admin access', async () => {
+    where.mockResolvedValue([{ role: 'admin' }]);
+    const passwordOnly = { ...user, assuranceLevel: 'aal1' as const };
+
+    await expect(service.requireReviewer(passwordOnly)).rejects.toMatchObject({
+      response: { code: 'mfa_required' },
+    });
+    await expect(service.requireAdmin(passwordOnly)).rejects.toMatchObject({
+      response: { code: 'mfa_required' },
+    });
+    await expect(service.reviewerRole(passwordOnly)).resolves.toBe('admin');
   });
 
   it('accepts an assigned reviewer role', async () => {

@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   Headers,
+  HttpCode,
   Param,
   Post,
   Query,
@@ -70,6 +71,24 @@ export class AdminUsersController {
       throw new BadRequestException('A valid username is required.');
     await this.attempts.consume('admin', username, parseClientIp(body));
     return this.users.getSignInIdentity(username);
+  }
+
+  /** Counts an authenticator code attempt before the web server checks it. */
+  @Post('mfa-attempts')
+  @HttpCode(204)
+  async recordMfaAttempt(
+    @Headers('x-zed360-internal-secret') internalSecret: string | undefined,
+    @Body() body: unknown,
+  ) {
+    assertInternalRequest(internalSecret);
+    const userId =
+      typeof body === 'object' && body !== null
+        ? (body as { userId?: unknown }).userId
+        : undefined;
+    if (typeof userId !== 'string' || !uuidPattern.test(userId)) {
+      throw new BadRequestException('A valid user is required.');
+    }
+    await this.attempts.consume('mfa', userId, parseClientIp(body));
   }
 
   @Get()

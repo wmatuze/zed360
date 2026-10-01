@@ -7,7 +7,7 @@ import {
 } from '@nestjs/throttler';
 import { isIP } from 'node:net';
 
-type SignInScope = 'admin' | 'business';
+type SignInScope = 'admin' | 'business' | 'mfa';
 
 // Sign-in runs inside Next.js server actions, so Supabase sees every attempt
 // from the web server's address and its own per-IP limits never apply to an
@@ -22,6 +22,11 @@ export const signInAttemptLimits = {
   business: {
     identifier: { limit: 5, window: hours(1) },
     clientIp: { limit: 30, window: hours(1) },
+  },
+  // Authenticator codes are six digits, so guesses per account stay low.
+  mfa: {
+    identifier: { limit: 5, window: minutes(15) },
+    clientIp: { limit: 20, window: minutes(15) },
   },
 } as const;
 

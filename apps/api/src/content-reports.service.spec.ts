@@ -30,6 +30,7 @@ describe('ContentReportsService', () => {
         id: '69458279-5563-4023-bc73-03361789435f',
         email: 'admin@example.com',
         emailVerifiedAt: new Date(),
+        assuranceLevel: 'aal2' as const,
       }),
     ).resolves.toEqual({
       viewerRole: 'admin',

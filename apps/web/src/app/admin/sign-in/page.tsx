@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { AdminAccessApiError, fetchAdminAccess } from "@/lib/admin-access";
 import { getVerifiedSession } from "@/lib/authenticated-session";
-import { safeNextPath } from "@/lib/safe-next-path";
+import { adminNextPath } from "@/lib/safe-next-path";
 import { AdminSignInForm } from "./sign-in-form";
 
 export const metadata: Metadata = {
@@ -21,17 +21,14 @@ export default async function AdminSignInPage({
   }>;
 }) {
   const parameters = await searchParams;
-  const requestedNext = safeNextPath(parameters.next, "/admin");
-  const nextPath =
-    requestedNext === "/admin" || requestedNext.startsWith("/admin/")
-      ? requestedNext
-      : "/admin";
+  const nextPath = adminNextPath(parameters.next);
   const session = await getVerifiedSession();
   let hasAdminAccess = false;
+  let mfaVerified = false;
   let wrongAccount = false;
   if (session) {
     try {
-      await fetchAdminAccess(session.accessToken);
+      ({ mfaVerified } = await fetchAdminAccess(session.accessToken));
       hasAdminAccess = true;
     } catch (error) {
       if (error instanceof AdminAccessApiError && error.status === 403) {
@@ -39,7 +36,13 @@ export default async function AdminSignInPage({
       }
     }
   }
-  if (hasAdminAccess) redirect(nextPath);
+  if (hasAdminAccess) {
+    redirect(
+      mfaVerified
+        ? nextPath
+        : `/admin/mfa?next=${encodeURIComponent(nextPath)}`,
+    );
+  }
 
   return (
     <main className="mx-auto grid w-full max-w-5xl gap-10 px-5 pb-20 pt-14 sm:px-8 lg:grid-cols-[.72fr_1.28fr] lg:px-10 lg:pt-24">
