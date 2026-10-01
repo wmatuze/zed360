@@ -8,6 +8,7 @@ describe('BusinessPresenceController', () => {
     id: 'user-id',
     email: 'owner@example.com',
     emailVerifiedAt: new Date(),
+    assuranceLevel: 'aal2' as const,
   };
 
   it('authenticates and validates availability before updating it', async () => {

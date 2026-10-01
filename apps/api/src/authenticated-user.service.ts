@@ -9,11 +9,30 @@ import { eq, users } from '@zed360/database';
 import { DatabaseService } from './database.service';
 import { loadApiEnvironment } from './environment';
 
+export type AssuranceLevel = 'aal1' | 'aal2';
+
 export type AuthenticatedUser = {
   id: string;
   email: string;
   emailVerifiedAt: Date;
+  /** aal2 once the session has been confirmed with a second factor. */
+  assuranceLevel: AssuranceLevel;
 };
+
+/**
+ * Reads the assurance level from a token Supabase has already validated.
+ * Anything unexpected is treated as single-factor.
+ */
+export function tokenAssuranceLevel(token: string): AssuranceLevel {
+  try {
+    const payload = JSON.parse(
+      Buffer.from(token.split('.')[1] ?? '', 'base64url').toString('utf8'),
+    ) as { aal?: unknown };
+    return payload.aal === 'aal2' ? 'aal2' : 'aal1';
+  } catch {
+    return 'aal1';
+  }
+}
 
 @Injectable()
 export class AuthenticatedUserService {
@@ -116,6 +135,7 @@ export class AuthenticatedUserService {
       id: user.id,
       email: user.email.trim().toLowerCase(),
       emailVerifiedAt: confirmedAt,
+      assuranceLevel: tokenAssuranceLevel(token),
     };
   }
 

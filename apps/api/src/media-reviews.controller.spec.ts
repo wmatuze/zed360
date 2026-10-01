@@ -8,6 +8,7 @@ describe('MediaReviewsController', () => {
     id: 'f8d18ef2-7f91-4a63-a40c-2017d7a02f07',
     email: 'reviewer@example.com',
     emailVerifiedAt: new Date(),
+    assuranceLevel: 'aal2' as const,
   };
   const verify = jest.fn();
   const list = jest.fn();

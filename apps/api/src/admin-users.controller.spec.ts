@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { AdminUsersController } from './admin-users.controller';
 import { AdminUsersService } from './admin-users.service';
 import { ThrottlerStorageService } from '@nestjs/throttler';
@@ -10,6 +10,7 @@ describe('AdminUsersController', () => {
     id: 'f8d18ef2-7f91-4a63-a40c-2017d7a02f07',
     email: 'admin@example.com',
     emailVerifiedAt: new Date('2026-09-10T08:00:00.000Z'),
+    assuranceLevel: 'aal2' as const,
   };
   const verify = jest.fn();
   const getSignInIdentity = jest.fn();
@@ -63,6 +64,22 @@ describe('AdminUsersController', () => {
     await expect(
       controller.signInIdentity(secret, { username: 'other.admin' }),
     ).resolves.toEqual({ email: 'admin@example.com' });
+  });
+
+  it('limits authenticator code attempts per user', async () => {
+    const secret = 'a'.repeat(32);
+    process.env.INTERNAL_API_SECRET = secret;
+    const body = { userId: user.id };
+
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      await controller.recordMfaAttempt(secret, body);
+    }
+    await expect(
+      controller.recordMfaAttempt(secret, body),
+    ).rejects.toMatchObject({ status: 429 });
+    await expect(
+      controller.recordMfaAttempt(undefined, body),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
   });
 
   it('loads a validated, paginated user query', async () => {

@@ -27,3 +27,25 @@ export async function resolveAdminEmail(username: string) {
   } | null;
   return typeof body?.email === "string" ? body.email : null;
 }
+
+/** Counts an authenticator code attempt; throws when the user is blocked. */
+export async function recordMfaAttempt(userId: string) {
+  const internalSecret = process.env.INTERNAL_API_SECRET;
+  if (!internalSecret || internalSecret.length < 32) {
+    throw new Error("Administrator authentication is not configured.");
+  }
+
+  const response = await fetch(`${apiUrl}/admin/users/mfa-attempts`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-zed360-internal-secret": internalSecret,
+    },
+    body: JSON.stringify({ userId, clientIp: await clientIpAddress() }),
+    cache: "no-store",
+  });
+  if (response.status === 429) throw new TooManySignInAttemptsError();
+  if (!response.ok) {
+    throw new Error("Authenticator attempts could not be checked.");
+  }
+}

@@ -4,7 +4,10 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { createClient } from '@supabase/supabase-js';
-import { AuthenticatedUserService } from './authenticated-user.service';
+import {
+  AuthenticatedUserService,
+  tokenAssuranceLevel,
+} from './authenticated-user.service';
 
 jest.mock('@supabase/supabase-js', () => ({ createClient: jest.fn() }));
 
@@ -53,8 +56,20 @@ describe('AuthenticatedUserService', () => {
       id: 'f8d18ef2-7f91-4a63-a40c-2017d7a02f07',
       email: 'owner@example.com',
       emailVerifiedAt: new Date('2026-08-10T09:00:00.000Z'),
+      assuranceLevel: 'aal1',
     });
     expect(getUser).toHaveBeenCalledWith('access-token');
+  });
+
+  it('reads the second-factor level from the verified token', async () => {
+    getUser.mockResolvedValue(confirmedUser());
+    const token = 'e30.eyJzdWIiOiJ1c2VyIiwiYWFsIjoiYWFsMiJ9.sig';
+
+    await expect(service.verify(`Bearer ${token}`)).resolves.toMatchObject({
+      assuranceLevel: 'aal2',
+    });
+    expect(tokenAssuranceLevel('e30.eyJhYWwiOiJhYWwxIn0.sig')).toBe('aal1');
+    expect(tokenAssuranceLevel('not-a-jwt')).toBe('aal1');
   });
 
   it('rejects requests without a bearer token', async () => {

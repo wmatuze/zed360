@@ -8,6 +8,7 @@ describe('BusinessServiceCoverageController', () => {
     id: 'f8d18ef2-7f91-4a63-a40c-2017d7a02f07',
     email: 'owner@example.com',
     emailVerifiedAt: new Date('2026-08-10T08:00:00.000Z'),
+    assuranceLevel: 'aal2' as const,
   };
   const businessId = 'e872475b-72a2-4f99-a065-f87aa19c00ee';
   const serviceId = '601fc37f-2445-4ad5-b792-2285ace4f297';

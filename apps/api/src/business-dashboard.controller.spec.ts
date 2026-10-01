@@ -8,6 +8,7 @@ describe('BusinessDashboardController', () => {
       id: 'user-id',
       email: 'owner@example.com',
       emailVerifiedAt: new Date(),
+      assuranceLevel: 'aal2' as const,
     };
     const verify = jest.fn().mockResolvedValue(user);
     const getDashboard = jest.fn().mockResolvedValue({ businesses: [] });

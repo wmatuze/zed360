@@ -21,6 +21,36 @@ The `GET /v1/admin/access` endpoint supplies the role needed to render the
 administration landing page. Domain endpoints continue to repeat their own
 authorization checks close to the underlying data.
 
+## Two-step verification
+
+Administrator and reviewer access requires an authenticator app (TOTP) in
+addition to the password.
+
+- `requireReviewer` and `requireAdmin` reject sessions whose access token is
+  not `aal2`, returning `403` with `code: "mfa_required"`.
+- `GET /v1/admin/access` deliberately skips that check and reports
+  `mfaVerified`, so sign-in can route the user to `/admin/mfa`. Use
+  `reviewerRole` only for this kind of routing decision.
+- The request proxy sends any password-only session to `/admin/mfa` before
+  other admin pages, including `/admin/update-password`, so a reset email
+  alone cannot bypass the second factor.
+- On first sign-in, `/admin/mfa` enrolls a TOTP factor with a QR code.
+  Code attempts are limited to five per user per 15 minutes.
+
+TOTP is enabled by default in Supabase (**Authentication → Multi-Factor**).
+
+### Recovering a lost authenticator
+
+If an administrator loses their device, another administrator with database
+access removes the factor so the user can enroll again at next sign-in:
+
+```sql
+delete from auth.mfa_factors
+where user_id = (select id from public.users where lower(email) = lower('admin@example.com'));
+```
+
+Confirm the person's identity through a separate channel before doing this.
+
 ## Audit events
 
 `admin_audit_events` is the cross-domain record for consequential platform

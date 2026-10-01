@@ -18,3 +18,13 @@ export function safeNextPath(
     return fallback;
   }
 }
+
+/** Same as safeNextPath, but only allows destinations inside /admin. */
+export function adminNextPath(value: string | null | undefined) {
+  const path = safeNextPath(value, "/admin");
+  return path === "/admin" ||
+    path.startsWith("/admin/") ||
+    path.startsWith("/admin?")
+    ? path
+    : "/admin";
+}
