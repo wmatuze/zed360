@@ -46,6 +46,61 @@ export class BusinessDashboardService {
               where dashboard_interaction.business_id = member_business.id
                 and dashboard_interaction.outcome_confirmed = true
             ) else 0 end as customer_selections,
+          case when member_business.status = 'active' and member_business.review_status = 'approved'
+            then (
+              select count(*)::int from request_matches waiting_match
+              inner join customer_requests waiting_request
+                on waiting_request.id = waiting_match.request_id
+              where waiting_match.business_id = member_business.id
+                and waiting_match.status in ('queued', 'sent', 'viewed')
+                and waiting_request.status in ('open', 'matched')
+                and (waiting_request.expires_at is null or waiting_request.expires_at > now())
+                and not exists (select 1 from business_responses waiting_response
+                  where waiting_response.match_id = waiting_match.id)
+            ) else 0 end as awaiting_response,
+          case when member_business.status = 'active' and member_business.review_status = 'approved'
+            then (
+              select count(*)::int from request_matches recent_match
+              where recent_match.business_id = member_business.id
+                and recent_match.created_at >= now() - interval '30 days'
+            ) else 0 end as recent_matches,
+          case when member_business.status = 'active' and member_business.review_status = 'approved'
+            then (
+              select count(*)::int from business_responses recent_response
+              inner join request_matches recent_response_match
+                on recent_response_match.id = recent_response.match_id
+              where recent_response_match.business_id = member_business.id
+                and recent_response_match.created_at >= now() - interval '30 days'
+            ) else 0 end as recent_responses,
+          case when member_business.status = 'active' and member_business.review_status = 'approved'
+            then (
+              select count(*)::int from interactions recent_interaction
+              where recent_interaction.business_id = member_business.id
+                and recent_interaction.outcome_confirmed = true
+                and coalesce(recent_interaction.resolved_at, recent_interaction.contacted_at)
+                  >= now() - interval '30 days'
+            ) else 0 end as recent_selections,
+          case when member_business.status = 'active' and member_business.review_status = 'approved'
+            then (
+              select round((percentile_cont(0.5) within group (order by extract(epoch from
+                timed_response.created_at - coalesce(timed_match.sent_at, timed_match.created_at)
+              )) / 60)::numeric, 1)::float
+              from business_responses timed_response
+              inner join request_matches timed_match
+                on timed_match.id = timed_response.match_id
+              where timed_match.business_id = member_business.id
+                and timed_match.created_at >= now() - interval '30 days'
+                and timed_response.created_at >= coalesce(timed_match.sent_at, timed_match.created_at)
+            ) else null end as median_response_minutes,
+          (select count(*)::int from business_locations unpinned_location
+            where unpinned_location.business_id = member_business.id
+              and unpinned_location.is_active = true
+              and unpinned_location.coordinates is null) as locations_without_pin,
+          (select count(*)::int from business_locations unscheduled_location
+            where unscheduled_location.business_id = member_business.id
+              and unscheduled_location.is_active = true
+              and jsonb_typeof(unscheduled_location.opening_hours -> 'days') is distinct from 'array'
+            ) as locations_without_hours,
           (select count(*)::int from business_products dashboard_product
             where dashboard_product.business_id = member_business.id
               and dashboard_product.status = 'active'
@@ -161,7 +216,16 @@ export class BusinessDashboardService {
               'customerSelections', stats.customer_selections,
               'publishedProducts', stats.published_products,
               'pendingMedia', stats.pending_media,
-              'publishedReviews', stats.published_reviews
+              'publishedReviews', stats.published_reviews,
+              'awaitingResponse', stats.awaiting_response,
+              'locationsWithoutPin', stats.locations_without_pin,
+              'locationsWithoutHours', stats.locations_without_hours
+            ),
+            'last30Days', jsonb_build_object(
+              'matches', stats.recent_matches,
+              'responses', stats.recent_responses,
+              'selections', stats.recent_selections,
+              'medianResponseMinutes', stats.median_response_minutes
             ),
             'setup', jsonb_build_object(
               'approved', stats.status = 'active' and stats.review_status = 'approved',
