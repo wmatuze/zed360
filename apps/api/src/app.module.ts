@@ -55,6 +55,8 @@ import { AdminAuditService } from './admin-audit.service';
 import { AdminUsersController } from './admin-users.controller';
 import { AdminUsersService } from './admin-users.service';
 import { AdminCategoriesController } from './admin-categories.controller';
+import { AdminOverviewController } from './admin-overview.controller';
+import { AdminOverviewService } from './admin-overview.service';
 import { AdminCategoriesService } from './admin-categories.service';
 import { AdminLocationsController } from './admin-locations.controller';
 import { AdminLocationsService } from './admin-locations.service';
@@ -64,6 +66,7 @@ import { AdminLocationsService } from './admin-locations.service';
   controllers: [
     AdminAccessController,
     AdminCategoriesController,
+    AdminOverviewController,
     AdminLocationsController,
     AdminUsersController,
     AppController,
@@ -92,6 +95,7 @@ import { AdminLocationsService } from './admin-locations.service';
   providers: [
     AdminAuditService,
     AdminCategoriesService,
+    AdminOverviewService,
     AdminLocationsService,
     AdminUsersService,
     AppService,

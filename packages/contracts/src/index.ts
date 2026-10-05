@@ -1056,6 +1056,76 @@ export const adminAccessSchema = z.object({
 
 export type AdminAccess = z.infer<typeof adminAccessSchema>;
 
+const adminQueueSchema = z.object({
+  count: z.number().int().nonnegative(),
+  /** When the longest-waiting item entered the queue. */
+  oldestAt: z.coerce.date().nullable(),
+});
+
+const adminRequestPeriodSchema = z.object({
+  posted: z.number().int().nonnegative(),
+  answered: z.number().int().nonnegative(),
+  chosen: z.number().int().nonnegative(),
+});
+
+export const adminOverviewSchema = z.object({
+  role: z.enum(["admin", "reviewer"]),
+  queues: z.object({
+    businessReviews: adminQueueSchema,
+    profileRevisions: adminQueueSchema,
+    customerReviews: adminQueueSchema,
+    mediaReviews: adminQueueSchema,
+    contentReports: adminQueueSchema,
+  }),
+  requests: z.object({
+    last30Days: adminRequestPeriodSchema,
+    previous30Days: adminRequestPeriodSchema,
+    openNow: z.number().int().nonnegative(),
+    unansweredOverADay: z.number().int().nonnegative(),
+    medianResponseMinutes: z.number().nonnegative().nullable(),
+  }),
+  businesses: z.object({
+    live: z.number().int().nonnegative(),
+    pending: z.number().int().nonnegative(),
+    changesRequested: z.number().int().nonnegative(),
+    suspended: z.number().int().nonnegative(),
+    joinedLast30Days: z.number().int().nonnegative(),
+    joinedPrevious30Days: z.number().int().nonnegative(),
+    staleAvailability: z.number().int().nonnegative(),
+  }),
+  reviews: z.object({
+    published: z.number().int().nonnegative(),
+    publishedLast30Days: z.number().int().nonnegative(),
+    averageRating: z.number().min(1).max(5).nullable(),
+  }),
+  provinces: z.array(
+    z.object({
+      name: z.string(),
+      businesses: z.number().int().nonnegative(),
+      requests: z.number().int().nonnegative(),
+    }),
+  ),
+  categories: z.array(
+    z.object({
+      name: z.string(),
+      requests: z.number().int().nonnegative(),
+      answered: z.number().int().nonnegative(),
+    }),
+  ),
+  recentActivity: z.array(
+    z.object({
+      id: z.string().uuid(),
+      action: z.string(),
+      subjectType: z.string(),
+      reason: z.string().nullable(),
+      actor: z.string(),
+      createdAt: z.coerce.date(),
+    }),
+  ),
+});
+
+export type AdminOverview = z.infer<typeof adminOverviewSchema>;
+
 export const adminUserListQuerySchema = z.object({
   q: z.string().trim().max(120).default(""),
   page: z.coerce.number().int().positive().default(1),
