@@ -283,6 +283,15 @@ export const businessDashboardSchema = z.object({
         publishedProducts: z.number().int().nonnegative(),
         pendingMedia: z.number().int().nonnegative(),
         publishedReviews: z.number().int().nonnegative(),
+        awaitingResponse: z.number().int().nonnegative(),
+        locationsWithoutPin: z.number().int().nonnegative(),
+        locationsWithoutHours: z.number().int().nonnegative(),
+      }),
+      last30Days: z.object({
+        matches: z.number().int().nonnegative(),
+        responses: z.number().int().nonnegative(),
+        selections: z.number().int().nonnegative(),
+        medianResponseMinutes: z.number().nonnegative().nullable(),
       }),
       setup: z.object({
         approved: z.boolean(),
