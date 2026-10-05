@@ -85,3 +85,11 @@ Sources checked on 10 August 2026:
   <https://nextjs.org/docs/app/guides/authentication>
 - Next.js data security:
   <https://nextjs.org/docs/app/guides/data-security>
+
+## Finding a business
+
+`/admin/reviews` searches and filters in the database, 25 businesses per page,
+so every business can be found however many there are. Search covers the
+business name, its contact email and phone, the owner's email, service and
+category names, and location, district, and province names. Businesses awaiting
+a decision are listed first, then the newest.

@@ -19,8 +19,13 @@ export class AdminReviewApiError extends Error {
 
 export async function fetchAdminReviewQueue(
   accessToken: string,
+  query: { q?: string; status?: string; page?: number } = {},
 ): Promise<AdminBusinessReviewQueue> {
-  const response = await fetch(`${apiUrl}/admin/business-reviews`, {
+  const search = new URLSearchParams();
+  if (query.q) search.set("q", query.q);
+  if (query.status) search.set("status", query.status);
+  if (query.page) search.set("page", String(query.page));
+  const response = await fetch(`${apiUrl}/admin/business-reviews?${search}`, {
     headers: { authorization: `Bearer ${accessToken}` },
     cache: "no-store",
   });

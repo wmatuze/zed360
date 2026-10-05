@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import type {
+  AdminBusinessReviewQuery,
   AdminBusinessReviewQueue,
   SubmitBusinessReview,
   SubmittedBusinessReview,
@@ -22,6 +23,7 @@ import {
   eq,
   inArray,
   provinces,
+  sql,
   users,
 } from '@zed360/database';
 import type { AuthenticatedUser } from './authenticated-user.service';
@@ -200,27 +202,98 @@ export class BusinessReviewsService {
     private readonly authorization: PlatformAuthorizationService,
   ) {}
 
-  async list(user: AuthenticatedUser): Promise<AdminBusinessReviewQueue> {
+  async list(
+    user: AuthenticatedUser,
+    query: AdminBusinessReviewQuery,
+  ): Promise<AdminBusinessReviewQueue> {
     const viewerRole = await this.authorization.requireReviewer(user);
-    const submissions = await this.database.db
-      .select({
-        id: businesses.id,
-        name: businesses.name,
-        description: businesses.description,
-        status: businesses.status,
-        reviewStatus: businesses.reviewStatus,
-        email: businesses.email,
-        phone: businesses.phone,
-        whatsapp: businesses.whatsapp,
-        website: businesses.website,
-        createdAt: businesses.createdAt,
-      })
-      .from(businesses)
-      .orderBy(desc(businesses.createdAt))
-      .limit(100);
+    // Filtering happens in the database so businesses beyond the first page
+    // can still be found.
+    const pattern = `%${query.q}%`;
+    const conditions = [
+      query.status === 'all'
+        ? undefined
+        : query.status === 'suspended'
+          ? eq(businesses.status, 'suspended')
+          : eq(businesses.reviewStatus, query.status),
+      query.q
+        ? sql`(
+            ${businesses.name} ilike ${pattern}
+            or coalesce(${businesses.email}, '') ilike ${pattern}
+            or coalesce(${businesses.phone}, '') ilike ${pattern}
+            or exists (
+              select 1 from business_members search_member
+              inner join users search_owner on search_owner.id = search_member.user_id
+              where search_member.business_id = ${businesses.id}
+                and search_member.role = 'owner'
+                and coalesce(search_owner.email, '') ilike ${pattern}
+            )
+            or exists (
+              select 1 from business_services search_service
+              left join categories search_category
+                on search_category.id = search_service.category_id
+              where search_service.business_id = ${businesses.id}
+                and (search_service.name ilike ${pattern}
+                  or coalesce(search_category.name, '') ilike ${pattern})
+            )
+            or exists (
+              select 1 from business_locations search_location
+              left join districts search_district
+                on search_district.id = search_location.district_id
+              left join provinces search_province
+                on search_province.id = search_district.province_id
+              where search_location.business_id = ${businesses.id}
+                and (search_location.name ilike ${pattern}
+                  or coalesce(search_district.name, '') ilike ${pattern}
+                  or coalesce(search_province.name, '') ilike ${pattern})
+            )
+          )`
+        : undefined,
+    ];
+    const where = and(...conditions);
+    const [submissions, totals, pending] = await Promise.all([
+      this.database.db
+        .select({
+          id: businesses.id,
+          name: businesses.name,
+          description: businesses.description,
+          status: businesses.status,
+          reviewStatus: businesses.reviewStatus,
+          email: businesses.email,
+          phone: businesses.phone,
+          whatsapp: businesses.whatsapp,
+          website: businesses.website,
+          createdAt: businesses.createdAt,
+        })
+        .from(businesses)
+        .where(where)
+        // Decisions that are waiting come first, then the newest businesses.
+        .orderBy(
+          sql`(${businesses.reviewStatus} = 'pending') desc`,
+          desc(businesses.createdAt),
+        )
+        .limit(query.pageSize)
+        .offset((query.page - 1) * query.pageSize),
+      this.database.db
+        .select({ total: sql<number>`count(*)::int` })
+        .from(businesses)
+        .where(where),
+      this.database.db
+        .select({ total: sql<number>`count(*)::int` })
+        .from(businesses)
+        .where(eq(businesses.reviewStatus, 'pending')),
+    ]);
+    const total = Number(totals[0]?.total ?? 0);
+    const paging = {
+      pendingCount: Number(pending[0]?.total ?? 0),
+      page: query.page,
+      pageSize: query.pageSize,
+      total,
+      totalPages: total === 0 ? 0 : Math.ceil(total / query.pageSize),
+    };
 
     if (submissions.length === 0) {
-      return { viewerRole, businesses: [] };
+      return { viewerRole, businesses: [], ...paging };
     }
 
     const businessIds = submissions.map(({ id }) => id);
@@ -283,6 +356,7 @@ export class BusinessReviewsService {
 
     return {
       viewerRole,
+      ...paging,
       businesses: submissions.map((business) => {
         const verifications = verificationRows.filter(
           (row) => row.businessId === business.id,

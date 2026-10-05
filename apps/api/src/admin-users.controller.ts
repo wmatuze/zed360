@@ -106,6 +106,20 @@ export class AdminUsersController {
     );
   }
 
+  @Get(':userId')
+  async get(
+    @Headers('authorization') authorization: string | undefined,
+    @Param('userId') userId: string,
+  ) {
+    if (!uuidPattern.test(userId)) {
+      throw new BadRequestException('A valid user is required.');
+    }
+    return this.users.get(
+      await this.authentication.verify(authorization),
+      userId,
+    );
+  }
+
   @Post(':userId/actions')
   async act(
     @Headers('authorization') authorization: string | undefined,

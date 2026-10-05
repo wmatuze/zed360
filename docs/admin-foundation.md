@@ -41,15 +41,18 @@ TOTP is enabled by default in Supabase (**Authentication → Multi-Factor**).
 
 ### Recovering a lost authenticator
 
-If an administrator loses their device, another administrator with database
-access removes the factor so the user can enroll again at next sign-in:
+If an administrator or reviewer loses their device, another administrator
+opens that person's page under `/admin/users` and chooses "Reset
+authenticator". See [user and role administration](admin-user-management.md).
+Confirm the person's identity through a separate channel before doing this.
+
+If the only administrator loses their device, nobody can use that screen. Then
+someone with database access removes the factor directly:
 
 ```sql
 delete from auth.mfa_factors
 where user_id = (select id from public.users where lower(email) = lower('admin@example.com'));
 ```
-
-Confirm the person's identity through a separate channel before doing this.
 
 ## Audit events
 

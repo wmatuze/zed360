@@ -32,10 +32,26 @@ describe('BusinessReviewsController', () => {
   });
 
   it('verifies identity before loading the private review queue', async () => {
-    await controller.list('Bearer access-token');
+    await controller.list('Bearer access-token', {
+      q: ' solar ',
+      status: 'pending',
+      page: '2',
+    });
 
     expect(verify).toHaveBeenCalledWith('Bearer access-token');
-    expect(list).toHaveBeenCalledWith(user);
+    expect(list).toHaveBeenCalledWith(user, {
+      q: 'solar',
+      status: 'pending',
+      page: 2,
+      pageSize: 25,
+    });
+  });
+
+  it('rejects an unknown status filter before authenticating', async () => {
+    await expect(
+      controller.list('Bearer access-token', { status: 'deleted' }),
+    ).rejects.toThrow('Check the business search parameters.');
+    expect(list).not.toHaveBeenCalled();
   });
 
   it('passes a valid review decision to the service', async () => {

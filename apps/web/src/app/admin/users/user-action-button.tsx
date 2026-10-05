@@ -1,5 +1,6 @@
 "use client";
 
+import type { AdminUserAction } from "@zed360/contracts";
 import { useFormStatus } from "react-dom";
 
 export function UserActionButton({
@@ -8,7 +9,7 @@ export function UserActionButton({
   className,
   confirmation,
 }: {
-  action: "role_granted" | "role_revoked" | "suspended" | "reinstated";
+  action: AdminUserAction["action"];
   children: string;
   className: string;
   confirmation: string;

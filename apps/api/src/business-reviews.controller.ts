@@ -6,8 +6,10 @@ import {
   Headers,
   Param,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
+  adminBusinessReviewQuerySchema,
   claimBusinessSchema,
   submitBusinessReviewSchema,
 } from '@zed360/contracts';
@@ -22,9 +24,16 @@ export class BusinessReviewsController {
   ) {}
 
   @Get()
-  async list(@Headers('authorization') authorization?: string) {
+  async list(
+    @Headers('authorization') authorization: string | undefined,
+    @Query() query: unknown,
+  ) {
+    const parsed = adminBusinessReviewQuerySchema.safeParse(query);
+    if (!parsed.success) {
+      throw new BadRequestException('Check the business search parameters.');
+    }
     const user = await this.authentication.verify(authorization);
-    return this.reviews.list(user);
+    return this.reviews.list(user, parsed.data);
   }
 
   @Post(':businessId/decisions')
