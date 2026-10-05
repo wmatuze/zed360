@@ -15,10 +15,11 @@ describe('AdminUsersController', () => {
   const verify = jest.fn();
   const getSignInIdentity = jest.fn();
   const list = jest.fn();
+  const get = jest.fn();
   const act = jest.fn();
   const controller = new AdminUsersController(
     { verify } as unknown as AuthenticatedUserService,
-    { getSignInIdentity, list, act } as unknown as AdminUsersService,
+    { getSignInIdentity, list, get, act } as unknown as AdminUsersService,
     new SignInAttemptLimiter(new ThrottlerStorageService()),
   );
   const originalInternalSecret = process.env.INTERNAL_API_SECRET;
@@ -37,6 +38,7 @@ describe('AdminUsersController', () => {
       email: 'admin@example.com',
     });
     list.mockReset().mockResolvedValue({ users: [] });
+    get.mockReset();
     act.mockReset().mockResolvedValue({ userId: user.id });
   });
 
@@ -89,7 +91,54 @@ describe('AdminUsersController', () => {
       q: 'owner',
       page: 2,
       pageSize: 25,
+      role: 'all',
+      status: 'all',
     });
+  });
+
+  it('passes role and status filters through', async () => {
+    await controller.list('Bearer token', {
+      role: 'team',
+      status: 'suspended',
+    });
+
+    expect(list).toHaveBeenCalledWith(
+      user,
+      expect.objectContaining({ role: 'team', status: 'suspended' }),
+    );
+  });
+
+  it('rejects an unknown role filter', async () => {
+    await expect(
+      controller.list('Bearer token', { role: 'owner' }),
+    ).rejects.toThrow('Check the user search parameters.');
+    expect(list).not.toHaveBeenCalled();
+  });
+
+  it('loads one user for an administrator', async () => {
+    get.mockResolvedValue({ user: { id: user.id } });
+
+    await expect(controller.get('Bearer token', user.id)).resolves.toEqual({
+      user: { id: user.id },
+    });
+    expect(get).toHaveBeenCalledWith(user, user.id);
+  });
+
+  it('rejects a malformed user id before authenticating', async () => {
+    await expect(controller.get('Bearer token', 'not-a-uuid')).rejects.toThrow(
+      'A valid user is required.',
+    );
+    expect(verify).not.toHaveBeenCalled();
+  });
+
+  it('accepts an authenticator reset with a reason', async () => {
+    const action = {
+      action: 'authenticator_reset',
+      reason: 'Confirmed identity by phone call',
+    };
+    await controller.act('Bearer token', user.id, action);
+
+    expect(act).toHaveBeenCalledWith(user, user.id, action);
   });
 
   it('passes a valid role decision to the service', async () => {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   AdminReviewApiError,
@@ -44,6 +45,15 @@ const decisionLabels = {
   reinstated: "Reinstated",
 } as const;
 
+const statuses = [
+  "all",
+  "pending",
+  "changes_requested",
+  "approved",
+  "rejected",
+  "suspended",
+];
+
 function display(value: string | null) {
   return value || "Not provided";
 }
@@ -51,16 +61,32 @@ function display(value: string | null) {
 export default async function AdminReviewsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ result?: string; q?: string; status?: string }>;
+  searchParams: Promise<{
+    result?: string;
+    q?: string;
+    status?: string;
+    page?: string;
+  }>;
 }) {
   const session = await getVerifiedSession();
   if (!session) redirect("/admin/sign-in?next=/admin/reviews");
+
+  const { result, ...filters } = await searchParams;
+  const q = filters.q?.trim() ?? "";
+  const status = statuses.includes(filters.status ?? "")
+    ? (filters.status as string)
+    : "all";
+  const page = Math.max(1, Number(filters.page) || 1);
 
   let queue = null;
   let accessDenied = false;
   let loadError = "";
   try {
-    queue = await fetchAdminReviewQueue(session.accessToken);
+    queue = await fetchAdminReviewQueue(session.accessToken, {
+      q,
+      status,
+      page,
+    });
   } catch (error) {
     if (error instanceof AdminReviewApiError && error.status === 401) {
       redirect("/admin/sign-in?next=/admin/reviews&error=session_expired");
@@ -74,38 +100,14 @@ export default async function AdminReviewsPage({
     }
   }
 
-  const { result, q = "", status = "all" } = await searchParams;
   const resultMessage = result ? resultMessages[result] : undefined;
-  const pendingCount =
-    queue?.businesses.filter(({ reviewStatus }) => reviewStatus === "pending")
-      .length ?? 0;
-  const normalizedQuery = q.trim().toLowerCase();
-  const filteredBusinesses =
-    queue?.businesses.filter((business) => {
-      const matchesStatus =
-        status === "all" ||
-        business.status === status ||
-        business.reviewStatus === status;
-      const searchable = [
-        business.name,
-        business.ownerEmail,
-        business.contact.email,
-        business.contact.phone,
-        ...business.services.flatMap((service) => [
-          service.name,
-          service.categoryName,
-        ]),
-        ...business.locations.flatMap((location) => [
-          location.name,
-          location.districtName,
-          location.provinceName,
-        ]),
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      return matchesStatus && searchable.includes(normalizedQuery);
-    }) ?? [];
+  const pendingCount = queue?.pendingCount ?? 0;
+  const filteredBusinesses = queue?.businesses ?? [];
+  const pageQuery = (target: number) => ({
+    q: q || undefined,
+    status: status === "all" ? undefined : status,
+    page: target > 1 ? target : undefined,
+  });
 
   return (
     <main className="px-5 text-white sm:px-8 lg:px-10">
@@ -365,6 +367,46 @@ export default async function AdminReviewsPage({
             );
           })}
         </div>
+
+        {queue && queue.total > 0 ? (
+          <nav
+            aria-label="Business pages"
+            className="mt-6 flex items-center justify-between"
+          >
+            {queue.page > 1 ? (
+              <Link
+                className="button button-quiet"
+                href={{
+                  pathname: "/admin/reviews",
+                  query: pageQuery(queue.page - 1),
+                }}
+              >
+                Previous
+              </Link>
+            ) : (
+              <span />
+            )}
+            <span className="text-sm text-white/50">
+              {queue.total} {queue.total === 1 ? "business" : "businesses"}
+              {queue.totalPages > 1
+                ? ` · page ${queue.page} of ${queue.totalPages}`
+                : ""}
+            </span>
+            {queue.page < queue.totalPages ? (
+              <Link
+                className="button button-quiet"
+                href={{
+                  pathname: "/admin/reviews",
+                  query: pageQuery(queue.page + 1),
+                }}
+              >
+                Next
+              </Link>
+            ) : (
+              <span />
+            )}
+          </nav>
+        ) : null}
       </section>
     </main>
   );
