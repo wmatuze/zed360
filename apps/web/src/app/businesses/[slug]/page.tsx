@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
+import { LocationMap } from "@/components/location-map";
 import { ReportContent } from "@/components/report-content";
 import {
   SaveBusinessButton,
@@ -632,6 +633,14 @@ export default async function BusinessProfilePage({
                               ))}
                             </dl>
                           </details>
+                        ) : null}
+                        {location.coordinates ? (
+                          <div className="mt-3">
+                            <LocationMap
+                              coordinates={location.coordinates}
+                              label={`${business.name}, ${location.name}`}
+                            />
+                          </div>
                         ) : null}
                         {directions ? (
                           <a

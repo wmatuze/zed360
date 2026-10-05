@@ -2,6 +2,7 @@
 
 import type { LocationCoordinates } from "@zed360/contracts";
 import { useId, useState } from "react";
+import { LocationMap } from "@/components/location-map";
 import { mapPreviewHref, parseMapPin, toCoordinates } from "@/lib/map-pin";
 
 export function PinField({ initial }: { initial: LocationCoordinates | null }) {
@@ -86,8 +87,17 @@ export function PinField({ initial }: { initial: LocationCoordinates | null }) {
           </button>
         </div>
       ) : (
-        <p className="text-sm text-white/50">No pin yet.</p>
+        <p className="text-sm text-white/50">
+          No pin yet. Customers see no map for this location until you set one.
+        </p>
       )}
+      {pin ? (
+        <LocationMap
+          coordinates={pin}
+          key={`${pin.latitude},${pin.longitude}`}
+          label="the pin you set"
+        />
+      ) : null}
       <button
         className="button button-secondary w-fit"
         disabled={locating}
