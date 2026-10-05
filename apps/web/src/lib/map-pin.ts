@@ -72,3 +72,18 @@ export function parseMapPin(input: string): PinResult {
 export function mapPreviewHref({ latitude, longitude }: LocationCoordinates) {
   return `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
 }
+
+// OpenStreetMap's embeddable map needs no API key. The box is roughly a
+// kilometre across, close enough to recognise the surrounding streets.
+export function mapEmbedHref({ latitude, longitude }: LocationCoordinates) {
+  const span = 0.005;
+  const box = [
+    longitude - span,
+    latitude - span,
+    longitude + span,
+    latitude + span,
+  ]
+    .map((value) => value.toFixed(6))
+    .join(",");
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${box}&layer=mapnik&marker=${latitude},${longitude}`;
+}

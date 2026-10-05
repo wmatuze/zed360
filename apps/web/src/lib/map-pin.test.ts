@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { mapPreviewHref, parseMapPin, toCoordinates } from "./map-pin.ts";
+import {
+  mapEmbedHref,
+  mapPreviewHref,
+  parseMapPin,
+  toCoordinates,
+} from "./map-pin.ts";
 
 const kitwe = { latitude: -12.8024, longitude: 28.2132 };
 
@@ -68,5 +73,15 @@ test("previews a pin on the map", () => {
   assert.equal(
     mapPreviewHref(kitwe),
     "https://www.google.com/maps/search/?api=1&query=-12.8024,28.2132",
+  );
+});
+
+test("embeds a map centred on the pin", () => {
+  const url = new URL(mapEmbedHref(kitwe));
+  assert.equal(url.origin, "https://www.openstreetmap.org");
+  assert.equal(url.searchParams.get("marker"), "-12.8024,28.2132");
+  assert.equal(
+    url.searchParams.get("bbox"),
+    "28.208200,-12.807400,28.218200,-12.797400",
   );
 });
