@@ -1,8 +1,7 @@
 # Merit ordering and homepage sections
 
 Zed360 never sells position. Every order a customer can see is either earned
-by the business or a plain fact about it, and the page says which rule is in
-use. This follows the "No payments" rule in the
+by the business or a plain fact about it. This follows the "No payments" rule in the
 [product principles](product-principles.md).
 
 ## Orders
@@ -43,19 +42,22 @@ registration. See [business verification](business-verification.md).
 
 ## Homepage
 
-Below "Businesses worth discovering", the homepage shows up to three sections
-under the heading "Businesses that earned their place": Top rated, Recently
+Below "Businesses worth discovering", the homepage shows up to three sections,
+each under a plain title with one short line beneath it: Top rated, Recently
 verified, and Newly added. For each section:
 
-- the rule is printed under the title;
 - every card states why that business is there (its rating and review count,
   the check and its date, or the date it joined);
 - at most four businesses are shown, with a link to the full list;
 - a business without a reason is never shown, and a section with no
   businesses is left out entirely rather than padded.
 
+The pages do not announce that position cannot be bought. That rule governs
+how the lists are built and is recorded here; customers simply see ordinary
+section titles.
+
 The directory at `/businesses` has an "Order by" control offering the same
-orders and prints the rule in use.
+orders, with a short note when a non-default order narrows the list.
 
 ## What must never feed an order
 

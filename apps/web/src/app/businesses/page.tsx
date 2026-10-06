@@ -46,23 +46,23 @@ type DirectorySearchParams = {
   page?: string;
 };
 
-// Every order is earned or factual; none can be bought.
+// Orders are by merit or fact only; see docs/merit-ordering.md.
 const sortOptions = {
   recently_confirmed: {
     label: "Recently confirmed",
-    rule: "Businesses that most recently confirmed their details are current come first.",
+    rule: null,
   },
   top_rated: {
     label: "Top rated",
-    rule: "Only businesses with verified customer reviews, ranked by rating. More reviews count for more than a single high score.",
+    rule: "Showing businesses with verified customer reviews, highest rated first.",
   },
   recently_verified: {
     label: "Recently verified",
-    rule: "Only businesses with a completed contact or registration check, most recent first.",
+    rule: "Showing businesses Zed360 has checked, most recent first.",
   },
   newest: {
     label: "Newly added",
-    rule: "The newest approved businesses come first.",
+    rule: "Newest businesses first.",
   },
 } as const;
 
@@ -270,9 +270,11 @@ export default async function BusinessesPage({
           </div>
         </form>
 
-        <p className="mt-4 text-xs leading-5 text-white/50">
-          {sortOptions[sort].rule} No business pays for its position.
-        </p>
+        {sortOptions[sort].rule ? (
+          <p className="mt-4 text-xs leading-5 text-white/50">
+            {sortOptions[sort].rule}
+          </p>
+        ) : null}
 
         {errorMessage ? (
           <div
