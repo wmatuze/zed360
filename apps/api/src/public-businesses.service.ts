@@ -4,6 +4,7 @@ import type {
   PublicBusinessDirectory,
   PublicBusinessDirectoryQuery,
   PublicBusinessProfile,
+  PublicBusinessSort,
 } from '@zed360/contracts';
 import {
   and,
@@ -46,6 +47,52 @@ function optionalNumber(value: string | null) {
   return value === null ? null : Number(value);
 }
 
+// Written out in full because Drizzle drops the table name from columns
+// inside a SELECT list, which would make these subqueries compare the wrong id.
+const businessId = sql.raw('"businesses"."id"');
+
+const publishedReviewCount = sql<number>`(
+  select count(*)::int from reviews published_review
+  where published_review.business_id = ${businessId}
+    and published_review.is_published = true
+)`;
+
+const publishedAverageRating = sql<string | null>`(
+  select round(avg(published_review.rating), 1) from reviews published_review
+  where published_review.business_id = ${businessId}
+    and published_review.is_published = true
+)`;
+
+// Ownership checks are private; only the checks shown on a profile count.
+const latestVerificationAt = sql<string | null>`(
+  select max(coalesce(verification.reviewed_at, verification.updated_at))
+  from business_verifications verification
+  where verification.business_id = ${businessId}
+    and verification.status = 'verified'
+    and verification.type in ('contact', 'registration')
+)`;
+
+// A plain average would put one 5-star review above fifty 4.8-star reviews.
+// Each business is therefore scored as if it also held three 4-star reviews,
+// so a rating has to be earned by volume as well as quality.
+const RATING_PRIOR_MEAN = 4;
+const RATING_PRIOR_WEIGHT = 3;
+const weightedRating = sql`(
+  select (coalesce(sum(published_review.rating), 0)
+      + ${RATING_PRIOR_MEAN * RATING_PRIOR_WEIGHT})::numeric
+    / (count(*) + ${RATING_PRIOR_WEIGHT})
+  from reviews published_review
+  where published_review.business_id = ${businessId}
+    and published_review.is_published = true
+)`;
+
+const directoryOrder: Record<PublicBusinessSort, SQL[]> = {
+  recently_confirmed: [sql`${businesses.lastConfirmedAt} desc nulls last`],
+  top_rated: [sql`${weightedRating} desc`, sql`${publishedReviewCount} desc`],
+  recently_verified: [sql`${latestVerificationAt} desc nulls last`],
+  newest: [desc(businesses.createdAt)],
+};
+
 @Injectable()
 export class PublicBusinessesService {
   constructor(private readonly database: DatabaseService) {}
@@ -78,6 +125,12 @@ export class PublicBusinessesService {
     query: PublicBusinessDirectoryQuery,
   ): Promise<PublicBusinessDirectory> {
     const filters = this.directoryFilters(query);
+    // "Top rated" and "recently verified" list only businesses that have
+    // earned a place; they are not the whole directory re-ordered.
+    if (query.sort === 'top_rated')
+      filters.push(sql`${publishedReviewCount} > 0`);
+    if (query.sort === 'recently_verified')
+      filters.push(sql`${latestVerificationAt} is not null`);
     const where = and(...filters);
     const offset = (query.page - 1) * pageSize;
 
@@ -98,13 +151,14 @@ export class PublicBusinessesService {
           availability: businesses.availabilityStatus,
           availabilityNote: businesses.availabilityNote,
           availabilityUpdatedAt: businesses.availabilityUpdatedAt,
+          joinedAt: businesses.createdAt,
+          reviewCount: publishedReviewCount,
+          averageRating: publishedAverageRating,
+          verifiedAt: latestVerificationAt,
         })
         .from(businesses)
         .where(where)
-        .orderBy(
-          sql`${businesses.lastConfirmedAt} desc nulls last`,
-          asc(businesses.name),
-        )
+        .orderBy(...directoryOrder[query.sort], asc(businesses.name))
         .limit(pageSize)
         .offset(offset),
     ]);
@@ -171,8 +225,17 @@ export class PublicBusinessesService {
           (asset) => asset.purpose === 'cover',
         );
 
+        const { reviewCount, averageRating, verifiedAt, joinedAt, ...summary } =
+          business;
         return {
-          ...business,
+          ...summary,
+          reviewSummary: {
+            reviewCount,
+            averageRating:
+              averageRating === null ? null : Number(averageRating),
+          },
+          verifiedAt: verifiedAt ? new Date(verifiedAt).toISOString() : null,
+          joinedAt: joinedAt.toISOString(),
           logoUrl: approvedLogo
             ? publicMediaUrl(
                 approvedLogo.storageBucket,

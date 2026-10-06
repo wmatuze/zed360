@@ -55,6 +55,7 @@ Better future matching and business visibility
 - [Administration foundation](docs/admin-foundation.md)
 - [Administration overview and platform analytics](docs/admin-overview.md)
 - [Profile activity](docs/profile-activity.md)
+- [Merit ordering and homepage sections](docs/merit-ordering.md)
 - [User and role administration](docs/admin-user-management.md)
 - [Git branch and pull-request workflow](docs/git-workflow.md)
 

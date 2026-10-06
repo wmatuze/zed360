@@ -1500,12 +1500,22 @@ export type AdminCustomerReviewQueue = z.infer<
   typeof adminCustomerReviewQueueSchema
 >;
 
+// Every order is earned or factual. None can be bought.
+export const publicBusinessSortSchema = z.enum([
+  "recently_confirmed",
+  "top_rated",
+  "recently_verified",
+  "newest",
+]);
+export type PublicBusinessSort = z.infer<typeof publicBusinessSortSchema>;
+
 export const publicBusinessDirectoryQuerySchema = z.object({
   q: z.string().trim().max(100).optional(),
   category: z.string().trim().max(120).optional(),
   province: z.string().trim().max(120).optional(),
   district: z.string().uuid().optional(),
   fulfillment: serviceFulfillmentModeSchema.optional(),
+  sort: publicBusinessSortSchema.default("recently_confirmed"),
   page: z.coerce.number().int().positive().max(1000).default(1),
 });
 
@@ -1605,6 +1615,13 @@ export const publicBusinessSummarySchema = z.object({
   availabilityFreshness: freshnessStateSchema,
   profileFreshness: freshnessStateSchema,
   trust: publicBusinessTrustSchema,
+  reviewSummary: z.object({
+    averageRating: z.number().min(1).max(5).nullable(),
+    reviewCount: z.number().int().nonnegative(),
+  }),
+  /** When Zed360 last completed a contact or registration check. */
+  verifiedAt: z.string().datetime().nullable(),
+  joinedAt: z.string().datetime(),
   primaryLocation: publicBusinessLocationSchema.nullable(),
   categories: z.array(z.object({ name: z.string(), slug: z.string() })),
   serviceNames: z.array(z.string()),

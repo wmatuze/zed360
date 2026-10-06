@@ -42,8 +42,29 @@ type DirectorySearchParams = {
   province?: string;
   district?: string;
   fulfillment?: string;
+  sort?: string;
   page?: string;
 };
+
+// Every order is earned or factual; none can be bought.
+const sortOptions = {
+  recently_confirmed: {
+    label: "Recently confirmed",
+    rule: "Businesses that most recently confirmed their details are current come first.",
+  },
+  top_rated: {
+    label: "Top rated",
+    rule: "Only businesses with verified customer reviews, ranked by rating. More reviews count for more than a single high score.",
+  },
+  recently_verified: {
+    label: "Recently verified",
+    rule: "Only businesses with a completed contact or registration check, most recent first.",
+  },
+  newest: {
+    label: "Newly added",
+    rule: "The newest approved businesses come first.",
+  },
+} as const;
 
 function pageHref(filters: DirectorySearchParams, page: number) {
   const parameters = new URLSearchParams();
@@ -67,8 +88,14 @@ export default async function BusinessesPage({
     province: requested.province || undefined,
     district: requested.district || undefined,
     fulfillment: requested.fulfillment || undefined,
+    sort:
+      requested.sort && requested.sort in sortOptions
+        ? requested.sort
+        : undefined,
     page: requested.page || undefined,
   };
+  const sort = (filters.sort ??
+    "recently_confirmed") as keyof typeof sortOptions;
 
   let directory = null;
   let referenceData = null;
@@ -199,7 +226,7 @@ export default async function BusinessesPage({
               </select>
             </label>
           </div>
-          <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end">
             <label className="text-sm text-white/65 sm:w-64">
               How can they serve you?
               <select
@@ -215,7 +242,24 @@ export default async function BusinessesPage({
                 ))}
               </select>
             </label>
-            <div className="flex gap-3">
+            <label className="text-sm text-white/65 sm:w-64">
+              Order by
+              <select
+                className="mt-2 w-full rounded-xl border border-white/10 bg-[#10141c] px-4 py-3 text-white outline-none focus:border-[var(--lime)]/55"
+                defaultValue={filters.sort ?? ""}
+                name="sort"
+              >
+                {Object.entries(sortOptions).map(([value, option]) => (
+                  <option
+                    key={value}
+                    value={value === "recently_confirmed" ? "" : value}
+                  >
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="flex gap-3 sm:ml-auto">
               <Link className="button button-secondary" href="/businesses">
                 Clear
               </Link>
@@ -225,6 +269,10 @@ export default async function BusinessesPage({
             </div>
           </div>
         </form>
+
+        <p className="mt-4 text-xs leading-5 text-white/50">
+          {sortOptions[sort].rule} No business pays for its position.
+        </p>
 
         {errorMessage ? (
           <div
