@@ -160,6 +160,18 @@ export default async function AdminPage() {
     overview.businesses.joinedLast30Days,
     overview.businesses.joinedPrevious30Days,
   );
+  const viewsTrend = trend(
+    overview.activity.last30Days.profileViews,
+    overview.activity.previous30Days.profileViews,
+  );
+  const contactsTrend = trend(
+    overview.activity.last30Days.contacts,
+    overview.activity.previous30Days.contacts,
+  );
+  const contactRate = percentage(
+    overview.activity.last30Days.contacts,
+    overview.activity.last30Days.profileViews,
+  );
   const staleShare = percentage(
     overview.businesses.staleAvailability,
     overview.businesses.live,
@@ -340,6 +352,69 @@ export default async function AdminPage() {
             clearest sign of missing or inactive businesses.
           </p>
         ) : null}
+      </section>
+
+      <section aria-labelledby="activity-heading" className="mt-14">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <h2
+            className="text-xl font-semibold tracking-[-0.03em]"
+            id="activity-heading"
+          >
+            Business profiles, last 30 days
+          </h2>
+          <p className="text-xs text-white/50">
+            Counts only. No visitor is identified or recorded.
+          </p>
+        </div>
+        <dl className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {[
+            {
+              label: "Profile views",
+              value: overview.activity.last30Days.profileViews,
+              note: viewsTrend.label,
+              tone: viewsTrend.direction,
+            },
+            {
+              label: "Contact taps",
+              value: overview.activity.last30Days.contacts,
+              note: contactsTrend.label,
+              tone: contactsTrend.direction,
+            },
+            {
+              label: "Directions opened",
+              value: overview.activity.last30Days.directions,
+              note: "Customers heading to a business",
+              tone: "same" as const,
+            },
+            {
+              label: "Shares",
+              value: overview.activity.last30Days.shares,
+              note: "Profiles passed on to someone else",
+              tone: "same" as const,
+            },
+          ].map((item) => (
+            <div
+              className="rounded-2xl border border-white/10 bg-white/[0.035] p-5"
+              key={item.label}
+            >
+              <dt className="text-xs uppercase tracking-[0.14em] text-white/50">
+                {item.label}
+              </dt>
+              <dd className="mt-2 text-4xl font-semibold tracking-[-0.04em]">
+                {item.value}
+              </dd>
+              <dd className={`mt-3 text-xs ${trendStyles[item.tone]}`}>
+                {item.note}
+              </dd>
+            </div>
+          ))}
+        </dl>
+        {contactRate === null ? null : (
+          <p className="mt-4 text-sm text-white/55">
+            {contactRate}% of profile views led to a tap on WhatsApp, call,
+            email, or website.
+          </p>
+        )}
       </section>
 
       <section aria-labelledby="businesses-heading" className="mt-14">

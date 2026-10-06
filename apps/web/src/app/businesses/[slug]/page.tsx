@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
+import { ProfileViewBeacon, TrackedLink } from "@/components/business-activity";
 import { LocationMap } from "@/components/location-map";
 import { ReportContent } from "@/components/report-content";
 import {
@@ -131,6 +132,7 @@ export default async function BusinessProfilePage({
 
   return (
     <main className="min-h-screen bg-[var(--ink)] text-white">
+      <ProfileViewBeacon slug={business.slug} />
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-6 sm:px-8 lg:px-10">
         <Link className="flex items-center gap-3" href="/">
           <BrandLogo />
@@ -241,7 +243,10 @@ export default async function BusinessProfilePage({
                   place={place}
                   slug={business.slug}
                 />
-                <ShareBusinessButtons name={business.name} />
+                <ShareBusinessButtons
+                  name={business.name}
+                  slug={business.slug}
+                />
               </div>
             </div>
           </div>
@@ -537,40 +542,46 @@ export default async function BusinessProfilePage({
               </p>
               <div className="mt-5 flex flex-col gap-3">
                 {whatsapp ? (
-                  <a
+                  <TrackedLink
                     className="button button-primary"
+                    event="contact_whatsapp"
+                    external
                     href={whatsapp}
-                    rel="noreferrer"
-                    target="_blank"
+                    slug={business.slug}
                   >
                     WhatsApp →
-                  </a>
+                  </TrackedLink>
                 ) : null}
                 {business.phone ? (
-                  <a
+                  <TrackedLink
                     className="button button-secondary"
+                    event="contact_call"
                     href={`tel:${business.phone}`}
+                    slug={business.slug}
                   >
                     Call {business.phone}
-                  </a>
+                  </TrackedLink>
                 ) : null}
                 {business.email ? (
-                  <a
+                  <TrackedLink
                     className="button button-secondary"
+                    event="contact_email"
                     href={`mailto:${business.email}`}
+                    slug={business.slug}
                   >
                     Send email
-                  </a>
+                  </TrackedLink>
                 ) : null}
                 {website ? (
-                  <a
+                  <TrackedLink
                     className="button button-secondary"
+                    event="contact_website"
+                    external
                     href={website}
-                    rel="noreferrer"
-                    target="_blank"
+                    slug={business.slug}
                   >
                     Visit website ↗
-                  </a>
+                  </TrackedLink>
                 ) : null}
               </div>
               {!business.phone && !business.email && !whatsapp && !website ? (
@@ -643,14 +654,15 @@ export default async function BusinessProfilePage({
                           </div>
                         ) : null}
                         {directions ? (
-                          <a
+                          <TrackedLink
                             className="mt-3 inline-block text-xs font-semibold text-[var(--lime)] hover:underline"
+                            event="directions"
+                            external
                             href={directions}
-                            rel="noreferrer"
-                            target="_blank"
+                            slug={business.slug}
                           >
                             Get directions ↗
-                          </a>
+                          </TrackedLink>
                         ) : null}
                       </div>
                     );

@@ -54,6 +54,7 @@ Better future matching and business visibility
 - [Business review administration](docs/admin-review.md)
 - [Administration foundation](docs/admin-foundation.md)
 - [Administration overview and platform analytics](docs/admin-overview.md)
+- [Profile activity](docs/profile-activity.md)
 - [User and role administration](docs/admin-user-management.md)
 - [Git branch and pull-request workflow](docs/git-workflow.md)
 
