@@ -31,9 +31,9 @@ import type { SQL } from 'drizzle-orm';
 import { DatabaseService } from './database.service';
 import { fromPoint } from './location-coordinates';
 import { publicMediaUrl } from './media-storage';
-import { describeOperatingHours } from './operating-hours';
+import { describeOperatingHours, zonedDayAndMinute } from './operating-hours';
 
-const pageSize = 18;
+const pageSize = 30;
 const DAY = 24 * 60 * 60 * 1000;
 
 function freshness(value: Date | null, maximumAgeDays: number) {
@@ -227,8 +227,25 @@ export class PublicBusinessesService {
 
         const { reviewCount, averageRating, verifiedAt, joinedAt, ...summary } =
           business;
+        const temporarilyUnavailable =
+          business.availability === 'temporarily_unavailable' &&
+          freshness(business.availabilityUpdatedAt, 7) === 'current';
+        const locationStatuses = related.locations
+          .filter((location) => location.businessId === business.id)
+          .map(
+            (location) =>
+              describeOperatingHours(
+                location.openingHours,
+                temporarilyUnavailable,
+              ).currentStatus,
+          );
         return {
           ...summary,
+          openStatus: locationStatuses.includes('open')
+            ? ('open' as const)
+            : locationStatuses.some((status) => status !== 'unknown')
+              ? ('closed' as const)
+              : ('unknown' as const),
           reviewSummary: {
             reviewCount,
             averageRating:
@@ -469,7 +486,70 @@ export class PublicBusinessesService {
     } else if (query.province) {
       filters.push(this.provinceFilter(query.province));
     }
+
+    if (query.available) {
+      // The same 7-day rule that decides what a profile shows as current.
+      filters.push(sql`(
+        ${businesses.availabilityStatus} = 'available'
+        and ${businesses.availabilityUpdatedAt} >= now() - interval '7 days'
+      )`);
+    }
+
+    if (query.open) filters.push(this.openNowFilter());
     return filters;
+  }
+
+  /**
+   * Mirrors describeOperatingHours: a location is open if today's hours
+   * cover the current Zambian time, or yesterday's hours run past midnight
+   * and have not yet ended. Times are zero-padded "HH:MM", so comparing them
+   * as text is comparing them as times.
+   */
+  private openNowFilter(now = new Date()): SQL {
+    const { dayOfWeek, minute } = zonedDayAndMinute(now);
+    const yesterday = (dayOfWeek + 6) % 7;
+    const time = `${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}`;
+    return sql`(
+      not (
+        ${businesses.availabilityStatus} = 'temporarily_unavailable'
+        and ${businesses.availabilityUpdatedAt} >= now() - interval '7 days'
+      )
+      and exists (
+        select 1 from business_locations open_location
+        where open_location.business_id = ${businesses.id}
+          and open_location.is_active = true
+          and jsonb_typeof(open_location.opening_hours -> 'days') = 'array'
+          and exists (
+            select 1
+            from jsonb_array_elements(open_location.opening_hours -> 'days') as schedule(day)
+            where (
+              (schedule.day ->> 'dayOfWeek')::int = ${dayOfWeek}
+              and (
+                schedule.day ->> 'status' = 'open_24_hours'
+                or (
+                  schedule.day ->> 'status' = 'hours'
+                  and (
+                    (
+                      schedule.day ->> 'opensAt' < schedule.day ->> 'closesAt'
+                      and ${time} >= schedule.day ->> 'opensAt'
+                      and ${time} < schedule.day ->> 'closesAt'
+                    )
+                    or (
+                      schedule.day ->> 'opensAt' > schedule.day ->> 'closesAt'
+                      and ${time} >= schedule.day ->> 'opensAt'
+                    )
+                  )
+                )
+              )
+            ) or (
+              (schedule.day ->> 'dayOfWeek')::int = ${yesterday}
+              and schedule.day ->> 'status' = 'hours'
+              and schedule.day ->> 'closesAt' < schedule.day ->> 'opensAt'
+              and ${time} < schedule.day ->> 'closesAt'
+            )
+          )
+      )
+    )`;
   }
 
   private districtFilter(districtId: string) {

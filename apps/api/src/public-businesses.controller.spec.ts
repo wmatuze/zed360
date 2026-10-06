@@ -47,6 +47,23 @@ describe('PublicBusinessesController', () => {
     expect(getDirectory).toHaveBeenCalledTimes(1);
   });
 
+  it('passes the open-now and available-now filters through', async () => {
+    await controller.getDirectory({ open: '1', available: '1' });
+    expect(getDirectory).toHaveBeenCalledWith({
+      open: '1',
+      available: '1',
+      sort: 'recently_confirmed',
+      page: 1,
+    });
+  });
+
+  it('rejects filter flags other than "1"', () => {
+    expect(() => controller.getDirectory({ open: 'yes' })).toThrow(
+      BadRequestException,
+    );
+    expect(getDirectory).not.toHaveBeenCalled();
+  });
+
   it('rejects unknown fulfillment modes', () => {
     expect(() =>
       controller.getDirectory({ fulfillment: 'teleportation' }),

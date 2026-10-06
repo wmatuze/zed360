@@ -1516,6 +1516,10 @@ export const publicBusinessDirectoryQuerySchema = z.object({
   district: z.string().uuid().optional(),
   fulfillment: serviceFulfillmentModeSchema.optional(),
   sort: publicBusinessSortSchema.default("recently_confirmed"),
+  /** "1" keeps only businesses with a location open at this moment. */
+  open: z.literal("1").optional(),
+  /** "1" keeps only businesses that recently said they can take work. */
+  available: z.literal("1").optional(),
   page: z.coerce.number().int().positive().max(1000).default(1),
 });
 
@@ -1619,6 +1623,8 @@ export const publicBusinessSummarySchema = z.object({
     averageRating: z.number().min(1).max(5).nullable(),
     reviewCount: z.number().int().nonnegative(),
   }),
+  /** Whether any of the business's locations is open at this moment. */
+  openStatus: z.enum(["open", "closed", "unknown"]),
   /** When Zed360 last completed a contact or registration check. */
   verifiedAt: z.string().datetime().nullable(),
   joinedAt: z.string().datetime(),
