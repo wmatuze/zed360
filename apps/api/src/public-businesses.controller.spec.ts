@@ -32,8 +32,19 @@ describe('PublicBusinessesController', () => {
       q: 'solar',
       category: 'energy',
       fulfillment: 'business_travel',
+      sort: 'recently_confirmed',
       page: 2,
     });
+  });
+
+  it('accepts an earned order and rejects anything else', async () => {
+    await controller.getDirectory({ sort: 'top_rated' });
+    expect(getDirectory).toHaveBeenCalledWith({ sort: 'top_rated', page: 1 });
+
+    expect(() => controller.getDirectory({ sort: 'sponsored' })).toThrow(
+      BadRequestException,
+    );
+    expect(getDirectory).toHaveBeenCalledTimes(1);
   });
 
   it('rejects unknown fulfillment modes', () => {

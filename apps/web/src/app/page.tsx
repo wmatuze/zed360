@@ -2,6 +2,8 @@ import type { PublicBusinessDirectory, ReferenceData } from "@zed360/contracts";
 import Image from "next/image";
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
+import { HomeMeritSections } from "@/components/home-merit-sections";
+import { meritSections, verificationLabel } from "@/lib/merit-sections";
 import {
   fetchPublicBusinessDirectory,
   fetchPublicReferenceData,
@@ -31,19 +33,28 @@ function initials(value: string) {
 async function homepageData(): Promise<{
   directory: PublicBusinessDirectory | null;
   referenceData: ReferenceData | null;
+  merit: Record<string, PublicBusinessDirectory["businesses"]>;
 }> {
-  const [directoryResult, referenceResult] = await Promise.allSettled([
+  const [directoryResult, referenceResult, ...meritResults] = await Promise.allSettled([
     fetchPublicBusinessDirectory({}),
     fetchPublicReferenceData(),
+    ...meritSections.map(({ sort }) => fetchPublicBusinessDirectory({ sort })),
   ]);
   return {
     directory: directoryResult.status === "fulfilled" ? directoryResult.value : null,
     referenceData: referenceResult.status === "fulfilled" ? referenceResult.value : null,
+    // A section that fails to load is simply left out of the page.
+    merit: Object.fromEntries(
+      meritSections.map(({ sort }, index) => {
+        const result = meritResults[index];
+        return [sort, result?.status === "fulfilled" ? result.value.businesses : []];
+      }),
+    ),
   };
 }
 
 export default async function Home() {
-  const { directory, referenceData } = await homepageData();
+  const { directory, referenceData, merit } = await homepageData();
   const categories = referenceData?.categories.slice(0, 8) ?? [];
   const businesses = directory?.businesses.slice(0, 6) ?? [];
 
@@ -138,7 +149,7 @@ export default async function Home() {
             <div className="home-business-grid mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {businesses.map((business) => {
                 const location = business.primaryLocation?.district;
-                const verified = business.trust.contactVerified || business.trust.registrationVerified;
+                const verified = verificationLabel(business.trust);
                 return (
                   <Link className="home-business-card group" href={`/businesses/${business.slug}`} key={business.id}>
                     <div className="relative aspect-[16/8] overflow-hidden bg-white/5">
@@ -153,7 +164,7 @@ export default async function Home() {
                     <div className="flex flex-1 flex-col p-5 pt-4">
                       <div className="flex items-start justify-between gap-4">
                         <h3 className="text-xl font-semibold tracking-[-0.03em] group-hover:text-[var(--lime)]">{business.name}</h3>
-                        {verified ? <span className="verified-pill">Verified</span> : null}
+                        {verified ? <span className="verified-pill">{verified}</span> : null}
                       </div>
                       <p className="mt-2 text-sm text-white/50">{location ? `${location.name}, ${location.provinceName}` : "Serving customers in Zambia"}</p>
                       <p className="mt-4 line-clamp-2 text-sm leading-6 text-white/55">{business.description || business.serviceNames.slice(0, 3).join(" · ") || "View this business profile and its available services."}</p>
@@ -173,6 +184,8 @@ export default async function Home() {
           )}
         </div>
       </section>
+
+      <HomeMeritSections results={merit} />
 
       <section className="border-b border-white/8" id="how-it-works">
         <div className="mx-auto grid max-w-7xl gap-px px-5 py-2 sm:px-8 md:grid-cols-3 lg:px-10">
