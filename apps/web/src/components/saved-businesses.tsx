@@ -53,7 +53,7 @@ type SaveBusinessButtonProps = {
   slug: string;
   name: string;
   place: string | null;
-  variant?: "card" | "profile";
+  variant?: "card" | "profile" | "row";
 };
 
 export function SaveBusinessButton({
@@ -67,6 +67,20 @@ export function SaveBusinessButton({
   const toggle = () =>
     writeSaved(toggleSavedBusiness(readSaved(), { slug, name, place }));
   const label = `${selected ? "Remove" : "Save"} ${name}${selected ? " from saved businesses" : ""}`;
+
+  if (variant === "row")
+    return (
+      <button
+        aria-label={label}
+        aria-pressed={selected}
+        className={`grid h-9 w-9 place-items-center rounded-full border text-base leading-none transition ${selected ? "border-[var(--lime)] bg-[var(--lime)] text-[var(--ink)]" : "border-white/15 text-white/70 hover:border-[var(--lime)]/40 hover:text-white"}`}
+        onClick={toggle}
+        title={label}
+        type="button"
+      >
+        <span aria-hidden>{selected ? "♥" : "♡"}</span>
+      </button>
+    );
 
   if (variant === "card")
     return (

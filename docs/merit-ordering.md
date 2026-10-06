@@ -56,8 +56,8 @@ The pages do not announce that position cannot be bought. That rule governs
 how the lists are built and is recorded here; customers simply see ordinary
 section titles.
 
-The directory at `/businesses` has an "Order by" control offering the same
-orders, with a short note when a non-default order narrows the list.
+The directory at `/businesses` offers the same orders under "More filters".
+See [business directory](business-directory.md).
 
 ## What must never feed an order
 

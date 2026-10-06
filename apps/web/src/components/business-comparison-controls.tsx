@@ -44,7 +44,16 @@ function useSelection() {
   return slugs;
 }
 
-export function CompareButton({ slug, name }: { slug: string; name: string }) {
+export function CompareButton({
+  slug,
+  name,
+  variant = "card",
+}: {
+  slug: string;
+  name: string;
+  /** "card" floats over a tall card; "row" sits inline in a compact row. */
+  variant?: "card" | "row";
+}) {
   const slugs = useSelection();
   const selected = slugs.includes(slug);
   const [message, setMessage] = useState("");
@@ -61,6 +70,29 @@ export function CompareButton({ slug, name }: { slug: string; name: string }) {
     writeSelection([...slugs, slug]);
     setMessage("");
   };
+  if (variant === "row")
+    return (
+      <span className="relative">
+        <button
+          aria-label={`${selected ? "Remove" : "Add"} ${name} ${selected ? "from" : "to"} comparison`}
+          aria-pressed={selected}
+          className={`h-9 rounded-full border px-3 text-xs font-semibold transition ${selected ? "border-[var(--lime)] bg-[var(--lime)] text-[var(--ink)]" : "border-white/15 text-white/70 hover:border-[var(--lime)]/40 hover:text-white"}`}
+          onClick={toggle}
+          type="button"
+        >
+          {selected ? "✓ Comparing" : "Compare"}
+        </button>
+        {message ? (
+          <span
+            className="absolute right-0 top-full z-20 mt-1 whitespace-nowrap rounded-lg border border-amber-200/25 bg-[var(--panel)] px-2.5 py-1.5 text-[.68rem] text-amber-100"
+            role="status"
+          >
+            {message}
+          </span>
+        ) : null}
+      </span>
+    );
+
   return (
     <div className="absolute bottom-4 left-4 z-10">
       <button

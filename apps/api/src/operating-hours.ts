@@ -26,7 +26,7 @@ const minutes = (value: string) => {
   return hour * 60 + minute;
 };
 
-function zonedDayAndMinute(now: Date) {
+export function zonedDayAndMinute(now: Date) {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: BUSINESS_TIMEZONE,
     weekday: 'short',
