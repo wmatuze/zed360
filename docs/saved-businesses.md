@@ -23,7 +23,8 @@ collected and must not affect visibility.
 
 A profile can be shared through the device's share sheet, by copying its link,
 or straight into WhatsApp. Shared links contain only the public profile
-address.
+address. Zed360 counts that a share button was tapped, not who tapped it or
+who received the link.
 
 ## Directions
 

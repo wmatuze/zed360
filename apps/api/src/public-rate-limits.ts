@@ -17,6 +17,9 @@ export const publicRateLimits = {
   customerReview: { burst: 5, hourly: 20 },
   reviewCode: { burst: 3, hourly: 10 },
   contentReport: { burst: 5, hourly: 5 },
+  // One visit can record a view and a few taps, and many customers share an
+  // address, so this is generous. Beyond it, counts are simply not recorded.
+  profileActivity: { burst: 40, hourly: 400 },
 } as const;
 
 export const throttlerOptions: ThrottlerModuleOptions = {

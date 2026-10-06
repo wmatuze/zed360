@@ -152,6 +152,23 @@ export class AdminOverviewService {
           'joinedPrevious30Days', previous_joined,
           'staleAvailability', stale_availability
         ) from business_counts),
+        'activity', (select jsonb_build_object(
+          'last30Days', jsonb_build_object(
+            'profileViews', coalesce(sum(count) filter (where event = 'profile_view'
+              and day > (now() at time zone 'Africa/Lusaka')::date - 30), 0)::int,
+            'contacts', coalesce(sum(count) filter (where event::text like 'contact_%'
+              and day > (now() at time zone 'Africa/Lusaka')::date - 30), 0)::int,
+            'directions', coalesce(sum(count) filter (where event = 'directions'
+              and day > (now() at time zone 'Africa/Lusaka')::date - 30), 0)::int,
+            'shares', coalesce(sum(count) filter (where event = 'share'
+              and day > (now() at time zone 'Africa/Lusaka')::date - 30), 0)::int),
+          'previous30Days', jsonb_build_object(
+            'profileViews', coalesce(sum(count) filter (where event = 'profile_view'
+              and day <= (now() at time zone 'Africa/Lusaka')::date - 30), 0)::int,
+            'contacts', coalesce(sum(count) filter (where event::text like 'contact_%'
+              and day <= (now() at time zone 'Africa/Lusaka')::date - 30), 0)::int)
+        ) from business_activity_daily
+          where day > (now() at time zone 'Africa/Lusaka')::date - 60),
         'reviews', (select jsonb_build_object(
           'published', published,
           'publishedLast30Days', published_recently,

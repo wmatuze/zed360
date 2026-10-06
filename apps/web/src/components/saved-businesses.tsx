@@ -7,6 +7,7 @@ import {
   toggleSavedBusiness,
   type SavedBusiness,
 } from "@/lib/saved-businesses";
+import { trackActivity } from "@/lib/track-activity";
 
 const storageKey = "zed360:saved-businesses";
 const changeEvent = "zed360:saved-change";
@@ -94,16 +95,25 @@ export function SaveBusinessButton({
   );
 }
 
-export function ShareBusinessButtons({ name }: { name: string }) {
+export function ShareBusinessButtons({
+  name,
+  slug,
+}: {
+  name: string;
+  slug: string;
+}) {
   const [message, setMessage] = useState("Share");
-  const shareOnWhatsapp = () =>
+  const shareOnWhatsapp = () => {
+    trackActivity(slug, "share");
     window.open(
       `https://wa.me/?text=${encodeURIComponent(`${name} on Zed360: ${window.location.href}`)}`,
       "_blank",
       "noopener,noreferrer",
     );
+  };
   const share = async () => {
     const url = window.location.href;
+    trackActivity(slug, "share");
     try {
       if (navigator.share) {
         await navigator.share({ title: `${name} on Zed360`, url });

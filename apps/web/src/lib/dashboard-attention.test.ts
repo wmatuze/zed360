@@ -44,6 +44,19 @@ function business(overrides: {
       selections: 0,
       medianResponseMinutes: null,
     },
+    activity: {
+      last30Days: {
+        profileViews: 0,
+        whatsapp: 0,
+        calls: 0,
+        emails: 0,
+        websiteVisits: 0,
+        directions: 0,
+        shares: 0,
+      },
+      previous30Days: { profileViews: 0, contacts: 0 },
+      daily: [],
+    },
     setup: {
       approved: true,
       hasAvailableService: true,

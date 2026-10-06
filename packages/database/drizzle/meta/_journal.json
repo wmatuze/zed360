@@ -155,6 +155,13 @@
       "when": 1790864278264,
       "tag": "0021_right_gauntlet",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1791271923667,
+      "tag": "0022_business_activity",
+      "breakpoints": true
     }
   ]
 }

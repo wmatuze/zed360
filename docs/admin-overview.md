@@ -40,6 +40,10 @@ projected, and draft requests are never counted.
 - **Typical business response time** is the median time from a match being
   sent to its response, across all businesses, for matches created in the last
   30 days.
+- **Business profiles, last 30 days** totals profile views, contact taps,
+  directions opened, and shares across all businesses, compared with the 30
+  days before, and the share of views that led to a contact tap. See
+  [profile activity](profile-activity.md).
 - **Live** businesses are active and approved. **Availability out of date**
   counts live businesses that have not confirmed availability in 7 days, the
   same rule customers see on a profile.
@@ -58,10 +62,9 @@ projected, and draft requests are never counted.
 The overview contains counts, category and province names, and the names of
 administrators who made audited changes. It never includes customer contact
 details, request text, or review text. No per-visitor tracking exists behind
-these figures.
+these figures; profile activity is stored only as daily totals.
 
 ## Not included
 
 Zed360 takes no payments, so there are no revenue, subscription, or promotion
-figures. Profile views and contact taps are not recorded yet and are therefore
-not shown.
+figures.

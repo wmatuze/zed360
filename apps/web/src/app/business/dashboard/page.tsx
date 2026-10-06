@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ActivityChart } from "@/components/activity-chart";
 import { BrandLogo } from "@/components/brand-logo";
+import { trend } from "@/lib/admin-overview-format";
 import { getVerifiedBusinessSession } from "@/lib/business-account";
 import {
   BusinessDashboardApiError,
@@ -116,6 +118,13 @@ export default async function BusinessDashboardPage({
     ? percentage(recent.responses, recent.matches)
     : null;
   const responseTime = responseTimeLabel(recent?.medianResponseMinutes ?? null);
+  const activity = business?.activity;
+  const contactTaps = activity
+    ? activity.last30Days.whatsapp +
+      activity.last30Days.calls +
+      activity.last30Days.emails +
+      activity.last30Days.websiteVisits
+    : 0;
   const setupSteps = business
     ? [
         {
@@ -424,6 +433,72 @@ export default async function BusinessDashboardPage({
                     </div>
                   ))}
                 </dl>
+              </section>
+            ) : null}
+
+            {live && activity ? (
+              <section aria-labelledby="activity-heading" className="mt-12">
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <h2
+                    className="text-xl font-semibold tracking-[-0.03em]"
+                    id="activity-heading"
+                  >
+                    Your public profile, last 30 days
+                  </h2>
+                  <p className="text-xs text-white/50">
+                    Counts only. Zed360 does not record who visited.
+                  </p>
+                </div>
+                <dl className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                  {[
+                    {
+                      label: "Profile views",
+                      value: activity.last30Days.profileViews,
+                      note: trend(
+                        activity.last30Days.profileViews,
+                        activity.previous30Days.profileViews,
+                      ).label,
+                    },
+                    {
+                      label: "Contact taps",
+                      value: contactTaps,
+                      note: `WhatsApp ${activity.last30Days.whatsapp} · Call ${activity.last30Days.calls} · Email ${activity.last30Days.emails} · Website ${activity.last30Days.websiteVisits}`,
+                    },
+                    {
+                      label: "Directions opened",
+                      value: activity.last30Days.directions,
+                      note: "Customers finding their way to you",
+                    },
+                    {
+                      label: "Shares",
+                      value: activity.last30Days.shares,
+                      note: "Customers passing your profile on",
+                    },
+                  ].map((item) => (
+                    <div
+                      className="rounded-2xl border border-white/10 bg-white/[0.035] p-5"
+                      key={item.label}
+                    >
+                      <dt className="text-xs uppercase tracking-[0.14em] text-white/50">
+                        {item.label}
+                      </dt>
+                      <dd className="mt-2 text-3xl font-semibold tracking-[-0.04em]">
+                        {item.value}
+                      </dd>
+                      <dd className="mt-2 text-xs leading-5 text-white/50">
+                        {item.note}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+                <div className="mt-3">
+                  <ActivityChart daily={activity.daily} />
+                </div>
+                <p className="mt-3 text-xs leading-5 text-white/50">
+                  A tap means a customer pressed the button; Zed360 cannot see
+                  whether the call or message went through. These figures never
+                  affect where you appear in search.
+                </p>
               </section>
             ) : null}
 

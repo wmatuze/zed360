@@ -253,6 +253,49 @@ export const businessAccountSchema = z.object({
 
 export type BusinessAccount = z.infer<typeof businessAccountSchema>;
 
+export const businessActivityEventSchema = z.enum([
+  "profile_view",
+  "contact_whatsapp",
+  "contact_call",
+  "contact_email",
+  "contact_website",
+  "directions",
+  "share",
+]);
+export type BusinessActivityEvent = z.infer<typeof businessActivityEventSchema>;
+
+export const recordBusinessActivitySchema = z.object({
+  event: businessActivityEventSchema,
+});
+
+const activityCount = z.number().int().nonnegative();
+
+/** Counts of public profile activity. No visitor is identified or stored. */
+export const businessActivitySchema = z.object({
+  last30Days: z.object({
+    profileViews: activityCount,
+    whatsapp: activityCount,
+    calls: activityCount,
+    emails: activityCount,
+    websiteVisits: activityCount,
+    directions: activityCount,
+    shares: activityCount,
+  }),
+  previous30Days: z.object({
+    profileViews: activityCount,
+    contacts: activityCount,
+  }),
+  /** One entry per day for the last 30 days, oldest first. */
+  daily: z.array(
+    z.object({
+      day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      profileViews: activityCount,
+      contacts: activityCount,
+    }),
+  ),
+});
+export type BusinessActivity = z.infer<typeof businessActivitySchema>;
+
 export const businessDashboardSchema = z.object({
   totals: z.object({
     openMatches: z.number().int().nonnegative(),
@@ -293,6 +336,7 @@ export const businessDashboardSchema = z.object({
         selections: z.number().int().nonnegative(),
         medianResponseMinutes: z.number().nonnegative().nullable(),
       }),
+      activity: businessActivitySchema,
       setup: z.object({
         approved: z.boolean(),
         hasAvailableService: z.boolean(),
@@ -1092,6 +1136,18 @@ export const adminOverviewSchema = z.object({
     joinedLast30Days: z.number().int().nonnegative(),
     joinedPrevious30Days: z.number().int().nonnegative(),
     staleAvailability: z.number().int().nonnegative(),
+  }),
+  activity: z.object({
+    last30Days: z.object({
+      profileViews: z.number().int().nonnegative(),
+      contacts: z.number().int().nonnegative(),
+      directions: z.number().int().nonnegative(),
+      shares: z.number().int().nonnegative(),
+    }),
+    previous30Days: z.object({
+      profileViews: z.number().int().nonnegative(),
+      contacts: z.number().int().nonnegative(),
+    }),
   }),
   reviews: z.object({
     published: z.number().int().nonnegative(),

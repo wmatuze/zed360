@@ -47,9 +47,12 @@ business.
   pin is a suggestion, not a fault: businesses that customers do not visit
   should leave it empty.
 - **Unread alerts** are notification rows belonging to the signed-in user.
+- **Your public profile, last 30 days** shows counted profile views, contact
+  taps by channel, directions opened, and shares, with a bar per day. See
+  [profile activity](profile-activity.md) for exactly what is counted.
 - Published product, published review, pending media, and setup figures are
-  derived directly from their corresponding records; Zed360 does not estimate
-  views, revenue, conversion, or popularity.
+  derived directly from their corresponding records. Zed360 does not estimate
+  revenue, conversion, or popularity, and every figure is a real count.
 
 ## Access and performance
 
