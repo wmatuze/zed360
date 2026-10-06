@@ -19,9 +19,9 @@ function initials(value: string) {
 }
 
 /**
- * Homepage sections whose order is earned or factual. Each states its rule,
- * each card states why that business is there, and a section with nothing to
- * show is left out rather than padded.
+ * Homepage sections ordered by merit or fact, never by payment. Each card
+ * states why that business is there, and a section with nothing to show is
+ * left out rather than padded.
  */
 export function HomeMeritSections({
   results,
@@ -39,26 +39,15 @@ export function HomeMeritSections({
   return (
     <section className="border-b border-white/8">
       <div className="mx-auto w-full max-w-7xl px-5 py-20 sm:px-8 lg:px-10 lg:py-28">
-        <p className="eyebrow">
-          <span /> Earned, not bought
-        </p>
-        <h2 className="mt-5 max-w-2xl text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
-          Businesses that earned their place.
-        </h2>
-        <p className="mt-4 max-w-2xl leading-7 text-white/50">
-          No business pays to appear here. Each list says exactly how it is
-          ordered.
-        </p>
-
-        <div className="mt-12 grid gap-12">
+        <div className="grid gap-14">
           {sections.map(({ section, entries }) => (
             <div key={section.sort}>
               <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
                 <div>
-                  <h3 className="text-2xl font-semibold tracking-[-0.03em]">
+                  <h2 className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
                     {section.title}
-                  </h3>
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-white/50">
+                  </h2>
+                  <p className="mt-2 max-w-2xl leading-7 text-white/50">
                     {section.rule}
                   </p>
                 </div>

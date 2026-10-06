@@ -24,7 +24,7 @@ export function verificationLabel(trust: Business["trust"]) {
 export type MeritSection = {
   sort: Exclude<PublicBusinessSort, "recently_confirmed">;
   title: string;
-  /** Shown to customers: exactly why a business appears in this section. */
+  /** One short line under the title saying what the section lists. */
   rule: string;
   /** Why this particular business is here, or null if it should be hidden. */
   reason: (business: Business) => string | null;
@@ -34,7 +34,7 @@ export const meritSections: MeritSection[] = [
   {
     sort: "top_rated",
     title: "Top rated",
-    rule: "Ranked by reviews from customers who chose the business through a Zed360 request. More reviews count for more than a single high score.",
+    rule: "The highest-rated businesses, based on verified customer reviews.",
     reason: ({ reviewSummary }) =>
       reviewSummary.reviewCount > 0 && reviewSummary.averageRating !== null
         ? `★ ${reviewSummary.averageRating} from ${reviewSummary.reviewCount} verified ${reviewSummary.reviewCount === 1 ? "review" : "reviews"}`
@@ -43,7 +43,7 @@ export const meritSections: MeritSection[] = [
   {
     sort: "recently_verified",
     title: "Recently verified",
-    rule: "Businesses whose contact details or registration Zed360 checked most recently.",
+    rule: "Businesses Zed360 has most recently checked.",
     reason: ({ trust, verifiedAt }) => {
       const label = verificationLabel(trust);
       return label && verifiedAt ? `${label} ${shortDate(verifiedAt)}` : null;
@@ -52,7 +52,7 @@ export const meritSections: MeritSection[] = [
   {
     sort: "newest",
     title: "Newly added",
-    rule: "The newest approved businesses on Zed360.",
+    rule: "New businesses on Zed360.",
     reason: ({ joinedAt }) => `Joined ${shortDate(joinedAt)}`,
   },
 ];

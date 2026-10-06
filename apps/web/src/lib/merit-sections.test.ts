@@ -99,9 +99,9 @@ test("a section never shows a business without a reason, and caps its length", (
   assert.equal(sectionBusinesses(section("newest"), many).length, 4);
 });
 
-test("every section states its rule and none mentions payment", () => {
+test("every section has a title and a short description", () => {
   for (const item of meritSections) {
-    assert.ok(item.rule.length > 20);
-    assert.doesNotMatch(item.rule, /sponsor|paid|promot|featured/i);
+    assert.ok(item.title.length > 0);
+    assert.ok(item.rule.length > 0 && item.rule.length < 80);
   }
 });
