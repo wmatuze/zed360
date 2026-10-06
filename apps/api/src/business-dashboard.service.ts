@@ -92,6 +92,39 @@ export class BusinessDashboardService {
                 and timed_match.created_at >= now() - interval '30 days'
                 and timed_response.created_at >= coalesce(timed_match.sent_at, timed_match.created_at)
             ) else null end as median_response_minutes,
+          (select jsonb_build_object(
+              'profileViews', coalesce(sum(count) filter (where event = 'profile_view'), 0)::int,
+              'whatsapp', coalesce(sum(count) filter (where event = 'contact_whatsapp'), 0)::int,
+              'calls', coalesce(sum(count) filter (where event = 'contact_call'), 0)::int,
+              'emails', coalesce(sum(count) filter (where event = 'contact_email'), 0)::int,
+              'websiteVisits', coalesce(sum(count) filter (where event = 'contact_website'), 0)::int,
+              'directions', coalesce(sum(count) filter (where event = 'directions'), 0)::int,
+              'shares', coalesce(sum(count) filter (where event = 'share'), 0)::int)
+            from business_activity_daily recent_activity
+            where recent_activity.business_id = member_business.id
+              and recent_activity.day > (now() at time zone 'Africa/Lusaka')::date - 30) as activity_recent,
+          (select jsonb_build_object(
+              'profileViews', coalesce(sum(count) filter (where event = 'profile_view'), 0)::int,
+              'contacts', coalesce(sum(count) filter (where event::text like 'contact_%'), 0)::int)
+            from business_activity_daily previous_activity
+            where previous_activity.business_id = member_business.id
+              and previous_activity.day > (now() at time zone 'Africa/Lusaka')::date - 60
+              and previous_activity.day <= (now() at time zone 'Africa/Lusaka')::date - 30) as activity_previous,
+          (select jsonb_agg(jsonb_build_object(
+              'day', to_char(calendar.day, 'YYYY-MM-DD'),
+              'profileViews', coalesce(day_activity.views, 0),
+              'contacts', coalesce(day_activity.contacts, 0)) order by calendar.day)
+            from generate_series(
+              (now() at time zone 'Africa/Lusaka')::date - 29,
+              (now() at time zone 'Africa/Lusaka')::date,
+              interval '1 day') as calendar(day)
+            left join lateral (
+              select sum(count) filter (where event = 'profile_view')::int as views,
+                     sum(count) filter (where event::text like 'contact_%')::int as contacts
+              from business_activity_daily daily_activity
+              where daily_activity.business_id = member_business.id
+                and daily_activity.day = calendar.day::date
+            ) day_activity on true) as activity_daily,
           (select count(*)::int from business_locations unpinned_location
             where unpinned_location.business_id = member_business.id
               and unpinned_location.is_active = true
@@ -226,6 +259,11 @@ export class BusinessDashboardService {
               'responses', stats.recent_responses,
               'selections', stats.recent_selections,
               'medianResponseMinutes', stats.median_response_minutes
+            ),
+            'activity', jsonb_build_object(
+              'last30Days', stats.activity_recent,
+              'previous30Days', stats.activity_previous,
+              'daily', stats.activity_daily
             ),
             'setup', jsonb_build_object(
               'approved', stats.status = 'active' and stats.review_status = 'approved',

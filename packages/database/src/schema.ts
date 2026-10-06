@@ -2,6 +2,7 @@ import { relations, sql } from "drizzle-orm";
 import {
   boolean,
   check,
+  date,
   geometry,
   index,
   integer,
@@ -10,6 +11,7 @@ import {
   pgEnum,
   pgPolicy,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -161,6 +163,15 @@ export const contentReportStatus = pgEnum("content_report_status", [
   "open",
   "dismissed",
   "actioned",
+]);
+export const businessActivityEvent = pgEnum("business_activity_event", [
+  "profile_view",
+  "contact_whatsapp",
+  "contact_call",
+  "contact_email",
+  "contact_website",
+  "directions",
+  "share",
 ]);
 
 export const users = pgTable(
@@ -853,6 +864,27 @@ export const reviews = pgTable(
       table.createdAt,
     ),
     check("reviews_rating_check", sql`${table.rating} between 1 and 5`),
+  ],
+).enableRLS();
+
+// Daily totals of public profile activity. Deliberately a counter and not an
+// event log: there is no row per visitor, so nothing here can identify or
+// follow a customer.
+export const businessActivityDaily = pgTable(
+  "business_activity_daily",
+  {
+    businessId: uuid("business_id")
+      .notNull()
+      .references(() => businesses.id, { onDelete: "cascade" }),
+    // The calendar day in Zambia (Africa/Lusaka).
+    day: date("day", { mode: "string" }).notNull(),
+    event: businessActivityEvent("event").notNull(),
+    count: integer("count").default(0).notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.businessId, table.day, table.event] }),
+    index("business_activity_daily_day_idx").on(table.day),
+    check("business_activity_daily_count_check", sql`${table.count} >= 0`),
   ],
 ).enableRLS();
 

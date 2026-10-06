@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type {
+  BusinessActivityEvent,
   PublicBusinessDirectory,
   PublicBusinessDirectoryQuery,
   PublicBusinessProfile,
@@ -48,6 +49,24 @@ function optionalNumber(value: string | null) {
 @Injectable()
 export class PublicBusinessesService {
   constructor(private readonly database: DatabaseService) {}
+
+  /**
+   * Adds one to today's count for a live business. Unknown or hidden
+   * businesses are ignored silently so the endpoint reveals nothing.
+   */
+  async recordActivity(slug: string, event: BusinessActivityEvent) {
+    await this.database.client`
+      insert into business_activity_daily (business_id, day, event, count)
+      select business.id, (now() at time zone 'Africa/Lusaka')::date,
+             ${event}::business_activity_event, 1
+      from businesses business
+      where business.slug = ${slug}
+        and business.status = 'active'
+        and business.review_status = 'approved'
+      on conflict (business_id, day, event)
+      do update set count = business_activity_daily.count + 1
+    `;
+  }
 
   async compare(slugs: string[]) {
     return {

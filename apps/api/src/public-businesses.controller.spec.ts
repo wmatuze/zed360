@@ -6,16 +6,19 @@ describe('PublicBusinessesController', () => {
   const getDirectory = jest.fn();
   const getProfile = jest.fn();
   const compare = jest.fn();
+  const recordActivity = jest.fn();
   const controller = new PublicBusinessesController({
     getDirectory,
     getProfile,
     compare,
+    recordActivity,
   } as unknown as PublicBusinessesService);
 
   beforeEach(() => {
     getDirectory.mockReset().mockResolvedValue({ businesses: [] });
     getProfile.mockReset().mockResolvedValue({});
     compare.mockReset().mockResolvedValue({ businesses: [] });
+    recordActivity.mockReset().mockResolvedValue(undefined);
   });
 
   it('normalizes and validates public directory filters', async () => {
@@ -61,5 +64,25 @@ describe('PublicBusinessesController', () => {
       BadRequestException,
     );
     expect(getProfile).not.toHaveBeenCalled();
+  });
+
+  it('records a valid activity for a business', async () => {
+    await controller.recordActivity('kopa-motors', {
+      event: 'contact_whatsapp',
+    });
+    expect(recordActivity).toHaveBeenCalledWith(
+      'kopa-motors',
+      'contact_whatsapp',
+    );
+  });
+
+  it('rejects unknown activity and malformed slugs without recording', async () => {
+    await expect(
+      controller.recordActivity('kopa-motors', { event: 'purchase' }),
+    ).rejects.toThrow('A valid activity is required.');
+    await expect(
+      controller.recordActivity('../admin', { event: 'profile_view' }),
+    ).rejects.toThrow('A valid activity is required.');
+    expect(recordActivity).not.toHaveBeenCalled();
   });
 });
