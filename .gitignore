@@ -22,6 +22,10 @@ uploads/
 tmp/
 *.log
 
+# Temporary git worktrees and generated documents
+.worktrees/
+/output/
+
 # Private research exports
 Zed360_Survey_Responses*.csv
 
