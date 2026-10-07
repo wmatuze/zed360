@@ -68,12 +68,17 @@ The card label is computed by the application and the filter by the database.
 They must stay in step: if `describeOperatingHours` changes, change
 `openNowFilter` with it.
 
-## The same card elsewhere
+## Cards elsewhere
 
-The homepage's "Businesses worth discovering" block uses the same card without
-Compare, because the homepage has no comparison tray. The saved-businesses page
-uses a matching card built from what the browser stored (name, place, and the
-date saved), since it loads without contacting the API.
+The saved-businesses page uses a matching compact card built from what the
+browser stored (name, place, and the date saved), since it loads without
+contacting the API.
+
+The homepage is different on purpose. Its "Businesses worth discovering" block
+shows only four businesses and leads each card with the business's own cover
+photo, because the homepage is the shop window. A business without a cover
+photo gets a patterned panel with its initials rather than a stock image. Cover
+photos stay out of the directory, where there may be thousands of results.
 
 ## Cached responses
 

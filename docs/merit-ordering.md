@@ -59,19 +59,24 @@ registration. See [business verification](business-verification.md).
 
 ## Homepage
 
-Below "Businesses worth discovering", the homepage shows up to three sections,
-each under a plain title with one short line beneath it: Top rated, Most viewed
-this week, Recently verified, and Newly added. For each section:
+Below "Businesses worth discovering", the homepage has one "Discover" section
+with a tab per list: Top rated, Most viewed this week, Recently verified, and
+Newly added. The lists share one section so the page does not stack several
+look-alike rows, which also made the same few businesses repeat down the page.
 
-- every card states why that business is there (its rating and review count,
-  its views this week, the check and its date, or the date it joined);
-- at most four businesses are shown, with a link to the full list;
-- a business without a reason is never shown, and a section with no
-  businesses is left out entirely rather than padded.
+- The section opens on the tab with the most businesses, so it never starts on
+  a near-empty list.
+- Each tab shows one short line saying what it lists and a link to the full
+  list in the directory.
+- Every card states why that business is there (its rating and review count,
+  its views this week, the check and its date, or the date it joined).
+- At most four businesses are shown per tab.
+- A business without a reason is never shown, and a list with no businesses
+  gets no tab. If no list has any business, the section is left out.
 
 The pages do not announce that position cannot be bought. That rule governs
 how the lists are built and is recorded here; customers simply see ordinary
-section titles.
+titles.
 
 The directory at `/businesses` offers the same orders under "More filters".
 See [business directory](business-directory.md).
