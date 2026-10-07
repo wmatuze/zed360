@@ -102,6 +102,62 @@ export class BusinessNotificationsService {
     };
   }
 
+  /**
+   * Marks a notification as read and says where it leads: the request it is
+   * about if that is still open, or request history once it has ended.
+   */
+  async open(user: AuthenticatedUser, notificationId: string) {
+    const [opened] = await this.database.client`
+      update business_notifications notification
+      set read_at = coalesce(notification.read_at, now())
+      from business_notification_events event
+      where event.id = notification.event_id
+        and notification.id = ${notificationId}
+        and notification.recipient_user_id = ${user.id}
+      returning event.type, event.business_id as "businessId",
+                event.data ->> 'requestId' as "requestId",
+                event.action_url as "actionUrl"
+    `;
+    if (!opened) throw new NotFoundException('Notification not found.');
+
+    const requestId =
+      typeof opened.requestId === 'string' &&
+      /^[0-9a-f-]{36}$/i.test(opened.requestId)
+        ? opened.requestId
+        : null;
+    if (
+      requestId &&
+      (opened.type === 'request_matched' || opened.type === 'customer_selected')
+    ) {
+      const [active] = await this.database.client`
+        select 1 from request_matches matched
+        inner join customer_requests request on request.id = matched.request_id
+        where matched.request_id = ${requestId}
+          and matched.business_id = ${String(opened.businessId)}
+          and request.status in ('open', 'matched')
+          and matched.status in ('queued', 'sent', 'viewed', 'responded')
+          and (request.expires_at is null or request.expires_at > now())
+        limit 1
+      `;
+      return {
+        destination: active
+          ? `/business/requests#request-${requestId}`
+          : `/business/requests/history#request-${requestId}`,
+      };
+    }
+
+    const stored =
+      typeof opened.actionUrl === 'string' ? opened.actionUrl : null;
+    return {
+      destination:
+        stored &&
+        /^\/(?![/\\])/.test(stored) &&
+        stored !== '/business/notifications'
+          ? stored
+          : '/business/notifications',
+    };
+  }
+
   async markRead(user: AuthenticatedUser, notificationId: string) {
     const [updated] = await this.database.db
       .update(businessNotifications)

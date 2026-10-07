@@ -73,6 +73,9 @@ reviews, with those awaiting a reply first, and the average rating.
   chose another business", "Expired without a choice", or "Closed by the
   customer"), with totals for received, answered, and chosen.
 
+A notification about a request opens directly on that request, in whichever
+view it now belongs to, and highlights it.
+
 Past requests show only the summary, category, and district that were visible
 while the request was open. They never show the customer's details or other
 businesses' responses. The most recent 100 are listed.

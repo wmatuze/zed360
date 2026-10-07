@@ -161,7 +161,8 @@ export default async function BusinessRequestHistoryPage() {
                   : null;
                 return (
                   <li
-                    className="rounded-2xl border border-white/10 bg-white/[0.035] p-5"
+                    className="scroll-mt-6 rounded-2xl border border-white/10 bg-white/[0.035] p-5 target:border-[var(--lime)] target:bg-[var(--lime)]/[0.05]"
+                    id={`request-${request.requestId}`}
                     key={request.matchId}
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">

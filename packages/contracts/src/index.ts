@@ -26,6 +26,15 @@ export const createCustomerRequestSchema = z
     budgetMaximum: z.coerce.number().nonnegative().optional(),
     details: z.string().trim().max(2000).optional(),
     categoryAnswers: z.record(z.string(), z.unknown()).default({}),
+    /** Optional. Where to tell the customer that a business has responded. */
+    notifyEmail: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .email("Enter a valid email address, or leave it empty")
+      .max(254)
+      .optional()
+      .or(z.literal("")),
   })
   .refine(
     ({ budgetMinimum, budgetMaximum }) =>
@@ -1787,6 +1796,7 @@ export const businessRequestHistorySchema = z.object({
   requests: z.array(
     z.object({
       matchId: z.string().uuid(),
+      requestId: z.string().uuid(),
       businessName: z.string(),
       summary: z.string(),
       categoryName: z.string(),

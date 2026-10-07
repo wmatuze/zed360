@@ -8,6 +8,7 @@ describe('BusinessNotificationsController', () => {
   const verify = jest.fn();
   const list = jest.fn();
   const markRead = jest.fn();
+  const open = jest.fn();
   const markAllRead = jest.fn();
   const archive = jest.fn();
   const restore = jest.fn();
@@ -17,6 +18,7 @@ describe('BusinessNotificationsController', () => {
     {
       list,
       markRead,
+      open,
       markAllRead,
       archive,
       restore,
@@ -80,5 +82,23 @@ describe('BusinessNotificationsController', () => {
       controller.list('Bearer token', 'deleted', '1'),
     ).rejects.toThrow(BadRequestException);
     expect(verify).not.toHaveBeenCalled();
+  });
+
+  it('opens a notification for the verified recipient', async () => {
+    const notificationId = '8f3c2a10-5b7e-4c1d-9a2f-3e4d5c6b7a89';
+    open.mockReset().mockResolvedValue({ destination: '/business/requests' });
+
+    await expect(
+      controller.open('Bearer token', notificationId),
+    ).resolves.toEqual({ destination: '/business/requests' });
+    expect(open).toHaveBeenCalledWith(user, notificationId);
+  });
+
+  it('rejects a malformed notification id before opening it', async () => {
+    open.mockReset();
+    await expect(controller.open('Bearer token', 'nope')).rejects.toThrow(
+      'A valid notification is required.',
+    );
+    expect(open).not.toHaveBeenCalled();
   });
 });
