@@ -41,6 +41,15 @@ export const meritSections: MeritSection[] = [
         : null,
   },
   {
+    sort: "most_viewed",
+    title: "Most viewed this week",
+    rule: "The profiles customers opened most in the last 7 days.",
+    reason: ({ viewsThisWeek }) =>
+      viewsThisWeek > 0
+        ? `${viewsThisWeek.toLocaleString("en-ZM")} ${viewsThisWeek === 1 ? "view" : "views"} this week`
+        : null,
+  },
+  {
     sort: "recently_verified",
     title: "Recently verified",
     rule: "Businesses Zed360 has most recently checked.",
@@ -53,7 +62,8 @@ export const meritSections: MeritSection[] = [
     sort: "newest",
     title: "Newly added",
     rule: "New businesses on Zed360.",
-    reason: ({ joinedAt }) => `Joined ${shortDate(joinedAt)}`,
+    reason: ({ joinedAt }) =>
+      joinedAt ? `Joined ${shortDate(joinedAt)}` : null,
   },
 ];
 

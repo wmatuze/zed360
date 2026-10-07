@@ -49,14 +49,20 @@ These measures stop accidents and casual inflation, not a determined person.
 An owner could raise their own numbers by visiting their profile from several
 devices. That is acceptable only because of the rule below.
 
-## Activity never affects visibility
+## Activity and visibility
 
-Profile activity is shown to the business and to administrators. It must never
-influence search order, matching, featured sections, or any badge. Visibility
-is earned through confirmed customer interactions, responsiveness, verified
-reviews, verification, and current information, as set out in the
-[product principles](product-principles.md). If these counts ever fed ranking,
-they would become worth faking.
+Profile activity is shown to the business and to administrators. It must not
+influence search order, matching, "Top rated", the default directory order, or
+any badge. Visibility there is earned through confirmed customer interactions,
+responsiveness, verified reviews, verification, and current information, as
+set out in the [product principles](product-principles.md). If these counts fed
+ranking, they would become worth faking.
+
+There is one deliberate, limited exception. The public "Most viewed this week"
+list orders businesses by profile views over the last 7 days and shows each
+count. It is labelled as popularity and nothing else depends on it. Contact
+taps, shares, and saves are never shown publicly. See
+[merit ordering](merit-ordering.md).
 
 ## API
 

@@ -196,35 +196,46 @@ export function SavedBusinessesList() {
   const compareSlugs = saved.slice(0, 3).map((item) => item.slug);
   return (
     <>
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {saved.map((business) => (
-          <div className="relative" key={business.slug}>
-            <Link
-              className="group flex h-full flex-col rounded-3xl border border-white/10 bg-white/[0.035] p-6 pb-16 transition hover:border-[var(--lime)]/35 hover:bg-white/[0.055]"
-              href={`/businesses/${business.slug}`}
-            >
-              <h2 className="text-xl font-semibold tracking-[-0.03em] transition group-hover:text-[var(--lime)]">
-                {business.name}
+          <li
+            className="group relative flex flex-col rounded-2xl border border-white/10 bg-white/[0.035] transition hover:border-[var(--lime)]/35 hover:bg-white/[0.055]"
+            key={business.slug}
+          >
+            <div className="flex-1 p-4">
+              <h2 className="line-clamp-2 font-semibold leading-snug tracking-[-0.01em]">
+                <Link
+                  className="outline-none transition after:absolute after:inset-0 after:rounded-2xl group-hover:text-[var(--lime)] focus-visible:after:ring-2 focus-visible:after:ring-[var(--lime)]"
+                  href={`/businesses/${business.slug}`}
+                >
+                  {business.name}
+                </Link>
               </h2>
               {business.place ? (
-                <p className="mt-2 text-sm text-white/50">{business.place}</p>
+                <p className="mt-1 truncate text-sm text-white/55">
+                  {business.place}
+                </p>
               ) : null}
-              <p className="mt-4 text-xs text-white/50">
+            </div>
+            <div className="flex items-center justify-between gap-2 border-t border-white/8 px-4 py-2.5">
+              <span className="text-[.7rem] text-white/50">
                 Saved{" "}
                 {new Intl.DateTimeFormat("en-ZM", {
                   dateStyle: "medium",
                 }).format(new Date(business.savedAt))}
-              </p>
-            </Link>
-            <SaveBusinessButton
-              name={business.name}
-              place={business.place}
-              slug={business.slug}
-              variant="card"
-            />
-          </div>
+              </span>
+              <span className="relative z-10">
+                <SaveBusinessButton
+                  name={business.name}
+                  place={business.place}
+                  slug={business.slug}
+                  variant="row"
+                />
+              </span>
+            </div>
+          </li>
         ))}
-      </div>
+      </ul>
       <div className="mt-8 flex flex-wrap gap-3">
         {compareSlugs.length >= 2 ? (
           <Link

@@ -17,6 +17,7 @@ const business = (overrides: Partial<Business>): Business =>
     trust: { contactVerified: false, registrationVerified: false },
     reviewSummary: { averageRating: null, reviewCount: 0 },
     verifiedAt: null,
+    viewsThisWeek: 0,
     joinedAt: "2026-08-07T09:00:00.000Z",
     ...overrides,
   }) as Business;
@@ -57,6 +58,16 @@ test("top rated shows the rating and how many reviews earned it", () => {
   assert.equal(reason(business({})), null);
 });
 
+test("most viewed shows the count and hides businesses nobody opened", () => {
+  const reason = section("most_viewed").reason;
+  assert.equal(reason(business({ viewsThisWeek: 1 })), "1 view this week");
+  assert.equal(
+    reason(business({ viewsThisWeek: 1240 })),
+    "1,240 views this week",
+  );
+  assert.equal(reason(business({})), null);
+});
+
 test("recently verified needs both a public check and its date", () => {
   const reason = section("recently_verified").reason;
   assert.equal(
@@ -80,6 +91,40 @@ test("recently verified needs both a public check and its date", () => {
     reason(business({ verifiedAt: "2026-08-31T12:21:08.000Z" })),
     null,
   );
+});
+
+test("a summary cached before these fields existed still loads", async () => {
+  const { publicBusinessSummarySchema } = await import("@zed360/contracts");
+  const cached = {
+    id: "93235cce-34d5-457b-b090-2aa2e973d8d1",
+    slug: "kopa-motors",
+    name: "Kopa Motors",
+    description: null,
+    logoUrl: null,
+    coverUrl: null,
+    lastConfirmedAt: null,
+    availability: "available",
+    availabilityNote: null,
+    availabilityUpdatedAt: null,
+    availabilityFreshness: "unconfirmed",
+    profileFreshness: "unconfirmed",
+    trust: { contactVerified: true, registrationVerified: false },
+    primaryLocation: null,
+    categories: [],
+    serviceNames: [],
+    fulfillmentModes: [],
+  };
+  const parsed = publicBusinessSummarySchema.parse(cached);
+  assert.deepEqual(parsed.reviewSummary, {
+    averageRating: null,
+    reviewCount: 0,
+  });
+  assert.equal(parsed.viewsThisWeek, 0);
+  assert.equal(parsed.openStatus, "unknown");
+  assert.equal(parsed.verifiedAt, null);
+  assert.equal(parsed.joinedAt, null);
+  // With nothing known, it earns no place in any section.
+  for (const item of meritSections) assert.equal(item.reason(parsed), null);
 });
 
 test("a section never shows a business without a reason, and caps its length", () => {
