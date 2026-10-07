@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { BrandLogo } from "@/components/brand-logo";
 import { getVerifiedBusinessSession } from "@/lib/business-account";
 import {
   BusinessLocationsApiError,
@@ -39,15 +37,7 @@ export default async function LocationsPage({
         : "Business locations could not be loaded.";
   }
   return (
-    <main className="min-h-screen bg-[var(--ink)] px-5 py-6 text-white sm:px-8 lg:px-10">
-      <header className="mx-auto flex max-w-6xl items-center justify-between">
-        <Link href="/">
-          <BrandLogo />
-        </Link>
-        <Link className="button button-quiet" href="/business/dashboard">
-          Dashboard
-        </Link>
-      </header>
+    <main className="px-5 py-6 sm:px-8 lg:px-10">
       <section className="mx-auto max-w-6xl pb-20 pt-14">
         <p className="eyebrow">
           <span /> Branch network

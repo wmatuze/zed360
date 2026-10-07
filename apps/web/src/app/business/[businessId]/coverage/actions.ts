@@ -64,14 +64,8 @@ export async function saveCoverage(
       provinceIds: formData.getAll(`${mode}_provinces`).map(String),
       feeMinimum: optionalNumber(formData, `${mode}_fee_minimum`),
       feeMaximum: optionalNumber(formData, `${mode}_fee_maximum`),
-      leadTimeMinimumDays: optionalNumber(
-        formData,
-        `${mode}_lead_minimum`,
-      ),
-      leadTimeMaximumDays: optionalNumber(
-        formData,
-        `${mode}_lead_maximum`,
-      ),
+      leadTimeMinimumDays: optionalNumber(formData, `${mode}_lead_minimum`),
+      leadTimeMaximumDays: optionalNumber(formData, `${mode}_lead_maximum`),
       notes: String(formData.get(`${mode}_notes`) ?? ""),
     } as UpdateBusinessServiceCoverage["options"][number]);
   }
@@ -80,7 +74,8 @@ export async function saveCoverage(
   if (!parsed.success) {
     return {
       status: "error",
-      message: parsed.error.issues[0]?.message ?? "Check the selected coverage.",
+      message:
+        parsed.error.issues[0]?.message ?? "Check the selected coverage.",
     };
   }
 
@@ -94,7 +89,10 @@ export async function saveCoverage(
       parsed.data,
     );
   } catch (error) {
-    if (error instanceof BusinessServiceCoverageApiError && error.status === 401) {
+    if (
+      error instanceof BusinessServiceCoverageApiError &&
+      error.status === 401
+    ) {
       redirect("/business/sign-in?error=session_expired");
     }
     return {

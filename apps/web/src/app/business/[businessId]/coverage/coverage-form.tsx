@@ -1,9 +1,6 @@
 "use client";
 
-import type {
-  BusinessServiceCoverage,
-  ReferenceData,
-} from "@zed360/contracts";
+import type { BusinessServiceCoverage, ReferenceData } from "@zed360/contracts";
 import { useActionState, useState } from "react";
 import { saveCoverage, type CoverageFormState } from "./actions";
 
@@ -53,7 +50,8 @@ function GeographicCoverage({
               name={`${mode}_scope`}
               onChange={(event) =>
                 setScope(
-                  event.target.value as Service["options"][number]["coverageScope"],
+                  event.target
+                    .value as Service["options"][number]["coverageScope"],
                 )
               }
               value={scope}
