@@ -121,6 +121,28 @@ These emails are stored ready to send in `email_outbox` and sent by the same
 once-a-minute pass, with the same retry rules. Each has a unique key, so it is
 sent at most once. A message still unsent after 24 hours is left unsent.
 
+#### The follow-up
+
+Deals are agreed on WhatsApp or by phone, so a customer has little reason to
+come back and say how a request ended. Without that, businesses never learn
+the outcome and no review can be written. Zed360 therefore asks once.
+
+- **When.** Three days after the first business responded, if the request is
+  still open and the customer left an address.
+- **Once.** One follow-up per request, ever. The email says it is the only
+  reminder.
+- **Who is left alone.** Customers who left no address, who already chose a
+  business, who closed the request, or whose request expired; requests where
+  every business said it was unavailable; and requests first answered more
+  than two weeks ago, so switching this on never emails people about old
+  requests.
+- **What it asks.** "Did you find someone?" with one button to the private
+  page. Arriving from that button shows a panel that points to "Choose this
+  business" on each response and to closing the request.
+
+The follow-up is queued and sent through the same outbox as other customer
+emails.
+
 The address is not verified. Someone could enter another person's address, who
 would then receive at most one short email per responding business. The public
 request endpoint is rate limited, which bounds this.
