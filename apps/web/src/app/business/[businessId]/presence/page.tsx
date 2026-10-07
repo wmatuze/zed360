@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { BrandLogo } from "@/components/brand-logo";
 import { getVerifiedBusinessSession } from "@/lib/business-account";
 import { fetchBusinessPresence } from "@/lib/business-presence";
 import { confirmProfile, saveAvailability } from "./actions";
@@ -39,15 +38,7 @@ export default async function BusinessPresencePage({
   const confirm = confirmProfile.bind(null, businessId, presence.business.slug);
 
   return (
-    <main className="min-h-screen bg-[var(--ink)] px-5 py-6 text-white sm:px-8 lg:px-10">
-      <header className="mx-auto flex max-w-5xl items-center justify-between">
-        <Link href="/">
-          <BrandLogo />
-        </Link>
-        <Link className="button button-quiet" href="/business/dashboard">
-          Dashboard
-        </Link>
-      </header>
+    <main className="px-5 py-6 sm:px-8 lg:px-10">
       <section className="mx-auto max-w-5xl pb-20 pt-14">
         <p className="eyebrow">
           <span /> Live business signals

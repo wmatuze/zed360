@@ -80,6 +80,20 @@ export default async function BusinessRequestsPage() {
         <h1 className="mt-5 max-w-2xl text-4xl font-semibold tracking-[-0.055em] sm:text-5xl">
           Requests matched to your business.
         </h1>
+        <nav aria-label="Requests" className="mt-6 flex gap-2">
+          <span
+            aria-current="page"
+            className="rounded-full border border-[var(--lime)] bg-[var(--lime)] px-4 py-2 text-sm font-semibold text-[var(--ink)]"
+          >
+            Active
+          </span>
+          <Link
+            className="rounded-full border border-white/12 px-4 py-2 text-sm text-white/65 transition hover:border-white/30 hover:text-white"
+            href="/business/requests/history"
+          >
+            Past
+          </Link>
+        </nav>
         <p className="mt-5 max-w-2xl leading-7 text-white/48">
           Only active, Zed360-approved businesses can see these requests. Each
           result is limited to the information needed to assess the work.

@@ -24,6 +24,7 @@ import {
   inArray,
   interactions,
   provinces,
+  reviewResponses,
   reviews,
   sql,
 } from '@zed360/database';
@@ -436,7 +437,18 @@ export class PublicBusinessesService {
           body: review.body,
           createdAt: review.createdAt.toISOString(),
           verifiedInteraction: true as const,
-          response: null,
+          response:
+            review.responseId &&
+            review.responseBody &&
+            review.responseCreatedAt &&
+            review.responseUpdatedAt
+              ? {
+                  id: review.responseId,
+                  body: review.responseBody,
+                  createdAt: review.responseCreatedAt.toISOString(),
+                  updatedAt: review.responseUpdatedAt.toISOString(),
+                }
+              : null,
         })),
     };
   }
@@ -729,9 +741,20 @@ export class PublicBusinessesService {
           rating: reviews.rating,
           body: reviews.body,
           createdAt: reviews.createdAt,
+          responseId: reviewResponses.id,
+          responseBody: reviewResponses.body,
+          responseCreatedAt: reviewResponses.createdAt,
+          responseUpdatedAt: reviewResponses.updatedAt,
         })
         .from(reviews)
         .innerJoin(interactions, eq(reviews.interactionId, interactions.id))
+        .leftJoin(
+          reviewResponses,
+          and(
+            eq(reviewResponses.reviewId, reviews.id),
+            eq(reviewResponses.isPublished, true),
+          ),
+        )
         .where(
           and(
             inArray(reviews.businessId, businessIds),

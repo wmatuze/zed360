@@ -24,6 +24,12 @@ export class BusinessRequestsController {
     return this.requests.getMatchedRequests(user);
   }
 
+  @Get('history')
+  async getHistory(@Headers('authorization') authorization?: string) {
+    const user = await this.authentication.verify(authorization);
+    return this.requests.getHistory(user);
+  }
+
   @Post(':matchId/responses')
   async submitResponse(
     @Headers('authorization') authorization: string | undefined,

@@ -55,10 +55,7 @@ export async function saveService(
     revalidatePath(`/businesses/${result.business.slug}`);
     revalidatePath("/businesses");
     revalidatePath("/business/dashboard");
-    return {
-      status: "success",
-      message: serviceId ? "Service updated." : "Service added.",
-    };
+    if (serviceId) return { status: "success", message: "Service updated." };
   } catch (error) {
     if (error instanceof BusinessServicesApiError && error.status === 401) {
       redirect("/business/sign-in?error=session_expired");
@@ -71,4 +68,7 @@ export async function saveService(
           : "The service could not be saved.",
     };
   }
+  // A new service cannot receive requests until it says where and how it is
+  // provided, so adding one continues on the coverage screen.
+  redirect(`/business/${businessId}/coverage?added=1`);
 }

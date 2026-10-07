@@ -57,6 +57,7 @@ Better future matching and business visibility
 - [Profile activity](docs/profile-activity.md)
 - [Merit ordering and homepage sections](docs/merit-ordering.md)
 - [Business directory](docs/business-directory.md)
+- [Business workspace](docs/business-workspace.md)
 - [User and role administration](docs/admin-user-management.md)
 - [Git branch and pull-request workflow](docs/git-workflow.md)
 

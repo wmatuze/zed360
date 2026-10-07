@@ -125,6 +125,12 @@ export class BusinessDashboardService {
               where daily_activity.business_id = member_business.id
                 and daily_activity.day = calendar.day::date
             ) day_activity on true) as activity_daily,
+          (select count(*)::int from reviews unanswered_review
+            where unanswered_review.business_id = member_business.id
+              and unanswered_review.is_published = true
+              and not exists (select 1 from review_responses reply
+                where reply.review_id = unanswered_review.id
+                  and reply.is_published = true)) as unanswered_reviews,
           (select count(*)::int from business_locations unpinned_location
             where unpinned_location.business_id = member_business.id
               and unpinned_location.is_active = true
@@ -251,6 +257,7 @@ export class BusinessDashboardService {
               'pendingMedia', stats.pending_media,
               'publishedReviews', stats.published_reviews,
               'awaitingResponse', stats.awaiting_response,
+              'unansweredReviews', stats.unanswered_reviews,
               'locationsWithoutPin', stats.locations_without_pin,
               'locationsWithoutHours', stats.locations_without_hours
             ),
