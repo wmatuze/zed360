@@ -1,4 +1,5 @@
 import {
+  customerFollowUpEmail,
   customerResponseEmail,
   notificationEmail,
   notificationLink,
@@ -106,5 +107,47 @@ describe('customer response email', () => {
   it('never reveals the business response or price in the email', () => {
     const email = customerResponseEmail(customer);
     expect(email.text).not.toMatch(/ZMW|K\d|price/i);
+  });
+});
+
+describe('customer follow-up email', () => {
+  const followUp = {
+    requestSummary: 'Need 5 laptops for a school',
+    responseCount: 2,
+    shareToken: '903e9437-e205-4132-b7d1-bcaa05050d08',
+    appUrl: 'https://zed360.example',
+  };
+
+  it('asks how it went and links to the private page', () => {
+    const email = customerFollowUpEmail(followUp);
+    const link =
+      'https://zed360.example/request/903e9437-e205-4132-b7d1-bcaa05050d08?followup=1';
+    expect(email.subject).toBe('Did you find someone for your request?');
+    expect(email.text).toContain(link);
+    expect(email.html).toContain(`href="${link}"`);
+    expect(email.text).toContain('2 businesses responded');
+  });
+
+  it('uses the singular for one response', () => {
+    expect(
+      customerFollowUpEmail({ ...followUp, responseCount: 1 }).text,
+    ).toContain('1 business responded');
+  });
+
+  it('promises it is the only reminder and offers a way out', () => {
+    const email = customerFollowUpEmail(followUp);
+    for (const body of [email.text, email.html]) {
+      expect(body).toContain('only reminder');
+      expect(body).toContain('close the request');
+    }
+  });
+
+  it('escapes the customer text in HTML', () => {
+    const email = customerFollowUpEmail({
+      ...followUp,
+      requestSummary: '<b>bold</b> & more',
+    });
+    expect(email.html).toContain('&lt;b&gt;bold&lt;/b&gt; &amp; more');
+    expect(email.html).not.toContain('<b>bold</b>');
   });
 });

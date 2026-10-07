@@ -7,11 +7,13 @@ import {
 import { DatabaseService } from './database.service';
 import { EmailSendError, EmailSender } from './email-sender';
 import { loadApiEnvironment } from './environment';
-import { notificationEmail } from './notification-email';
+import { customerFollowUpEmail, notificationEmail } from './notification-email';
 
 const POLL_INTERVAL_MS = 60_000;
 const BATCH_SIZE = 20;
 export const MAX_ATTEMPTS = 5;
+/** Days after the first business response before the customer is asked how it went. */
+export const FOLLOW_UP_AFTER_DAYS = 3;
 
 /**
  * Emails owners and managers about new notifications.
@@ -55,7 +57,7 @@ export class NotificationDeliveryService
     if (this.running) return { queued: 0, sent: 0, failed: 0 };
     this.running = true;
     try {
-      const queued = await this.enqueue();
+      const queued = (await this.enqueue()) + (await this.enqueueFollowUps());
       const alerts = await this.deliverDue();
       const outbox = await this.deliverOutbox();
       return {
@@ -188,6 +190,58 @@ export class NotificationDeliveryService
       }
     }
     return { sent, failed };
+  }
+
+  /**
+   * Queues the one follow-up a customer may receive: a few days after the
+   * first response, if the request is still open and they left an address.
+   * Requests whose first response is more than two weeks old are skipped, so
+   * switching this on never emails people about old requests.
+   */
+  async enqueueFollowUps() {
+    const due = await this.database.client`
+      select request.id, request.summary, request.share_token as "shareToken",
+             request.notify_email as "notifyEmail",
+             responses.total::int as "responseCount"
+      from customer_requests request
+      inner join lateral (
+        select count(*) as total, min(response.created_at) as first_at
+        from request_matches matched
+        inner join business_responses response on response.match_id = matched.id
+        where matched.request_id = request.id
+          and response.status <> 'unavailable'
+      ) responses on responses.total > 0
+      where request.notify_email is not null
+        and request.status in ('open', 'matched')
+        and (request.expires_at is null or request.expires_at > now())
+        and responses.first_at <= now() - make_interval(days => ${FOLLOW_UP_AFTER_DAYS})
+        and responses.first_at >= now() - interval '14 days'
+        and not exists (
+          select 1 from email_outbox sent
+          where sent.dedupe_key = 'customer-follow-up:' || request.id::text
+        )
+      order by responses.first_at
+      limit ${BATCH_SIZE}
+    `;
+
+    let queued = 0;
+    for (const request of due) {
+      const email = customerFollowUpEmail({
+        requestSummary: String(request.summary),
+        responseCount: Number(request.responseCount),
+        shareToken: String(request.shareToken),
+        appUrl: this.appUrl(),
+      });
+      const inserted = await this.database.client`
+        insert into email_outbox (dedupe_key, to_email, subject, text_body, html_body)
+        values (${`customer-follow-up:${String(request.id)}`}, ${String(request.notifyEmail)},
+                ${email.subject}, ${email.text}, ${email.html})
+        on conflict (dedupe_key) do nothing
+        returning id
+      `;
+      queued += inserted.length;
+    }
+    return queued;
   }
 
   /**

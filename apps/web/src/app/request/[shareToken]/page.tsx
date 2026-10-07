@@ -53,15 +53,17 @@ function websiteHref(value: string | null) {
   } catch {
     return null;
   }
-
 }
 
 export default async function SharedRequestPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ shareToken: string }>;
+  searchParams: Promise<{ followup?: string }>;
 }) {
   const { shareToken } = await params;
+  const fromFollowUp = (await searchParams).followup === "1";
   let data;
   try {
     data = await fetchSharedCustomerRequest(shareToken);
@@ -148,6 +150,29 @@ export default async function SharedRequestPage({
           </p>
         ) : null}
 
+        {fromFollowUp && !requestClosed ? (
+          <div className="mt-8 rounded-2xl border border-[var(--lime)]/30 bg-[var(--lime)]/10 p-6">
+            <h2 className="text-xl font-semibold tracking-[-0.02em]">
+              Did you find someone?
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/75">
+              {data.responses.length
+                ? "If you went with one of the businesses below, press “Choose this business” on it. You can then leave a review, which helps the next customer. If you found help elsewhere or no longer need it, close the request."
+                : "No business has responded yet. If you no longer need this, close the request."}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {data.responses.length ? (
+                <a className="button button-primary" href="#responses">
+                  Choose a business ↓
+                </a>
+              ) : null}
+              <a className="button button-secondary" href="#close-request">
+                Close the request ↓
+              </a>
+            </div>
+          </div>
+        ) : null}
+
         <div className="mt-8 rounded-2xl border border-white/10 p-5 text-sm leading-6 text-white/60">
           Keep this page private. Anyone with its link can view your request,
           compare responses, and record your decision.
@@ -165,7 +190,10 @@ export default async function SharedRequestPage({
           />
         ) : null}
 
-        <div className="mt-12 flex items-end justify-between gap-5">
+        <div
+          className="mt-12 flex scroll-mt-6 items-end justify-between gap-5"
+          id="responses"
+        >
           <div>
             <h2 className="text-2xl font-semibold tracking-[-0.035em]">
               Business responses

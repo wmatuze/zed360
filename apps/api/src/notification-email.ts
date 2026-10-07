@@ -117,3 +117,61 @@ export function customerResponseEmail(input: CustomerResponseEmailInput) {
 
   return { subject, text, html };
 }
+
+export type CustomerFollowUpEmailInput = {
+  requestSummary: string;
+  responseCount: number;
+  shareToken: string;
+  appUrl: string;
+};
+
+/**
+ * Asks a customer, once, whether they found someone. Their answer is what
+ * tells businesses how a request ended and what lets a review be written.
+ */
+export function customerFollowUpEmail(input: CustomerFollowUpEmailInput) {
+  const base = input.appUrl.replace(/\/+$/, '');
+  const link = `${base}/request/${encodeURIComponent(input.shareToken)}?followup=1`;
+  const subject = 'Did you find someone for your request?';
+  const responses =
+    input.responseCount === 1
+      ? '1 business responded'
+      : `${input.responseCount} businesses responded`;
+  const intro = `A few days ago you asked on Zed360:`;
+  const ask = `${responses}. If you chose one of them, please tell us which. It takes one tap, and you can leave a review that helps the next customer.`;
+  const close =
+    'If you no longer need it, you can close the request from the same page so businesses stop responding.';
+  const footer =
+    'This is the only reminder Zed360 sends for this request. You are receiving it because this email address was entered on the request. If that was not you, you can ignore this email.';
+
+  const text = [
+    intro,
+    '',
+    `“${input.requestSummary}”`,
+    '',
+    ask,
+    '',
+    `Tell us how it went: ${link}`,
+    '',
+    close,
+    '',
+    footer,
+  ].join('\n');
+
+  const html = `<!doctype html>
+<html lang="en">
+  <body style="margin:0;padding:24px;background:#f4f5f7;font-family:Arial,Helvetica,sans-serif;color:#0b0d12;">
+    <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:12px;padding:28px;">
+      <h1 style="margin:0 0 14px;font-size:20px;line-height:1.3;">Did you find someone?</h1>
+      <p style="margin:0 0 8px;font-size:13px;color:#5b6170;">${escapeHtml(intro)}</p>
+      <p style="margin:0 0 18px;font-size:15px;line-height:1.6;white-space:pre-wrap;">${escapeHtml(input.requestSummary)}</p>
+      <p style="margin:0 0 22px;font-size:15px;line-height:1.6;">${escapeHtml(ask)}</p>
+      <a href="${escapeHtml(link)}" style="display:inline-block;background:#b8f238;color:#0b0d12;text-decoration:none;font-weight:bold;font-size:15px;padding:12px 20px;border-radius:999px;">Tell us how it went</a>
+      <p style="margin:22px 0 0;font-size:13px;line-height:1.6;color:#5b6170;">${escapeHtml(close)}</p>
+      <p style="margin:14px 0 0;font-size:12px;line-height:1.6;color:#5b6170;">${escapeHtml(footer)}</p>
+    </div>
+  </body>
+</html>`;
+
+  return { subject, text, html };
+}

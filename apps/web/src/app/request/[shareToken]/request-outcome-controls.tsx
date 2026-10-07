@@ -10,11 +10,14 @@ async function sendOutcome(
   shareToken: string,
   action: CustomerRequestOutcomeAction,
 ) {
-  const response = await fetch(`${apiUrl}/requests/shared/${shareToken}/outcome`, {
-    body: JSON.stringify(action),
-    headers: { "content-type": "application/json" },
-    method: "POST",
-  });
+  const response = await fetch(
+    `${apiUrl}/requests/shared/${shareToken}/outcome`,
+    {
+      body: JSON.stringify(action),
+      headers: { "content-type": "application/json" },
+      method: "POST",
+    },
+  );
   const body = (await response.json().catch(() => null)) as {
     message?: unknown;
   } | null;
@@ -161,7 +164,10 @@ export function RequestClosureControls({
   }
 
   return (
-    <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.025] p-5">
+    <div
+      className="mt-10 scroll-mt-6 rounded-2xl border border-white/10 bg-white/[0.025] p-5"
+      id="close-request"
+    >
       <p className="font-semibold">
         {closed ? "Need more responses?" : "Finished with this request?"}
       </p>
