@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type {
+  BusinessRequestHistory,
   MatchedBusinessRequest,
   MatchedBusinessRequests,
   SubmitBusinessResponse,
@@ -183,6 +184,90 @@ export class BusinessRequestsService {
       .orderBy(desc(customerRequests.createdAt));
 
     return { requests: rows.map(toMatchedBusinessRequest) };
+  }
+
+  /**
+   * Requests that have ended for the signed-in user's businesses. Only the
+   * summary already shown while the request was open is returned; customer
+   * details and other businesses' responses are never included.
+   */
+  async getHistory(user: AuthenticatedUser): Promise<BusinessRequestHistory> {
+    const rows = await this.database.client`
+      select matched.id as "matchId",
+             business.name as "businessName",
+             request.summary,
+             category.name as "categoryName",
+             district.name as "districtName",
+             request.created_at as "createdAt",
+             case
+               when exists (select 1 from interactions chosen
+                 where chosen.request_id = request.id
+                   and chosen.business_id = business.id
+                   and chosen.outcome_confirmed = true) then 'chosen'
+               when exists (select 1 from interactions other
+                 where other.request_id = request.id
+                   and other.outcome_confirmed = true) then 'another_chosen'
+               when request.status = 'expired'
+                 or (request.expires_at is not null and request.expires_at <= now())
+                 or matched.status = 'expired' then 'expired'
+               else 'closed'
+             end as outcome,
+             response.status as "responseStatus",
+             response.price_minimum as "priceMinimum",
+             response.price_maximum as "priceMaximum",
+             response.created_at as "respondedAt"
+      from request_matches matched
+      inner join businesses business on business.id = matched.business_id
+      inner join business_members membership
+        on membership.business_id = business.id
+      inner join customer_requests request on request.id = matched.request_id
+      inner join categories category on category.id = request.category_id
+      left join districts district on district.id = request.district_id
+      left join business_responses response on response.match_id = matched.id
+      where membership.user_id = ${user.id}
+        and business.status = 'active'
+        and business.review_status = 'approved'
+        and request.status <> 'draft'
+        and not (
+          request.status in ('open', 'matched')
+          and matched.status in ('queued', 'sent', 'viewed', 'responded')
+          and (request.expires_at is null or request.expires_at > now())
+        )
+      order by request.created_at desc
+      limit 100
+    `;
+    const iso = (value: unknown) =>
+      new Date(value as string | Date).toISOString();
+    const money = (value: unknown) => (value === null ? null : Number(value));
+    const requests = rows.map((row) => ({
+      matchId: String(row.matchId),
+      businessName: String(row.businessName),
+      summary: String(row.summary),
+      categoryName: String(row.categoryName),
+      districtName:
+        typeof row.districtName === 'string' ? row.districtName : null,
+      createdAt: iso(row.createdAt),
+      outcome:
+        row.outcome as BusinessRequestHistory['requests'][number]['outcome'],
+      response: row.responseStatus
+        ? {
+            status: row.responseStatus as NonNullable<
+              BusinessRequestHistory['requests'][number]['response']
+            >['status'],
+            priceMinimum: money(row.priceMinimum),
+            priceMaximum: money(row.priceMaximum),
+            createdAt: iso(row.respondedAt),
+          }
+        : null,
+    }));
+    return {
+      requests,
+      totals: {
+        received: requests.length,
+        answered: requests.filter(({ response }) => response).length,
+        chosen: requests.filter(({ outcome }) => outcome === 'chosen').length,
+      },
+    };
   }
 
   async submitResponse(

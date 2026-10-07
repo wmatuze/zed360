@@ -12,11 +12,13 @@ describe('BusinessRequestsController', () => {
   };
   const verify = jest.fn();
   const getMatchedRequests = jest.fn();
+  const getHistory = jest.fn();
   const submitResponse = jest.fn();
   const controller = new BusinessRequestsController(
     { verify } as unknown as AuthenticatedUserService,
     {
       getMatchedRequests,
+      getHistory,
       submitResponse,
     } as unknown as BusinessRequestsService,
   );
@@ -58,5 +60,12 @@ describe('BusinessRequestsController', () => {
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(verify).not.toHaveBeenCalled();
     expect(submitResponse).not.toHaveBeenCalled();
+  });
+
+  it('loads request history only for a verified session', async () => {
+    getHistory.mockReset().mockResolvedValue({ requests: [] });
+    await controller.getHistory('Bearer access-token');
+    expect(verify).toHaveBeenCalledWith('Bearer access-token');
+    expect(getHistory).toHaveBeenCalledWith(user);
   });
 });

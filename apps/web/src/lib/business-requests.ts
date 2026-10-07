@@ -1,8 +1,10 @@
 import "server-only";
 
 import {
+  businessRequestHistorySchema,
   matchedBusinessRequestsSchema,
   submittedBusinessResponseSchema,
+  type BusinessRequestHistory,
   type MatchedBusinessRequests,
   type SubmitBusinessResponse,
   type SubmittedBusinessResponse,
@@ -83,6 +85,34 @@ export async function sendBusinessResponse(
   if (!parsed.success) {
     throw new BusinessRequestsApiError(
       "The response service returned an invalid result.",
+      502,
+    );
+  }
+  return parsed.data;
+}
+
+export async function fetchBusinessRequestHistory(
+  accessToken: string,
+): Promise<BusinessRequestHistory> {
+  const response = await fetch(`${apiUrl}/business-requests/history`, {
+    headers: { authorization: `Bearer ${accessToken}` },
+    cache: "no-store",
+  });
+  const body = (await response.json().catch(() => null)) as {
+    message?: unknown;
+  } | null;
+  if (!response.ok) {
+    throw new BusinessRequestsApiError(
+      typeof body?.message === "string"
+        ? body.message
+        : "Request history is unavailable.",
+      response.status,
+    );
+  }
+  const parsed = businessRequestHistorySchema.safeParse(body);
+  if (!parsed.success) {
+    throw new BusinessRequestsApiError(
+      "The request history service returned an invalid response.",
       502,
     );
   }

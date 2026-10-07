@@ -1771,6 +1771,49 @@ export type MatchedBusinessRequests = z.infer<
   typeof matchedBusinessRequestsSchema
 >;
 
+export const businessRequestOutcomeSchema = z.enum([
+  "chosen",
+  "another_chosen",
+  "expired",
+  "closed",
+]);
+
+/** Requests that are no longer open, with what the business did and how it ended. */
+export const businessRequestHistorySchema = z.object({
+  requests: z.array(
+    z.object({
+      matchId: z.string().uuid(),
+      businessName: z.string(),
+      summary: z.string(),
+      categoryName: z.string(),
+      districtName: z.string().nullable(),
+      createdAt: z.string().datetime(),
+      outcome: businessRequestOutcomeSchema,
+      response: z
+        .object({
+          status: z.enum([
+            "available",
+            "unavailable",
+            "needs_more_information",
+          ]),
+          priceMinimum: z.number().nonnegative().nullable(),
+          priceMaximum: z.number().nonnegative().nullable(),
+          createdAt: z.string().datetime(),
+        })
+        .nullable(),
+    }),
+  ),
+  totals: z.object({
+    received: z.number().int().nonnegative(),
+    answered: z.number().int().nonnegative(),
+    chosen: z.number().int().nonnegative(),
+  }),
+});
+
+export type BusinessRequestHistory = z.infer<
+  typeof businessRequestHistorySchema
+>;
+
 export const submitBusinessResponseSchema = z
   .object({
     status: z.enum(["available", "unavailable", "needs_more_information"]),
