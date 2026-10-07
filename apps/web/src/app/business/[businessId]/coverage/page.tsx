@@ -14,8 +14,10 @@ export const dynamic = "force-dynamic";
 
 export default async function ServiceCoveragePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ businessId: string }>;
+  searchParams: Promise<{ added?: string }>;
 }) {
   if (!isSupabaseConfigured()) redirect("/business/sign-in?setup=required");
   const session = await getVerifiedBusinessSession();
@@ -42,6 +44,12 @@ export default async function ServiceCoveragePage({
         ? error.message
         : "Service coverage could not be loaded.";
   }
+
+  const justAdded = (await searchParams).added === "1";
+  // Services that requests cannot reach yet come first.
+  const services = [...(coverage?.services ?? [])].sort(
+    (a, b) => Number(a.options.length > 0) - Number(b.options.length > 0),
+  );
 
   return (
     <main className="px-5 py-6 sm:px-8 lg:px-10">
@@ -73,14 +81,32 @@ export default async function ServiceCoveragePage({
               verified delivery or travel. Keep it current so customers are not
               misled.
             </div>
-            {coverage.services.map((service) => (
+            {justAdded ? (
+              <div
+                className="rounded-2xl border border-[var(--lime)]/30 bg-[var(--lime)]/10 p-5 text-sm leading-6"
+                role="status"
+              >
+                <span className="font-semibold">Service added.</span> One more
+                step: choose how customers receive it below. Until then,
+                requests cannot be matched to it.
+              </div>
+            ) : null}
+            {services.map((service) => (
               <article
-                className="rounded-3xl border border-white/10 bg-white/[0.035] p-6 sm:p-8"
+                className={`scroll-mt-40 rounded-3xl border p-6 sm:p-8 ${service.options.length ? "border-white/10 bg-white/[0.035]" : "border-amber-200/25 bg-amber-200/[0.04]"}`}
+                id={`service-${service.id}`}
                 key={service.id}
               >
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--lime)]">
-                  {service.categoryName}
-                </p>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--lime)]">
+                    {service.categoryName}
+                  </p>
+                  {service.options.length ? null : (
+                    <span className="rounded-full border border-amber-200/30 bg-amber-200/10 px-3 py-1 text-xs font-semibold text-amber-100">
+                      Needs coverage
+                    </span>
+                  )}
+                </div>
                 <h2 className="mt-2 text-2xl font-semibold tracking-[-0.035em]">
                   {service.name}
                 </h2>
@@ -91,7 +117,7 @@ export default async function ServiceCoveragePage({
                 />
               </article>
             ))}
-            {!coverage.services.length ? (
+            {!services.length ? (
               <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-7 text-sm text-white/55">
                 Add a service before configuring coverage.
               </div>

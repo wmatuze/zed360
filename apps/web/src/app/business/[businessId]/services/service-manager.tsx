@@ -160,6 +160,22 @@ function ServiceCard({
               : "Unavailable"}
         </span>
       </div>
+      {service.status === "active" && service.coverageModes === 0 ? (
+        <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-amber-200/25 bg-amber-200/[0.06] p-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm leading-6 text-amber-100/90">
+            <span className="font-semibold">
+              Customer requests cannot reach this service yet.
+            </span>{" "}
+            Say where and how you provide it.
+          </p>
+          <a
+            className="button button-primary shrink-0"
+            href={`/business/${businessId}/coverage#service-${service.id}`}
+          >
+            Set coverage →
+          </a>
+        </div>
+      ) : null}
       <form action={action} className="grid gap-4">
         <ServiceFields referenceData={referenceData} service={service} />
         <Message state={state} />
@@ -167,12 +183,12 @@ function ServiceCard({
           <button className="button button-secondary" disabled={pending}>
             {pending ? "Saving…" : "Save service"}
           </button>
-          {service.status === "active" ? (
+          {service.status === "active" && service.coverageModes > 0 ? (
             <a
               className="button button-quiet"
-              href={`/business/${businessId}/coverage`}
+              href={`/business/${businessId}/coverage#service-${service.id}`}
             >
-              {service.coverageModes ? "Edit coverage" : "Add coverage"}
+              Edit coverage
             </a>
           ) : null}
         </div>
@@ -209,8 +225,12 @@ export function ServiceManager({
         <ServiceFields referenceData={referenceData} />
         <Message state={state} />
         <button className="button button-primary w-fit" disabled={pending}>
-          {pending ? "Adding…" : "Add service"}
+          {pending ? "Adding…" : "Add service and set coverage →"}
         </button>
+        <p className="text-xs leading-5 text-white/50">
+          Next you will say where and how you provide it, so matching requests
+          can reach you.
+        </p>
       </form>
       <div className="grid gap-5">
         {services.map((service) => (
