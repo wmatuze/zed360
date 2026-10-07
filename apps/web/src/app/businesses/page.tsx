@@ -345,7 +345,7 @@ export default async function BusinessesPage({
         ) : null}
 
         {directory?.businesses.length ? (
-          <ul className="mt-5 grid gap-3 lg:grid-cols-2">
+          <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {directory.businesses.map((business) => (
               <BusinessRow business={business} key={business.id} />
             ))}
