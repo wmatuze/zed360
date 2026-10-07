@@ -28,6 +28,24 @@ export async function fetchBusinessAccount(
   return parseAccountResponse(response);
 }
 
+export async function setEmailAlerts(accessToken: string, enabled: boolean) {
+  const response = await fetch(`${apiUrl}/business-account/email-alerts`, {
+    method: "PUT",
+    headers: {
+      authorization: `Bearer ${accessToken}`,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({ enabled }),
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    throw new BusinessAccountApiError(
+      "Email alert settings could not be saved.",
+      response.status,
+    );
+  }
+}
+
 export async function linkBusiness(
   accessToken: string,
   businessId: string,

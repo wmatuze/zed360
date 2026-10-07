@@ -133,7 +133,14 @@ export class BusinessAccountsService {
             );
     const claimedIds = new Set(ownerRows.map((row) => row.businessId));
 
+    const [preferences] = await this.database.db
+      .select({ emailAlerts: users.emailAlertsEnabled })
+      .from(users)
+      .where(eq(users.id, user.id))
+      .limit(1);
+
     return {
+      emailAlerts: preferences?.emailAlerts ?? true,
       businesses: ownedBusinesses.map((business) => ({
         ...business,
         latestReviewReason: latestReviewReasons.get(business.id) ?? null,
@@ -431,6 +438,16 @@ export class BusinessAccountsService {
       }
       throw error;
     }
+  }
+
+  /** Turns email alerts on or off for the signed-in person only. */
+  async setEmailAlerts(user: AuthenticatedUser, enabled: boolean) {
+    await this.syncUser(user);
+    await this.database.db
+      .update(users)
+      .set({ emailAlertsEnabled: enabled, updatedAt: new Date() })
+      .where(eq(users.id, user.id));
+    return { emailAlerts: enabled };
   }
 
   private async syncUser(user: AuthenticatedUser) {

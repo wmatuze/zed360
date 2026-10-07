@@ -5,12 +5,14 @@ import {
   Get,
   Headers,
   Post,
+  Put,
   Query,
   UnauthorizedException,
 } from '@nestjs/common';
 import {
   businessApplicationClaimSchema,
   claimBusinessSchema,
+  updateEmailAlertsSchema,
 } from '@zed360/contracts';
 import { AuthenticatedUserService } from './authenticated-user.service';
 import { BusinessAccountsService } from './business-accounts.service';
@@ -81,6 +83,21 @@ export class BusinessAccountsController {
   async getAccount(@Headers('authorization') authorization?: string) {
     const user = await this.authentication.verify(authorization);
     return this.accounts.getAccount(user);
+  }
+
+  @Put('email-alerts')
+  async setEmailAlerts(
+    @Headers('authorization') authorization: string | undefined,
+    @Body() body: unknown,
+  ) {
+    const parsed = updateEmailAlertsSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException(
+        'Choose whether email alerts are on or off.',
+      );
+    }
+    const user = await this.authentication.verify(authorization);
+    return this.accounts.setEmailAlerts(user, parsed.data.enabled);
   }
 
   @Post('claims')

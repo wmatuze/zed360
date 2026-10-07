@@ -79,8 +79,8 @@ businesses' responses. The most recent 100 are listed.
 
 ## Known gaps
 
-- **Alerts.** Owners are told about new requests only inside Zed360. Email or
-  WhatsApp delivery is not built; see
+- **WhatsApp alerts.** Owners are emailed about new requests, but not yet
+  messaged on WhatsApp; see
   [business notifications](business-notifications.md).
 - **Team members.** Manager and staff roles exist, but an owner cannot yet add
   people to a business.

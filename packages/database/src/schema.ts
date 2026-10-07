@@ -173,6 +173,11 @@ export const businessActivityEvent = pgEnum("business_activity_event", [
   "directions",
   "share",
 ]);
+export const notificationChannel = pgEnum("notification_channel", ["email"]);
+export const notificationDeliveryStatus = pgEnum(
+  "notification_delivery_status",
+  ["pending", "sent", "failed"],
+);
 
 export const users = pgTable(
   "users",
@@ -189,6 +194,8 @@ export const users = pgTable(
       .notNull(),
     statusReason: text("status_reason"),
     statusChangedAt: timestamp("status_changed_at", { withTimezone: true }),
+    // Whether Zed360 may email this person about activity on their businesses.
+    emailAlertsEnabled: boolean("email_alerts_enabled").default(true).notNull(),
     ...timestamps,
   },
   (table) => [
@@ -864,6 +871,39 @@ export const reviews = pgTable(
       table.createdAt,
     ),
     check("reviews_rating_check", sql`${table.rating} between 1 and 5`),
+  ],
+).enableRLS();
+
+// One row per notification and channel, so a send is attempted, retried, and
+// recorded independently of the notification itself. A provider failure never
+// affects the request or review that caused the notification.
+export const businessNotificationDeliveries = pgTable(
+  "business_notification_deliveries",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    notificationId: uuid("notification_id")
+      .notNull()
+      .references(() => businessNotifications.id, { onDelete: "cascade" }),
+    channel: notificationChannel("channel").notNull(),
+    status: notificationDeliveryStatus("status").default("pending").notNull(),
+    attempts: integer("attempts").default(0).notNull(),
+    nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    providerMessageId: text("provider_message_id"),
+    lastError: text("last_error"),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("business_notification_deliveries_unique").on(
+      table.notificationId,
+      table.channel,
+    ),
+    index("business_notification_deliveries_due_idx").on(
+      table.status,
+      table.nextAttemptAt,
+    ),
   ],
 ).enableRLS();
 
