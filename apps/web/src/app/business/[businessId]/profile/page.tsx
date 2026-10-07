@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import { getVerifiedBusinessSession } from "@/lib/business-account";
+import { fetchBusinessCatalog } from "@/lib/business-catalog";
 import { fetchBusinessProfile } from "@/lib/business-profile-management";
 import { saveProfile } from "./actions";
+import { IdentityImages } from "./identity-images";
 
 export default async function BusinessProfilePage({
   params,
@@ -15,6 +17,11 @@ export default async function BusinessProfilePage({
   if (!session)
     redirect(`/business/sign-in?next=/business/${businessId}/profile`);
   const profile = await fetchBusinessProfile(session.accessToken, businessId);
+  // Images are optional to this page: if they cannot be loaded, the rest of
+  // the profile can still be edited.
+  const media = await fetchBusinessCatalog(session.accessToken, businessId)
+    .then((catalog) => catalog.media)
+    .catch(() => null);
   const values = profile.pending?.proposed ?? profile.current;
   const isCorrection = profile.business.reviewStatus === "changes_requested";
   const save = saveProfile.bind(null, businessId);
@@ -49,9 +56,31 @@ export default async function BusinessProfilePage({
             Latest update rejected: {profile.latestDecision.note}
           </p>
         ) : null}
+        {media ? (
+          <section aria-labelledby="images-heading" className="mt-10">
+            <h2 className="text-xl font-semibold" id="images-heading">
+              Logo and cover photo
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/50">
+              These are the first things customers see. Use real photos of your
+              business; Zed360 reviews them before they are shown.
+            </p>
+            <div className="mt-4">
+              <IdentityImages
+                businessId={businessId}
+                businessName={profile.business.name}
+                media={media}
+              />
+            </div>
+          </section>
+        ) : null}
+
+        <h2 className="mt-10 text-xl font-semibold">
+          Description and contact details
+        </h2>
         <form
           action={save}
-          className="mt-8 grid gap-5 rounded-2xl border border-white/10 bg-white/[.035] p-6"
+          className="mt-4 grid gap-5 rounded-2xl border border-white/10 bg-white/[.035] p-6"
         >
           <label>
             <span className="mb-2 block text-sm text-white/65">
