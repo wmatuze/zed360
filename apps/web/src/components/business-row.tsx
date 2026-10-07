@@ -28,7 +28,14 @@ function initials(value: string) {
  * card opens the profile; Save and Compare sit along the bottom, above that
  * link.
  */
-export function BusinessRow({ business }: { business: Business }) {
+export function BusinessRow({
+  business,
+  compare = true,
+}: {
+  business: Business;
+  /** Hide Compare on pages that have no comparison tray. */
+  compare?: boolean;
+}) {
   const district = business.primaryLocation?.district;
   const place = district ? `${district.name}, ${district.provinceName}` : null;
   const verification = verificationLabel(business.trust);
@@ -115,11 +122,13 @@ export function BusinessRow({ business }: { business: Business }) {
             slug={business.slug}
             variant="row"
           />
-          <CompareButton
-            name={business.name}
-            slug={business.slug}
-            variant="row"
-          />
+          {compare ? (
+            <CompareButton
+              name={business.name}
+              slug={business.slug}
+              variant="row"
+            />
+          ) : null}
         </div>
       </div>
     </li>

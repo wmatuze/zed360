@@ -68,6 +68,20 @@ The card label is computed by the application and the filter by the database.
 They must stay in step: if `describeOperatingHours` changes, change
 `openNowFilter` with it.
 
+## The same card elsewhere
+
+The homepage's "Businesses worth discovering" block uses the same card without
+Compare, because the homepage has no comparison tray. The saved-businesses page
+uses a matching card built from what the browser stored (name, place, and the
+date saved), since it loads without contacting the API.
+
+## Cached responses
+
+Pages keep directory responses for a few minutes. Fields added to a business
+summary after launch therefore have defaults in the contract, so a response
+cached before a field existed still loads. Give any new summary field a default
+for the same reason.
+
 ## Saved and compared businesses
 
 Save and Compare work as before and keep their lists in the customer's

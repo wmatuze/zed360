@@ -8,12 +8,13 @@ by the business or a plain fact about it. This follows the "No payments" rule in
 
 `GET /v1/businesses` accepts `sort`. Anything else is rejected.
 
-| `sort`               | Lists                                                | Ordered by                                    |
-| -------------------- | ---------------------------------------------------- | --------------------------------------------- |
-| `recently_confirmed` | every approved business (the default)                | most recent profile confirmation by the owner |
-| `top_rated`          | only businesses with at least one published review   | weighted rating, then number of reviews       |
-| `recently_verified`  | only businesses with a contact or registration check | most recent completed check                   |
-| `newest`             | every approved business                              | newest first                                  |
+| `sort`               | Lists                                                       | Ordered by                                    |
+| -------------------- | ----------------------------------------------------------- | --------------------------------------------- |
+| `recently_confirmed` | every approved business (the default)                       | most recent profile confirmation by the owner |
+| `top_rated`          | only businesses with at least one published review          | weighted rating, then number of reviews       |
+| `most_viewed`        | only businesses whose profile was opened in the last 7 days | profile views in the last 7 days              |
+| `recently_verified`  | only businesses with a contact or registration check        | most recent completed check                   |
+| `newest`             | every approved business                                     | newest first                                  |
 
 Ties are broken by name. The same filters (search, category, province,
 district, fulfilment) apply to every order.
@@ -32,6 +33,22 @@ displayed rating is always the true average and review count. Only the order
 uses the weighted score. Only published reviews count, and reviews come only
 from customers who chose the business through a Zed360 request.
 
+### Most viewed this week
+
+This order is popularity, not quality, and it is the one order a business can
+influence directly: opening its own profile from several devices raises the
+count. It was added deliberately, with these limits:
+
+- it is always titled "Most viewed this week" and each card shows the actual
+  number of views, so it never implies a recommendation;
+- it is never the default order and never feeds search, matching, "Top rated",
+  or any badge;
+- a view is counted once per browser tab per day, and the counting endpoint is
+  rate limited, which stops casual inflation but not a determined person.
+
+If this list is ever abused in practice, remove it rather than trying to make
+the count tamper-proof. See [profile activity](profile-activity.md).
+
 ### Recently verified
 
 Only checks that are shown on a public profile count: contact and
@@ -43,11 +60,11 @@ registration. See [business verification](business-verification.md).
 ## Homepage
 
 Below "Businesses worth discovering", the homepage shows up to three sections,
-each under a plain title with one short line beneath it: Top rated, Recently
-verified, and Newly added. For each section:
+each under a plain title with one short line beneath it: Top rated, Most viewed
+this week, Recently verified, and Newly added. For each section:
 
 - every card states why that business is there (its rating and review count,
-  the check and its date, or the date it joined);
+  its views this week, the check and its date, or the date it joined);
 - at most four businesses are shown, with a link to the full list;
 - a business without a reason is never shown, and a section with no
   businesses is left out entirely rather than padded.
@@ -62,13 +79,16 @@ See [business directory](business-directory.md).
 ## What must never feed an order
 
 - Payment of any kind.
-- Profile views, contact taps, shares, or saves. These are easy to inflate and
-  are shown only to the owner and administrators. See
+- Contact taps, shares, or saves, in any order.
+- Profile views, in any order other than the explicitly labelled "Most viewed
+  this week". Views are easy to inflate, so they must not influence search,
+  matching, "Top rated", or the default order. See
   [profile activity](profile-activity.md).
 - Administrator preference. There is no manual "featured" list.
 
-"Trending" and "most visited" sections were considered and left out for the
-second reason: they would rank businesses by a figure anyone can inflate.
+A "Trending" section was considered and left out: it would imply momentum or
+quality from a figure anyone can inflate. "Most viewed this week" says only
+what was counted.
 
 ## Adding a section
 

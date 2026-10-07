@@ -1500,10 +1500,12 @@ export type AdminCustomerReviewQueue = z.infer<
   typeof adminCustomerReviewQueueSchema
 >;
 
-// Every order is earned or factual. None can be bought.
+// Every order is earned or factual. None can be bought. "most_viewed" is
+// popularity, not quality, and is always labelled as such.
 export const publicBusinessSortSchema = z.enum([
   "recently_confirmed",
   "top_rated",
+  "most_viewed",
   "recently_verified",
   "newest",
 ]);
@@ -1619,15 +1621,22 @@ export const publicBusinessSummarySchema = z.object({
   availabilityFreshness: freshnessStateSchema,
   profileFreshness: freshnessStateSchema,
   trust: publicBusinessTrustSchema,
-  reviewSummary: z.object({
-    averageRating: z.number().min(1).max(5).nullable(),
-    reviewCount: z.number().int().nonnegative(),
-  }),
+  // The fields below were added after launch. Pages cache directory responses
+  // for a few minutes, so each has a default: a response cached before a field
+  // existed must still load instead of failing validation.
+  reviewSummary: z
+    .object({
+      averageRating: z.number().min(1).max(5).nullable(),
+      reviewCount: z.number().int().nonnegative(),
+    })
+    .default({ averageRating: null, reviewCount: 0 }),
+  /** Profile views counted over the last 7 days. */
+  viewsThisWeek: z.number().int().nonnegative().default(0),
   /** Whether any of the business's locations is open at this moment. */
-  openStatus: z.enum(["open", "closed", "unknown"]),
+  openStatus: z.enum(["open", "closed", "unknown"]).default("unknown"),
   /** When Zed360 last completed a contact or registration check. */
-  verifiedAt: z.string().datetime().nullable(),
-  joinedAt: z.string().datetime(),
+  verifiedAt: z.string().datetime().nullable().default(null),
+  joinedAt: z.string().datetime().nullable().default(null),
   primaryLocation: publicBusinessLocationSchema.nullable(),
   categories: z.array(z.object({ name: z.string(), slug: z.string() })),
   serviceNames: z.array(z.string()),

@@ -86,7 +86,18 @@ const weightedRating = sql`(
     and published_review.is_published = true
 )`;
 
+// Popularity, not quality: an owner can raise this by visiting their own
+// profile, so it is only ever shown as "most viewed", with the count.
+const viewsThisWeek = sql<number>`(
+  select coalesce(sum(viewed.count), 0)::int
+  from business_activity_daily viewed
+  where viewed.business_id = ${businessId}
+    and viewed.event = 'profile_view'
+    and viewed.day > (now() at time zone 'Africa/Lusaka')::date - 7
+)`;
+
 const directoryOrder: Record<PublicBusinessSort, SQL[]> = {
+  most_viewed: [sql`${viewsThisWeek} desc`],
   recently_confirmed: [sql`${businesses.lastConfirmedAt} desc nulls last`],
   top_rated: [sql`${weightedRating} desc`, sql`${publishedReviewCount} desc`],
   recently_verified: [sql`${latestVerificationAt} desc nulls last`],
@@ -131,6 +142,7 @@ export class PublicBusinessesService {
       filters.push(sql`${publishedReviewCount} > 0`);
     if (query.sort === 'recently_verified')
       filters.push(sql`${latestVerificationAt} is not null`);
+    if (query.sort === 'most_viewed') filters.push(sql`${viewsThisWeek} > 0`);
     const where = and(...filters);
     const offset = (query.page - 1) * pageSize;
 
@@ -155,6 +167,7 @@ export class PublicBusinessesService {
           reviewCount: publishedReviewCount,
           averageRating: publishedAverageRating,
           verifiedAt: latestVerificationAt,
+          viewsThisWeek,
         })
         .from(businesses)
         .where(where)

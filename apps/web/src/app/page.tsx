@@ -1,9 +1,9 @@
 import type { PublicBusinessDirectory, ReferenceData } from "@zed360/contracts";
-import Image from "next/image";
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
+import { BusinessRow } from "@/components/business-row";
 import { HomeMeritSections } from "@/components/home-merit-sections";
-import { meritSections, verificationLabel } from "@/lib/merit-sections";
+import { meritSections } from "@/lib/merit-sections";
 import {
   fetchPublicBusinessDirectory,
   fetchPublicReferenceData,
@@ -19,12 +19,6 @@ const footerColumns = [
   { title: "Explore", links: [["Browse businesses", "/businesses"], ["Post a request", "/request"], ["Categories", "#categories"]] },
   { title: "For business", links: [["List your business", "/for-business"], ["Business sign in", "/business/sign-in"], ["Manage your account", "/business/account"]] },
 ];
-
-const availabilityLabels = {
-  available: "Available now",
-  busy: "Currently busy",
-  temporarily_unavailable: "Temporarily unavailable",
-} as const;
 
 function initials(value: string) {
   return value.split(/\s+/).slice(0, 2).map((word) => word[0]).join("").toUpperCase();
@@ -56,7 +50,7 @@ async function homepageData(): Promise<{
 export default async function Home() {
   const { directory, referenceData, merit } = await homepageData();
   const categories = referenceData?.categories.slice(0, 8) ?? [];
-  const businesses = directory?.businesses.slice(0, 6) ?? [];
+  const businesses = directory?.businesses.slice(0, 8) ?? [];
 
   return (
     <main className="min-h-screen overflow-hidden bg-[var(--ink)] text-white">
@@ -146,39 +140,9 @@ export default async function Home() {
             <Link className="text-sm font-semibold text-[var(--lime)] hover:underline" href="/businesses">View all businesses →</Link>
           </div>
           {businesses.length ? (
-            <div className="home-business-grid mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {businesses.map((business) => {
-                const location = business.primaryLocation?.district;
-                const verified = verificationLabel(business.trust);
-                return (
-                  <Link className="home-business-card group" href={`/businesses/${business.slug}`} key={business.id}>
-                    <div className="relative aspect-[16/8] overflow-hidden bg-white/5">
-                      {business.coverUrl ? (
-                        <Image alt="" className="object-contain transition duration-300 group-hover:scale-[1.02]" fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw" src={business.coverUrl} unoptimized />
-                      ) : <div className="home-card-pattern" />}
-                      <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#11151d] to-transparent" />
-                      <span className="home-business-logo">
-                        {business.logoUrl ? <Image alt={`${business.name} logo`} className="object-cover" fill sizes="52px" src={business.logoUrl} unoptimized /> : initials(business.name)}
-                      </span>
-                    </div>
-                    <div className="flex flex-1 flex-col p-5 pt-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <h3 className="text-xl font-semibold tracking-[-0.03em] group-hover:text-[var(--lime)]">{business.name}</h3>
-                        {verified ? <span className="verified-pill">{verified}</span> : null}
-                      </div>
-                      <p className="mt-2 text-sm text-white/50">{location ? `${location.name}, ${location.provinceName}` : "Serving customers in Zambia"}</p>
-                      <p className="mt-4 line-clamp-2 text-sm leading-6 text-white/55">{business.description || business.serviceNames.slice(0, 3).join(" · ") || "View this business profile and its available services."}</p>
-                      <div className="mt-auto flex items-center justify-between gap-3 pt-5 text-xs">
-                        <span className={business.availabilityFreshness === "current" && business.availability === "available" ? "text-[var(--lime)]" : "text-white/50"}>
-                          {business.availabilityFreshness === "current" ? availabilityLabels[business.availability] : "View current details"}
-                        </span>
-                        <b className="text-white/50 group-hover:text-[var(--lime)]">View profile →</b>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
+            <ul className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {businesses.map((business) => <BusinessRow business={business} compare={false} key={business.id} />)}
+            </ul>
           ) : (
             <div className="home-empty-state mt-10"><p>Business profiles could not be loaded right now.</p><Link href="/businesses">Open the business directory →</Link></div>
           )}

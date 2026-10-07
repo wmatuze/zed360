@@ -34,6 +34,7 @@ const fulfillmentLabels = {
 const sortLabels = {
   recently_confirmed: "Recently confirmed",
   top_rated: "Top rated",
+  most_viewed: "Most viewed this week",
   recently_verified: "Recently verified",
   newest: "Newly added",
 } as const;
