@@ -327,6 +327,7 @@ export const businessDashboardSchema = z.object({
         pendingMedia: z.number().int().nonnegative(),
         publishedReviews: z.number().int().nonnegative(),
         awaitingResponse: z.number().int().nonnegative(),
+        unansweredReviews: z.number().int().nonnegative().default(0),
         locationsWithoutPin: z.number().int().nonnegative(),
         locationsWithoutHours: z.number().int().nonnegative(),
       }),

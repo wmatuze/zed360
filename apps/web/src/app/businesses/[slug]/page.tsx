@@ -517,6 +517,16 @@ export default async function BusinessProfilePage({
                           Rating only
                         </p>
                       )}
+                      {review.response ? (
+                        <div className="mt-4 rounded-2xl border-l-2 border-[var(--lime)]/50 bg-white/[0.04] p-4">
+                          <p className="text-xs font-semibold text-white/75">
+                            Reply from {business.name}
+                          </p>
+                          <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-white/65">
+                            {review.response.body}
+                          </p>
+                        </div>
+                      ) : null}
                       <ReportContent
                         compact
                         targetId={review.id}

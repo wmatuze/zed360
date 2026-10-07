@@ -76,6 +76,16 @@ export function attentionItems(business: DashboardBusiness): AttentionItem[] {
       action: "Confirm profile",
     });
 
+  if (canManage && business.metrics.unansweredReviews > 0)
+    items.push({
+      key: "reviews",
+      tone: "setup",
+      title: `${plural(business.metrics.unansweredReviews, "review is", "reviews are")} waiting for your reply`,
+      detail: "A public reply shows customers you listen.",
+      href: `${base}/reviews`,
+      action: "Reply",
+    });
+
   if (canManage) {
     if (!business.setup.hasAvailableService)
       items.push({

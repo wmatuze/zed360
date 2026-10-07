@@ -35,6 +35,7 @@ function business(overrides: {
       pendingMedia: 0,
       publishedReviews: 0,
       awaitingResponse: 0,
+      unansweredReviews: 0,
       locationsWithoutPin: 0,
       locationsWithoutHours: 0,
     },
@@ -96,6 +97,22 @@ test("waiting customers come before setup work", () => {
   assert.equal(
     items[2].href,
     "/business/ef7e5e78-5c1d-49b8-87aa-296145c2fc05/locations",
+  );
+});
+
+test("unanswered reviews are raised for managers, after customer work", () => {
+  const items = attentionItems(
+    business({ metrics: { unansweredReviews: 2, awaitingResponse: 1 } }),
+  );
+  assert.deepEqual(
+    items.map(({ key }) => key),
+    ["awaiting-response", "reviews"],
+  );
+  assert.equal(items[1].title, "2 reviews are waiting for your reply");
+  assert.ok(items[1].href?.endsWith("/reviews"));
+  assert.deepEqual(
+    keys(business({ role: "staff", metrics: { unansweredReviews: 2 } })),
+    [],
   );
 });
 
