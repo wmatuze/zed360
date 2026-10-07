@@ -65,3 +65,55 @@ export function notificationEmail(input: NotificationEmailInput) {
 
   return { subject, text, html };
 }
+
+export type CustomerResponseEmailInput = {
+  businessName: string;
+  requestSummary: string;
+  shareToken: string;
+  appUrl: string;
+};
+
+/**
+ * Tells a customer that a business has responded to their request. It links
+ * to their private request page and repeats only their own summary.
+ */
+export function customerResponseEmail(input: CustomerResponseEmailInput) {
+  const base = input.appUrl.replace(/\/+$/, '');
+  const link = `${base}/request/${encodeURIComponent(input.shareToken)}`;
+  const subject = `${input.businessName} responded to your request`
+    .replace(/\s+/g, ' ')
+    .slice(0, 200);
+  const intro = `${input.businessName} has responded to your request on Zed360:`;
+  const privacy =
+    'Keep this link private: anyone who has it can see your request and its responses.';
+  const footer =
+    'You are receiving this because this email address was entered on a Zed360 request. If that was not you, you can ignore this email.';
+
+  const text = [
+    intro,
+    '',
+    `“${input.requestSummary}”`,
+    '',
+    `See the response and contact the business: ${link}`,
+    '',
+    privacy,
+    '',
+    footer,
+  ].join('\n');
+
+  const html = `<!doctype html>
+<html lang="en">
+  <body style="margin:0;padding:24px;background:#f4f5f7;font-family:Arial,Helvetica,sans-serif;color:#0b0d12;">
+    <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:12px;padding:28px;">
+      <h1 style="margin:0 0 14px;font-size:20px;line-height:1.3;">${escapeHtml(input.businessName)} responded to your request</h1>
+      <p style="margin:0 0 8px;font-size:13px;color:#5b6170;">Your request</p>
+      <p style="margin:0 0 22px;font-size:15px;line-height:1.6;white-space:pre-wrap;">${escapeHtml(input.requestSummary)}</p>
+      <a href="${escapeHtml(link)}" style="display:inline-block;background:#b8f238;color:#0b0d12;text-decoration:none;font-weight:bold;font-size:15px;padding:12px 20px;border-radius:999px;">See the response</a>
+      <p style="margin:22px 0 0;font-size:13px;line-height:1.6;color:#5b6170;">${escapeHtml(privacy)}</p>
+      <p style="margin:14px 0 0;font-size:12px;line-height:1.6;color:#5b6170;">${escapeHtml(footer)}</p>
+    </div>
+  </body>
+</html>`;
+
+  return { subject, text, html };
+}

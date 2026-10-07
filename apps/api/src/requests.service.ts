@@ -88,6 +88,7 @@ export class RequestsService {
           budgetMinimum: request.budgetMinimum?.toFixed(2),
           budgetMaximum: request.budgetMaximum?.toFixed(2),
           expiresAt,
+          notifyEmail: request.notifyEmail || null,
         })
         .returning({
           id: customerRequests.id,
@@ -417,6 +418,7 @@ export class RequestsService {
         .select({
           id: customerRequests.id,
           status: customerRequests.status,
+          summary: customerRequests.summary,
           expiresAt: customerRequests.expiresAt,
         })
         .from(customerRequests)
@@ -544,7 +546,9 @@ export class RequestsService {
             businessId: eligibleResponse.businessId,
             type: 'customer_selected',
             title: 'A customer selected your business',
-            body: 'Your response was selected for a customer request.',
+            // The summary is what this business already saw when it was
+            // matched; nothing new about the customer is revealed.
+            body: `Your response to “${request.summary}” was selected.`,
             actionUrl: '/business/notifications',
             eventKey: `customer-selected:${request.id}:${eligibleResponse.businessId}`,
             data: { requestId: request.id },

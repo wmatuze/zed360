@@ -56,8 +56,13 @@ export class NotificationDeliveryService
     this.running = true;
     try {
       const queued = await this.enqueue();
-      const { sent, failed } = await this.deliverDue();
-      return { queued, sent, failed };
+      const alerts = await this.deliverDue();
+      const outbox = await this.deliverOutbox();
+      return {
+        queued,
+        sent: alerts.sent + outbox.sent,
+        failed: alerts.failed + outbox.failed,
+      };
     } catch (error) {
       this.logger.error(
         `Email alert pass failed: ${error instanceof Error ? error.message : 'unknown error'}`,
@@ -151,8 +156,9 @@ export class NotificationDeliveryService
         const email = notificationEmail({
           title: String(details.title),
           body: String(details.body),
-          actionUrl:
-            typeof details.actionUrl === 'string' ? details.actionUrl : null,
+          // Opening through this address marks the notification as read
+          // and lands on the request it is about.
+          actionUrl: `/business/notifications/${String(delivery.notification_id)}/open`,
           businessName: String(details.businessName),
           appUrl: this.appUrl(),
         });
@@ -179,6 +185,74 @@ export class NotificationDeliveryService
           `;
         }
         this.logger.warn(`Email alert ${id} attempt ${attempts}: ${message}`);
+      }
+    }
+    return { sent, failed };
+  }
+
+  /**
+   * Sends stored emails to people without an account, such as a customer who
+   * asked to hear about responses. Messages older than a day are left unsent:
+   * by then the news is stale.
+   */
+  async deliverOutbox() {
+    const due = await this.database.client`
+      update email_outbox message
+      set attempts = message.attempts + 1,
+          next_attempt_at = now() + make_interval(mins => (2 * power(2, message.attempts))::int),
+          updated_at = now()
+      where message.id in (
+        select candidate.id from email_outbox candidate
+        where candidate.status = 'pending'
+          and candidate.next_attempt_at <= now()
+          and candidate.created_at >= now() - interval '24 hours'
+        order by candidate.next_attempt_at
+        limit ${BATCH_SIZE}
+        for update skip locked
+      )
+      returning message.id, message.attempts, message.to_email as "toEmail",
+                message.subject, message.text_body as "text",
+                message.html_body as "html"
+    `;
+
+    let sent = 0;
+    let failed = 0;
+    for (const message of due) {
+      const id = String(message.id);
+      const attempts = Number(message.attempts);
+      const record = async (
+        status: 'pending' | 'sent' | 'failed',
+        providerMessageId: string | null,
+        error: string | null,
+      ) => {
+        await this.database.client`
+          update email_outbox
+          set status = ${status}::notification_delivery_status,
+              provider_message_id = ${providerMessageId},
+              last_error = ${error ? error.slice(0, 500) : null},
+              sent_at = case when ${status} = 'sent' then now() else null end,
+              updated_at = now()
+          where id = ${id}
+        `;
+      };
+      try {
+        const result = await this.sender.send({
+          to: String(message.toEmail),
+          subject: String(message.subject),
+          text: String(message.text),
+          html: String(message.html),
+          idempotencyKey: `zed360-outbox-${id}`,
+        });
+        await record('sent', result.id, null);
+        sent += 1;
+      } catch (error) {
+        const reason =
+          error instanceof Error ? error.message : 'Unknown send failure.';
+        const permanent = error instanceof EmailSendError && error.permanent;
+        const giveUp = permanent || attempts >= MAX_ATTEMPTS;
+        await record(giveUp ? 'failed' : 'pending', null, reason);
+        if (giveUp) failed += 1;
+        this.logger.warn(`Email ${id} attempt ${attempts}: ${reason}`);
       }
     }
     return { sent, failed };

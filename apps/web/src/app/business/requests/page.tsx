@@ -112,7 +112,8 @@ export default async function BusinessRequestsPage() {
           <div className="mt-10 grid gap-5">
             {data.requests.map(({ matchId, business, request, response }) => (
               <article
-                className="rounded-2xl border border-white/10 bg-white/[0.035] p-6 sm:p-7"
+                className="scroll-mt-6 rounded-2xl border border-white/10 bg-white/[0.035] p-6 target:border-[var(--lime)] target:bg-[var(--lime)]/[0.05] sm:p-7"
+                id={`request-${request.id}`}
                 key={matchId}
               >
                 <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">

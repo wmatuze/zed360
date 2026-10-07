@@ -169,6 +169,13 @@
       "when": 1791374668749,
       "tag": "0023_owner_email_alerts",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1791377381356,
+      "tag": "0024_customer_response_emails",
+      "breakpoints": true
     }
   ]
 }

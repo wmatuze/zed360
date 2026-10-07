@@ -746,6 +746,9 @@ export const customerRequests = pgTable(
     budgetMinimum: numeric("budget_minimum", { precision: 14, scale: 2 }),
     budgetMaximum: numeric("budget_maximum", { precision: 14, scale: 2 }),
     shareToken: uuid("share_token").defaultRandom().notNull(),
+    // Optional. Used only to tell the customer about responses to this request;
+    // never shown to businesses.
+    notifyEmail: text("notify_email"),
     expiresAt: timestamp("expires_at", { withTimezone: true }),
     ...timestamps,
   },
@@ -904,6 +907,35 @@ export const businessNotificationDeliveries = pgTable(
       table.status,
       table.nextAttemptAt,
     ),
+  ],
+).enableRLS();
+
+// Emails to people who have no Zed360 account, such as a customer who asked
+// to hear when a business responds. The message is stored ready to send so a
+// failed attempt can be retried without rebuilding it. The key makes each
+// message send at most once.
+export const emailOutbox = pgTable(
+  "email_outbox",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    dedupeKey: text("dedupe_key").notNull(),
+    toEmail: text("to_email").notNull(),
+    subject: text("subject").notNull(),
+    textBody: text("text_body").notNull(),
+    htmlBody: text("html_body").notNull(),
+    status: notificationDeliveryStatus("status").default("pending").notNull(),
+    attempts: integer("attempts").default(0).notNull(),
+    nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    providerMessageId: text("provider_message_id"),
+    lastError: text("last_error"),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("email_outbox_dedupe_unique").on(table.dedupeKey),
+    index("email_outbox_due_idx").on(table.status, table.nextAttemptAt),
   ],
 ).enableRLS();
 

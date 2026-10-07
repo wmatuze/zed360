@@ -76,6 +76,16 @@ export class BusinessNotificationsController {
     return this.notifications.restore(user, notificationId);
   }
 
+  @Post(':notificationId/open')
+  async open(
+    @Headers('authorization') authorization: string | undefined,
+    @Param('notificationId') notificationId: string,
+  ) {
+    this.requireNotificationId(notificationId);
+    const user = await this.authentication.verify(authorization);
+    return this.notifications.open(user, notificationId);
+  }
+
   @Post(':notificationId/read')
   async markRead(
     @Headers('authorization') authorization: string | undefined,

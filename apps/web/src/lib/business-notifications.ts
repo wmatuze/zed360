@@ -90,3 +90,35 @@ export const restoreBusinessNotification = (
 
 export const archiveAllReadBusinessNotifications = (accessToken: string) =>
   mutate(accessToken, "/archive-read");
+
+/** Marks a notification as read and returns the screen it leads to. */
+export async function openBusinessNotification(
+  accessToken: string,
+  notificationId: string,
+): Promise<string> {
+  const response = await fetch(
+    `${apiUrl}/business-notifications/${notificationId}/open`,
+    {
+      method: "POST",
+      headers: { authorization: `Bearer ${accessToken}` },
+      cache: "no-store",
+    },
+  );
+  const body = (await response.json().catch(() => null)) as {
+    destination?: unknown;
+    message?: unknown;
+  } | null;
+  if (!response.ok) {
+    throw new BusinessNotificationsApiError(
+      typeof body?.message === "string"
+        ? body.message
+        : "The notification could not be opened.",
+      response.status,
+    );
+  }
+  // Only ever follow a path inside Zed360.
+  return typeof body?.destination === "string" &&
+    /^\/(?![/\\])/.test(body.destination)
+    ? body.destination
+    : "/business/notifications";
+}

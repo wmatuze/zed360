@@ -26,6 +26,7 @@ type CreatedRequest = {
   status: "open";
   createdAt: string;
   summary?: string;
+  notifyEmail?: string;
 };
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/v1";
@@ -104,6 +105,7 @@ export function RequestForm() {
       budgetMaximum: optionalNumber("budgetMaximum"),
       details: value("details") || undefined,
       categoryAnswers: {},
+      notifyEmail: value("notifyEmail") || undefined,
     };
 
     try {
@@ -123,7 +125,11 @@ export function RequestForm() {
         );
       }
 
-      setCreatedRequest({ ...result, summary: request.summary });
+      setCreatedRequest({
+        ...result,
+        summary: request.summary,
+        notifyEmail: request.notifyEmail,
+      });
       rememberRecentRequest({
         id: result.id,
         shareToken: result.shareToken,
@@ -159,9 +165,26 @@ export function RequestForm() {
           Your request is now open.
         </h2>
         <p className="mt-3 leading-7 text-white/60">
-          Zed360 received your request successfully. Use your private page to
-          check and compare responses from approved businesses.
+          Matching businesses have been told about it. Compare their responses
+          on your private page and contact the one you prefer.
         </p>
+        {createdRequest.notifyEmail ? (
+          <p className="mt-4 rounded-2xl border border-[var(--lime)]/25 bg-[var(--lime)]/10 p-4 text-sm leading-6 text-white/80">
+            <span className="font-semibold">
+              We will email {createdRequest.notifyEmail}
+            </span>{" "}
+            when a business responds. Check your spam folder if you do not see
+            it.
+          </p>
+        ) : (
+          <p className="mt-4 rounded-2xl border border-amber-200/25 bg-amber-200/[0.06] p-4 text-sm leading-6 text-amber-100/90">
+            <span className="font-semibold">
+              You did not leave an email address,
+            </span>{" "}
+            so Zed360 cannot tell you when a business responds. Save the link
+            below and come back to check.
+          </p>
+        )}
         <p className="mt-4 text-sm text-white/50">
           Request reference: {createdRequest.id.slice(0, 8).toUpperCase()}
         </p>
@@ -373,6 +396,25 @@ export function RequestForm() {
           maxLength={2000}
           name="details"
           placeholder="Measurements, preferred brands, delivery requirements, or other useful details"
+        />
+      </label>
+      <label className="block rounded-2xl border border-[var(--lime)]/20 bg-[var(--lime)]/[0.05] p-4">
+        <span className="mb-1 block text-sm font-medium text-white/85">
+          Email me when a business responds{" "}
+          <i className="font-normal text-white/50">optional</i>
+        </span>
+        <span className="mb-3 block text-xs leading-5 text-white/55">
+          Businesses never see your email address. Zed360 uses it only to tell
+          you about responses to this request.
+        </span>
+        <input
+          autoComplete="email"
+          className="h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 outline-none transition placeholder:text-white/50 focus:border-[var(--lime)]/55"
+          inputMode="email"
+          maxLength={254}
+          name="notifyEmail"
+          placeholder="you@example.com"
+          type="email"
         />
       </label>
       {submitError ? (

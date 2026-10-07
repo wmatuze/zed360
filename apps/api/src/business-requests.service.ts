@@ -8,13 +8,14 @@ import type {
 } from '@zed360/contracts';
 import {
   and,
+  businesses,
   businessMembers,
   businessResponses,
-  businesses,
   categories,
   customerRequests,
   desc,
   districts,
+  emailOutbox,
   eq,
   inArray,
   requestMatches,
@@ -22,6 +23,8 @@ import {
 } from '@zed360/database';
 import type { AuthenticatedUser } from './authenticated-user.service';
 import { DatabaseService } from './database.service';
+import { loadApiEnvironment } from './environment';
+import { customerResponseEmail } from './notification-email';
 
 const visibleRequestStatuses = ['open', 'matched'] as const;
 const visibleMatchStatuses = ['queued', 'sent', 'viewed', 'responded'] as const;
@@ -194,6 +197,7 @@ export class BusinessRequestsService {
   async getHistory(user: AuthenticatedUser): Promise<BusinessRequestHistory> {
     const rows = await this.database.client`
       select matched.id as "matchId",
+             request.id as "requestId",
              business.name as "businessName",
              request.summary,
              category.name as "categoryName",
@@ -241,6 +245,7 @@ export class BusinessRequestsService {
     const money = (value: unknown) => (value === null ? null : Number(value));
     const requests = rows.map((row) => ({
       matchId: String(row.matchId),
+      requestId: String(row.requestId),
       businessName: String(row.businessName),
       summary: String(row.summary),
       categoryName: String(row.categoryName),
@@ -277,7 +282,13 @@ export class BusinessRequestsService {
   ): Promise<SubmittedBusinessResponse> {
     return this.database.db.transaction(async (transaction) => {
       const [authorizedMatch] = await transaction
-        .select({ id: requestMatches.id })
+        .select({
+          id: requestMatches.id,
+          businessName: businesses.name,
+          requestSummary: customerRequests.summary,
+          shareToken: customerRequests.shareToken,
+          notifyEmail: customerRequests.notifyEmail,
+        })
         .from(requestMatches)
         .innerJoin(businesses, eq(requestMatches.businessId, businesses.id))
         .innerJoin(
@@ -348,6 +359,31 @@ export class BusinessRequestsService {
         .update(requestMatches)
         .set({ status: 'responded', updatedAt: now })
         .where(eq(requestMatches.id, matchId));
+
+      // Tell the customer, if they asked to be told. The key allows one email
+      // per business per request, so editing a response never sends another.
+      if (authorizedMatch.notifyEmail) {
+        loadApiEnvironment();
+        const email = customerResponseEmail({
+          businessName: authorizedMatch.businessName,
+          requestSummary: authorizedMatch.requestSummary,
+          shareToken: authorizedMatch.shareToken,
+          appUrl:
+            process.env.NEXT_PUBLIC_APP_URL ??
+            process.env.WEB_ORIGIN ??
+            'http://localhost:3000',
+        });
+        await transaction
+          .insert(emailOutbox)
+          .values({
+            dedupeKey: `customer-response:${matchId}`,
+            toEmail: authorizedMatch.notifyEmail,
+            subject: email.subject,
+            textBody: email.text,
+            htmlBody: email.html,
+          })
+          .onConflictDoNothing();
+      }
 
       return {
         matchId,
