@@ -16,21 +16,22 @@ phone with limited data.
 - **Filter chips** — one chip per active filter. Selecting a chip removes that
   filter and returns to the first page. Removing a province also removes the
   district inside it.
-- **Rows** — each business is a compact row, two columns on wide screens.
+- **Cards** — each business is a small card: two across on tablets, three on
+  laptops, and four on wide screens.
 - **Pages** — 30 businesses per page with numbered pages: the first, the last,
   and those around the current page.
 
-## What a row shows
+## What a card shows
 
-Logo (or initials), name, the specific verification label, category and town,
-rating with review count, "Open now" or "Closed now", and current
-availability. Save and Compare sit on the right.
+Logo (or initials), name, category and town, rating with review count, "Open
+now" or "Closed now", and current availability. A strip along the bottom holds
+the specific verification label on the left and Save and Compare on the right.
 
-Cover images and descriptions are deliberately left to the profile page. Rows
-without cover images keep the directory light on mobile data, and a row is
-about a fifth of the height of the previous card.
+Cover images and descriptions are deliberately left to the profile page. Cards
+without cover images keep the directory light on mobile data, and a card is
+about a quarter of the height of the previous one.
 
-A row shows only what is true and current:
+A card shows only what is true and current:
 
 - The rating appears only when the business has published reviews.
 - "Open now" or "Closed now" appears only when opening hours have been added.
@@ -63,7 +64,7 @@ results. It follows the same rules as the label on a profile:
   yesterday's hours run past midnight and have not ended;
 - a business that recently marked itself temporarily unavailable is not open.
 
-The row label is computed by the application and the filter by the database.
+The card label is computed by the application and the filter by the database.
 They must stay in step: if `describeOperatingHours` changes, change
 `openNowFilter` with it.
 
