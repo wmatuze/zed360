@@ -55,6 +55,8 @@ import { AdminAuditService } from './admin-audit.service';
 import { AdminUsersController } from './admin-users.controller';
 import { AdminUsersService } from './admin-users.service';
 import { AdminCategoriesController } from './admin-categories.controller';
+import { EmailSender, ResendEmailSender } from './email-sender';
+import { NotificationDeliveryService } from './notification-delivery.service';
 import { AdminOverviewController } from './admin-overview.controller';
 import { AdminOverviewService } from './admin-overview.service';
 import { AdminCategoriesService } from './admin-categories.service';
@@ -95,6 +97,8 @@ import { AdminLocationsService } from './admin-locations.service';
   providers: [
     AdminAuditService,
     AdminCategoriesService,
+    { provide: EmailSender, useClass: ResendEmailSender },
+    NotificationDeliveryService,
     AdminOverviewService,
     AdminLocationsService,
     AdminUsersService,

@@ -249,9 +249,13 @@ export const businessAccountSchema = z.object({
       createdAt: z.string().datetime(),
     }),
   ),
+  /** Whether Zed360 emails this person about activity on their businesses. */
+  emailAlerts: z.boolean().default(true),
 });
 
 export type BusinessAccount = z.infer<typeof businessAccountSchema>;
+
+export const updateEmailAlertsSchema = z.object({ enabled: z.boolean() });
 
 export const businessActivityEventSchema = z.enum([
   "profile_view",

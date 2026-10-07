@@ -9,7 +9,7 @@ import {
 } from "@/lib/business-account";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { fetchBusinessNotifications } from "@/lib/business-notifications";
-import { claimBusiness, signOut } from "./actions";
+import { claimBusiness, saveEmailAlerts, signOut } from "./actions";
 import { ClaimButton } from "./claim-button";
 
 export const metadata: Metadata = { title: "Business account" };
@@ -35,7 +35,7 @@ const reviewStatusLabels = {
 export default async function BusinessAccountPage({
   searchParams,
 }: {
-  searchParams: Promise<{ link?: string }>;
+  searchParams: Promise<{ link?: string; alerts?: string }>;
 }) {
   if (!isSupabaseConfigured()) redirect("/business/sign-in?setup=required");
 
@@ -65,7 +65,7 @@ export default async function BusinessAccountPage({
     unreadNotifications = notificationsResult.value.unreadCount;
   }
 
-  const { link } = await searchParams;
+  const { link, alerts } = await searchParams;
   const linkMessage = link ? linkMessages[link] : undefined;
   const hasOperationalBusiness =
     account?.businesses.some(
@@ -271,6 +271,47 @@ export default async function BusinessAccountPage({
               Submit a business →
             </Link>
           </div>
+        ) : null}
+
+        {account && account.businesses.length ? (
+          <section
+            aria-labelledby="alerts-heading"
+            className="mt-10 rounded-2xl border border-white/10 bg-white/[0.035] p-6"
+          >
+            <h2 className="text-lg font-semibold" id="alerts-heading">
+              Email alerts
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/55">
+              Zed360 emails {session.email} when a customer request is matched
+              to one of your businesses, and when a customer chooses you.
+              Customers pick from the businesses that answer first.
+            </p>
+            <p
+              className={`mt-4 text-sm font-semibold ${account.emailAlerts ? "text-[var(--lime)]" : "text-amber-100/85"}`}
+            >
+              {account.emailAlerts
+                ? "Email alerts are on."
+                : "Email alerts are off. You will only see new requests when you sign in."}
+            </p>
+            {alerts === "error" ? (
+              <p className="mt-2 text-sm text-red-200" role="alert">
+                That setting could not be saved. Please try again.
+              </p>
+            ) : null}
+            <form
+              action={saveEmailAlerts.bind(null, !account.emailAlerts)}
+              className="mt-4"
+            >
+              <button
+                className={`button ${account.emailAlerts ? "button-quiet" : "button-primary"}`}
+                type="submit"
+              >
+                {account.emailAlerts
+                  ? "Turn email alerts off"
+                  : "Turn email alerts on"}
+              </button>
+            </form>
+          </section>
         ) : null}
 
         <div className="mt-10 rounded-2xl border border-[var(--lime)]/20 bg-[var(--lime)]/8 p-6">

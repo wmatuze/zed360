@@ -16,6 +16,7 @@ describe('BusinessAccountsController', () => {
   const getAccount = jest.fn();
   const getSignInEligibility = jest.fn();
   const claimBusiness = jest.fn();
+  const setEmailAlerts = jest.fn();
   const previewApplicationClaim = jest.fn();
   const confirmApplicationClaim = jest.fn();
   const controller = new BusinessAccountsController(
@@ -24,6 +25,7 @@ describe('BusinessAccountsController', () => {
       getAccount,
       getSignInEligibility,
       claimBusiness,
+      setEmailAlerts,
       previewApplicationClaim,
       confirmApplicationClaim,
     } as unknown as BusinessAccountsService,
@@ -126,5 +128,25 @@ describe('BusinessAccountsController', () => {
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(verify).not.toHaveBeenCalled();
     expect(confirmApplicationClaim).not.toHaveBeenCalled();
+  });
+
+  it('changes email alerts only for the verified person', async () => {
+    setEmailAlerts.mockReset().mockResolvedValue({ emailAlerts: false });
+
+    await expect(
+      controller.setEmailAlerts('Bearer access-token', { enabled: false }),
+    ).resolves.toEqual({ emailAlerts: false });
+    expect(verify).toHaveBeenCalledWith('Bearer access-token');
+    expect(setEmailAlerts).toHaveBeenCalledTimes(1);
+    const [, enabled] = setEmailAlerts.mock.calls[0] as [unknown, boolean];
+    expect(enabled).toBe(false);
+  });
+
+  it('rejects an email alert setting that is not on or off', async () => {
+    setEmailAlerts.mockReset();
+    await expect(
+      controller.setEmailAlerts('Bearer access-token', { enabled: 'yes' }),
+    ).rejects.toThrow('Choose whether email alerts are on or off.');
+    expect(setEmailAlerts).not.toHaveBeenCalled();
   });
 });

@@ -7,6 +7,7 @@ import {
   BusinessAccountApiError,
   getVerifiedBusinessSession,
   linkBusiness,
+  setEmailAlerts,
 } from "@/lib/business-account";
 import { createClient } from "@/lib/supabase/server";
 
@@ -31,6 +32,20 @@ export async function claimBusiness(businessId: string) {
 
   revalidatePath("/business/account");
   redirect("/business/account?link=success");
+}
+
+export async function saveEmailAlerts(enabled: boolean) {
+  const session = await getVerifiedBusinessSession();
+  if (!session) redirect("/business/sign-in");
+  try {
+    await setEmailAlerts(session.accessToken, enabled);
+  } catch (error) {
+    if (error instanceof BusinessAccountApiError && error.status === 401)
+      redirect("/business/sign-in?error=session_expired");
+    redirect("/business/account?alerts=error");
+  }
+  revalidatePath("/business/account");
+  redirect(`/business/account?alerts=${enabled ? "on" : "off"}`);
 }
 
 export async function signOut() {
